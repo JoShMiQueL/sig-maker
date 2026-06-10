@@ -65,7 +65,8 @@ body = """
 
 {% if version and release.previous.version -%}
     **Full Changelog**: [{{ release.previous.version }}...{{ version }}]({{ self::remote_url() }}/compare/{{ release.previous.version }}...{{ version }})
-{% endif -%}
+{% endif %}
+{% raw %}\n{% endraw %}
 """
 footer = ""
 trim = true
