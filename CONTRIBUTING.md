@@ -47,7 +47,26 @@ This project uses pre-commit hooks to ensure code quality. After cloning, set th
 sh .githooks/setup.sh
 ```
 
-This will run `cargo fmt --check`, `cargo clippy`, and `cargo test` before every commit.
+This will run `cargo fmt --check`, `cargo clippy`, `cargo build`, and `cargo test` before every commit. It also validates that commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) format.
+
+### Commit Message Format
+
+All commits must follow the Conventional Commits format:
+
+```
+<type>(<optional scope>): <description>
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `ci`, `chore`, `build`, `revert`
+
+**Examples:**
+```
+feat: add JSON output format
+fix(cli): handle missing input file
+docs: update README examples
+ci: migrate to cargo-dist
+chore!: bump MSRV to 1.85
+```
 
 ### Building
 

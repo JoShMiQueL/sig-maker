@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Pre-commit hook: runs fmt, clippy, and tests before allowing a commit.
+# Pre-commit hook: runs fmt, clippy, build, and tests before allowing a commit.
 # Install with: git config core.hooksPath .githooks
 
 set -e
@@ -18,6 +18,14 @@ cargo clippy -- -D warnings
 if [ $? -ne 0 ]; then
     echo ""
     echo "ERROR: Clippy found warnings. Fix them and try again."
+    exit 1
+fi
+
+echo "==> Running cargo build..."
+cargo build --quiet
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "ERROR: Build failed. Fix compilation errors and try again."
     exit 1
 fi
 
