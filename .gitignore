@@ -18,7 +18,3 @@ Thumbs.db
 *.exe
 *.dll
 *.pdb
-
-# Local CI scripts
-ci-check.sh
-ci-check.ps1
