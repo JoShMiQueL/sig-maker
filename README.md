@@ -1,5 +1,8 @@
 # Sig-Maker
 
+[![CI](https://github.com/JoShMiQueL/sig-maker/workflows/CI/badge.svg)](https://github.com/JoShMiQueL/sig-maker/actions/workflows/ci.yml)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 Multi-format signature/pattern converter and optimizer. Optimizes wildcard patterns from multiple memory snapshots and converts between Cheat Engine, IDA Pro, Ghidra, x64dbg, and other formats.
 
 ## Why
@@ -16,6 +19,10 @@ When reverse engineering games or applications, you often capture the same data 
 
 ## Installation
 
+### Pre-built Binaries (Recommended)
+
+Download pre-built binaries for Linux, macOS, and Windows from the [GitHub Releases](https://github.com/JoShMiQueL/sig-maker/releases) page. Installers are available for shell and PowerShell.
+
 ### From Source
 
 ```bash
@@ -24,21 +31,16 @@ cargo build --release
 
 Binary: `target/release/sig-maker` (or `sig-maker.exe` on Windows)
 
-### Package Managers (Coming Soon)
+### Package Managers (Planned)
 
-```bash
-# Homebrew (macOS/Linux)
-brew install sig-maker
+The following package managers are planned but not yet available:
 
-# Scoop (Windows)
-scoop install sig-maker
+- [ ] Homebrew (macOS/Linux)
+- [ ] Scoop (Windows)
+- [ ] Cargo Binstall
+- [ ] AUR (Arch Linux)
 
-# Cargo Binstall
-cargo binstall sig-maker
-
-# AUR (Arch Linux)
-yay -S sig-maker
-```
+See [TODO.md](TODO.md) for progress.
 
 ## Usage
 
@@ -58,6 +60,8 @@ Run:
 ```
 
 Output shows all formats + byte-by-byte diff.
+
+> **Note for Windows users:** If you double-click the `.exe` without arguments, it will show the usage message and wait for you to press Enter before closing. This is intentional to prevent the console from disappearing immediately.
 
 ### Convert single pattern
 
@@ -126,6 +130,13 @@ src/
 
 Typical analysis of 4-10 AOB instances completes in <1ms. Pattern parsing and format conversion are allocation-light for normal-sized patterns (<1KB).
 
+## Documentation
+
+- [CHANGELOG.md](CHANGELOG.md) — Version history and release notes
+- [AGENTS.md](AGENTS.md) — Project context for AI agents and contributors
+- [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
+- [TODO.md](TODO.md) — Planned features and improvements
+
 ## License
 
 **CC BY-NC-SA 4.0** (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International)
@@ -138,4 +149,4 @@ This means:
 
 See [LICENSE](LICENSE) file for full text.
 
-Copyright (c) 2024, JoShMiQueL
+Copyright (c) 2026, JoShMiQueL
