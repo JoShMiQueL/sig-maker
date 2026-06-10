@@ -1,0 +1,28 @@
+[package]
+name = "sig-maker"
+version = "0.1.0"
+edition = "2024"
+authors = ["JoShMiQueL"]
+description = "Multi-format signature/pattern converter and optimizer"
+license = "CC-BY-NC-SA-4.0"
+repository = "https://github.com/JoShMiQueL/sig-maker"
+keywords = ["signature", "pattern", "aob", "reverse-engineering", "cheat-engine", "binary"]
+categories = ["command-line-utilities", "development-tools"]
+rust-version = "1.85"
+
+[lib]
+name = "sig_maker"
+path = "src/lib.rs"
+
+[[bin]]
+name = "sig-maker"
+path = "src/main.rs"
+
+[dependencies]
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "pattern_bench"
+harness = false
