@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
+- *(changelog)* Add New Contributors section by [@JoShMiQueL](https://github.com/JoShMiQueL) ([5449986](https://github.com/JoShMiQueL/sig-maker/commit/5449986a52d7df3bae618265ec33d95895b161d8))
+
 - *(cli)* Show usage and pause on double-click launch by [@JoShMiQueL](https://github.com/JoShMiQueL) ([0845ab1](https://github.com/JoShMiQueL/sig-maker/commit/0845ab18d8cf7a9f13ea1dad3fea789549c6f6cb))
 
 
@@ -34,7 +36,10 @@ All notable changes to this project will be documented in this file.
 
 - Add space between author link and commit hash in changelog by [@JoShMiQueL](https://github.com/JoShMiQueL) ([0e2fa51](https://github.com/JoShMiQueL/sig-maker/commit/0e2fa51dcac0683c19a0f0fe339f5c48767da475))
 
-## [0.1.0-beta] - 2026-06-10
+
+### New Contributors
+
+* [@github-actions[bot]](https://github.com/github-actions[bot]) made their first contribution## [0.1.0-beta] - 2026-06-10
 
 ### CI/CD
 
@@ -64,3 +69,6 @@ All notable changes to this project will be documented in this file.
 - Apply cargo fmt formatting by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d0caf09](https://github.com/JoShMiQueL/sig-maker/commit/d0caf093176114c73bfee47606dcac6a97cb3298))
 
 
+### New Contributors
+
+* [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
