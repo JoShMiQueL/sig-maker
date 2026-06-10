@@ -3,6 +3,7 @@
 use sig_maker::analyzer;
 use sig_maker::cli::Config;
 use sig_maker::converter;
+use sig_maker::formats;
 use sig_maker::io::{self, Input};
 
 fn main() {
@@ -14,6 +15,23 @@ fn main() {
         Ok(i) => i,
         Err(e) => io::error_exit(&e),
     };
+
+    // Check-only mode: validate pattern without converting
+    if config.check_only {
+        let pattern_str = input.content.lines().next().unwrap_or("").trim();
+        match formats::validate_pattern(pattern_str) {
+            Ok(_) => {
+                if !config.quiet {
+                    println!("Pattern is valid: {}", pattern_str);
+                }
+                std::process::exit(0);
+            }
+            Err(e) => {
+                eprintln!("Pattern is invalid: {}", e);
+                std::process::exit(1);
+            }
+        }
+    }
 
     // Detect input type and process accordingly
     match input.detect_type() {

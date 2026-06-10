@@ -110,6 +110,14 @@ pub fn optimize_byte(values: &[u8]) -> BytePattern {
 pub use formatter::format_pattern;
 pub use parser::parse_pattern;
 
+/// Validate a pattern string without converting
+pub fn validate_pattern(input: &str) -> Result<(), String> {
+    match parse_pattern(input) {
+        Some(_) => Ok(()),
+        None => Err("Could not parse pattern".to_string()),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

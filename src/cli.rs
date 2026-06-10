@@ -9,6 +9,7 @@ pub struct Config {
     pub output_file: Option<String>,
     pub verbose: bool,
     pub quiet: bool,
+    pub check_only: bool,
 }
 
 impl Config {
@@ -29,6 +30,7 @@ impl Config {
         let mut verbose = false;
         let mut quiet = false;
         let mut show_version = false;
+        let mut check_only = false;
 
         let mut i = 1;
         while i < args.len() {
@@ -72,6 +74,10 @@ impl Config {
                     quiet = true;
                     i += 1;
                 }
+                "--check" | "-c" => {
+                    check_only = true;
+                    i += 1;
+                }
                 arg => {
                     if input_file.is_none() && !arg.starts_with("-") {
                         input_file = Some(arg.to_string());
@@ -93,6 +99,11 @@ impl Config {
             std::process::exit(1);
         }
 
+        if check_only && output_file.is_some() {
+            eprintln!("ERROR: --check cannot be used with --output");
+            std::process::exit(1);
+        }
+
         Self {
             input_file: input_file.unwrap_or_else(|| {
                 eprintln!("ERROR: No input file specified");
@@ -104,6 +115,7 @@ impl Config {
             output_file,
             verbose,
             quiet,
+            check_only,
         }
     }
 }
