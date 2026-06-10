@@ -3,7 +3,7 @@
 ## 🔴 High Priority (Implement Now)
 
 ### CLI Features
-- ⏳ **Output to file** (`-o, --output output.txt`)
+- ✅ **Output to file** (`-o, --output output.txt`)
 - ⏳ **Verbose/quiet modes** (`-v, --verbose`, `-q, --quiet`)
 - ⏳ **Terminal colors** (crate: `colored` or `owo-colors`)
 - ⏳ **Pattern validation** (`-c, --check` - detect if valid without converting)
