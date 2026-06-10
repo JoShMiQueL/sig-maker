@@ -22,7 +22,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "==> Running cargo build..."
-cargo build --quiet
+cargo build --release --quiet
 if [ $? -ne 0 ]; then
     echo ""
     echo "ERROR: Build failed. Fix compilation errors and try again."
@@ -30,10 +30,18 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "==> Running cargo test..."
-cargo test --quiet
+cargo test --quiet --release --lib --bins
 if [ $? -ne 0 ]; then
     echo ""
     echo "ERROR: Tests failed. Fix them and try again."
+    exit 1
+fi
+
+echo "==> Running integration tests..."
+cargo test --quiet --release --test integration
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "ERROR: Integration tests failed. Fix them and try again."
     exit 1
 fi
 
