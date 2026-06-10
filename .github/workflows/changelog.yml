@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   changelog:
@@ -24,4 +25,41 @@ jobs:
       - name: Generate changelog
         uses: ./.github/actions/generate-changelog
         with:
-          commit: 'true'
+          commit: 'false'
+
+      - name: Check if changelog changed
+        id: check_changes
+        run: |
+          if git diff --quiet CHANGELOG.md; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create branch
+        id: branch
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          BRANCH="changelog/update-$(date +%Y%m%d-%H%M%S)"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          git checkout -b "$BRANCH"
+
+      - name: Commit changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md [skip ci]"
+
+      - name: Push branch
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git push origin "${{ steps.branch.outputs.branch }}"
+
+      - name: Create PR
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          gh pr create --title "docs: update CHANGELOG.md" --body "Auto-generated changelog update" --base main --head "${{ steps.branch.outputs.branch }}" --label "automated"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
