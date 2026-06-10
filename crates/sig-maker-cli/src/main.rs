@@ -1,10 +1,10 @@
 //! Sig-Maker - Multi-format signature/pattern converter and optimizer
 
-use sig_maker::analyzer;
-use sig_maker::cli::Config;
-use sig_maker::converter;
-use sig_maker::formats;
-use sig_maker::io::{self, Input};
+use sig_maker_lib::analyzer;
+use sig_maker_lib::cli::Config;
+use sig_maker_lib::converter;
+use sig_maker_lib::formats;
+use sig_maker_lib::io::{self, Input};
 
 fn main() {
     // Parse command-line arguments

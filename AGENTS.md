@@ -7,20 +7,20 @@ Project context and rules for AI agents working on this codebase.
 **sig-maker** is a Rust CLI tool for converting and optimizing binary signatures/patterns between multiple formats (Cheat Engine, IDA, Ghidra, x64dbg, C++, Rust, Python, JSON).
 
 - **Language:** Rust (edition 2024, MSRV 1.85)
-- **Build system:** Cargo (no external dependencies for the main crate)
+- **Build system:** Cargo workspace with 2 crates
 - **Repository:** https://github.com/JoShMiQueL/sig-maker
 
 ## Commands
 
 ```bash
-# Build
-cargo build
+# Build workspace
+cargo build --workspace
 
 # Run tests
-cargo test
+cargo test --workspace
 
 # Lint
-cargo clippy -- -D warnings
+cargo clippy --workspace -- -D warnings
 
 # Format check
 cargo fmt -- --check
@@ -29,10 +29,10 @@ cargo fmt -- --check
 cargo fmt
 
 # Run benchmarks
-cargo bench
+cargo bench --workspace
 
-# Run the tool
-cargo run -- <input_file> [--to <format>]
+# Run the CLI
+cargo run --bin sig-maker -- <input_file> [--to <format>]
 ```
 
 ## Verification
@@ -51,17 +51,25 @@ These are the same checks enforced by the pre-commit hook and CI.
 ## Project Structure
 
 ```
-src/
-├── main.rs        # Entry point, CLI dispatch
-├── lib.rs         # Library re-exports
-├── cli.rs         # Argument parsing, usage display, pause-on-double-click
-├── analyzer.rs    # Multi-AOB analysis (find common pattern from multiple instances)
-├── converter.rs   # Single pattern format conversion
-├── formats.rs     # Pattern parsing, formatting, all format definitions
-├── io.rs          # File I/O, input type detection
-└── output.rs      # Output formatting and display
-benches/
-└── pattern_bench.rs  # Criterion benchmarks
+sig-maker/                    # Cargo workspace
+├── Cargo.toml               # Workspace configuration
+├── crates/
+│   ├── sig-maker-lib/       # Core library
+│   │   ├── src/
+│   │   │   ├── lib.rs       # Library re-exports
+│   │   │   ├── analyzer.rs    # Multi-AOB analysis
+│   │   │   ├── converter.rs   # Single pattern format conversion
+│   │   │   ├── formats/      # Pattern parsing, formatting
+│   │   │   ├── io.rs         # File I/O, input type detection
+│   │   │   ├── output.rs     # Output formatting and display
+│   │   │   └── cli.rs        # CLI logic
+│   │   ├── benches/          # Criterion benchmarks
+│   │   └── tests/            # Unit tests
+│   └── sig-maker-cli/       # CLI binary
+│       ├── src/
+│       │   └── main.rs      # Entry point, CLI dispatch
+│       └── tests/            # Integration tests
+└── benches/                 # Workspace-level benchmarks
 ```
 
 ## Commit Conventions

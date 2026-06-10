@@ -113,18 +113,42 @@ Example: Values `07`, `08`, `09` → optimized to `0?`
 ## Project Structure
 
 ```
-src/
-├── main.rs        # CLI entry
-├── cli.rs         # Argument parsing
-├── io.rs          # File I/O, format detection
-├── analyzer.rs    # Pattern optimization engine
-├── converter.rs   # Format conversion
-├── output.rs      # Result formatting
-└── formats/       # Format definitions
-    ├── mod.rs     # Format enum, BytePattern
-    ├── parser.rs  # 8 format parsers
-    └── formatter.rs # 8 format formatters
+sig-maker/                    # Cargo workspace
+├── Cargo.toml               # Workspace configuration
+├── crates/
+│   ├── sig-maker-lib/       # Core library
+│   │   ├── src/
+│   │   │   ├── lib.rs       # Library interface
+│   │   │   ├── analyzer.rs  # Pattern optimization engine
+│   │   │   ├── converter.rs # Format conversion
+│   │   │   ├── cli.rs       # CLI logic
+│   │   │   ├── io.rs        # File I/O, format detection
+│   │   │   ├── output.rs    # Result formatting
+│   │   │   └── formats/     # Format definitions
+│   │   │       ├── mod.rs
+│   │   │       ├── parser.rs
+│   │   │       └── formatter.rs
+│   │   ├── benches/         # Benchmarks
+│   │   └── tests/           # Unit tests
+│   └── sig-maker-cli/       # CLI binary
+│       ├── src/
+│       │   └── main.rs      # CLI entry point
+│       └── tests/           # Integration tests
+├── benches/                 # Workspace-level benchmarks
+└── .github/workflows/       # CI/CD
 ```
+
+## Architecture
+
+Sig-Maker is organized as a **Cargo workspace** with two crates:
+
+- **sig-maker-lib**: Core library containing all pattern analysis and conversion logic
+- **sig-maker-cli**: CLI binary that uses sig-maker-lib
+
+This modular architecture enables:
+- Reuse of the core library in other tools (GUI, MCP servers, etc.)
+- Independent versioning and testing
+- Clean separation between CLI and core logic
 
 ## Performance
 
