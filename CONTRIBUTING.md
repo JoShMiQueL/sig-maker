@@ -22,15 +22,30 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/JoShMi
 
 ### Pull Requests
 
+All contributions from external contributors **must** go through a Pull Request. The `main` branch is protected and requires the CI `build` check to pass.
+
+**Workflow:**
+
 1. Fork the repository
 2. Create a new branch: `git checkout -b feature/my-feature` or `fix/my-bugfix`
 3. Make your changes
 4. Run tests: `cargo test`
 5. Run formatting: `cargo fmt`
 6. Run clippy: `cargo clippy -- -D warnings`
-7. Commit your changes: `git commit -am 'Add some feature'`
+7. Commit your changes using [Conventional Commits](#commit-message-format)
 8. Push to the branch: `git push origin feature/my-feature`
-9. Open a Pull Request
+9. Open a Pull Request against `main`
+
+**Branch naming convention:**
+- `feat/description` — New features
+- `fix/description` — Bug fixes
+- `refactor/description` — Refactoring
+- `ci/description` — CI/CD changes
+- `docs/description` — Documentation
+
+**Merge strategy:** PRs are squash-merged into `main` to keep a clean linear history.
+
+> **Note for maintainers:** Admins can push directly to `main` for trivial changes (typos, version bumps, config tweaks). Use PRs for anything non-trivial.
 
 ## Development Setup
 
