@@ -14,7 +14,7 @@
 
 ### Testing & Quality
 - ✅ **More integration tests** (test complete end-to-end flow)
-- ⏳ **Fuzzing** (requires nightly Rust - run `rustup default nightly` first)
+- ✅ **Fuzzing** (configured with cargo-fuzz, requires nightly Rust to run)
 
 ---
 
