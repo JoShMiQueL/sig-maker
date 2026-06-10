@@ -81,8 +81,8 @@
 
 ### Automation
 - ✅ **CI workflow** (test, build, clippy, fmt on Linux/Windows/macOS)
-- ✅ **Release workflow** (multi-platform builds via cargo-dist)
-- ⏳ **Changelog generation** (manual - run `git cliff -o CHANGELOG.md` before release)
+- ✅ **Release workflow** (generates changelog, then multi-platform builds via cargo-dist)
+- ✅ **Changelog generation** (automatic - runs before release via git-cliff)
 - ✅ **Git hooks** (pre-commit: fmt/clippy/build/test, commit-msg: Conventional Commits)
 - ✅ **Branch protection** (PRs required, CI check required)
 - ✅ **Dependabot** (automatic dependency updates for GitHub Actions and Cargo)
