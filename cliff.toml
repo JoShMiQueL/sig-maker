@@ -35,6 +35,10 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
+    # Skip changelog bot commits (must be before other doc/chore rules)
+    { message = "^docs: update CHANGELOG", skip = true },
+    { message = "^chore\\(release\\)", skip = true },
+    # Group rules
     { message = "^feat", group = "Features" },
     { message = "^fix", group = "Bug Fixes" },
     { message = "^doc", group = "Documentation" },
@@ -44,9 +48,6 @@ commit_parsers = [
     { message = "^test", group = "Testing" },
     { message = "^ci", group = "CI/CD" },
     { message = "^chore", group = "Miscellaneous" },
-    # Skip changelog bot commits
-    { message = "^docs: update CHANGELOG", skip = true },
-    { message = "^chore\\(release\\)", skip = true },
 ]
 filter_commits = false
 tag_pattern = "v[0-9].*"
