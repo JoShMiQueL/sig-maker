@@ -17,11 +17,13 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
     {% for commit in commits %}
-        - {% if commit.scope %}*({{ commit.scope }})* {% endif %}{{ commit.message | upper_first }}\
-            {% if commit.github.username %} by @{{ commit.github.username }}{%- endif -%}
+        - {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
+            {{ commit.message | upper_first }}\
             {% if commit.github.pr_number %} in \
-              [#{{ commit.github.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.github.pr_number }}) \
-            {%- endif -%}
+              [#{{ commit.github.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.github.pr_number }})\
+            {%- endif %}\
+            {% if commit.github.username %} by [@{{ commit.github.username }}](https://github.com/{{ commit.github.username }}){%- endif %}\
+             ([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))
     {% endfor %}
 {% endfor %}
 """
@@ -42,6 +44,9 @@ commit_parsers = [
     { message = "^test", group = "Testing" },
     { message = "^ci", group = "CI/CD" },
     { message = "^chore", group = "Miscellaneous" },
+    # Skip changelog bot commits
+    { message = "^docs: update CHANGELOG", skip = true },
+    { message = "^chore\\(release\\)", skip = true },
 ]
 filter_commits = false
 tag_pattern = "v[0-9].*"
