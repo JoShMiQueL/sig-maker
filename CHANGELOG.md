@@ -11,10 +11,15 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - Update CHANGELOG.md by @github-actions[bot]
+- Update CHANGELOG.md by @github-actions[bot]
 
 ### Features
 
 - *(cli)* Show usage and pause on double-click launch by @JoShMiQueL
+
+### Miscellaneous
+
+- Add pre-commit git hooks (fmt, clippy, test) by @JoShMiQueL
 ## [0.1.0-beta] - 2026-06-10
 
 ### CI/CD
