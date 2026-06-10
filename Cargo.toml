@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "crates/sig-maker-lib",
+    "crates/sig-maker-core",
     "crates/sig-maker-cli",
 ]
 resolver = "2"
@@ -22,7 +22,6 @@ rust-version = "1.85"
 [workspace.dependencies]
 colored = "2.1"
 atty = "0.2"
-criterion = "0.5"
 
 # The profile that 'dist' will build with
 [profile.dist]

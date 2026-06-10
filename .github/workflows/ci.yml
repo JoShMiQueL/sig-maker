@@ -59,18 +59,3 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --verbose
 
-  benchmark:
-    name: Benchmark
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2.9.1
-
-      - name: Run benchmarks (check only)
-        run: cargo bench --workspace --no-run
-

@@ -7,9 +7,9 @@ use std::process::Command;
 fn run_sig_maker(args: &[&str]) -> (String, String, i32) {
     // Use debug binary for CI, release for local
     let binary_path = if std::env::var("CI").is_ok() {
-        "../../target/debug/sig-maker"
+        "../../target/debug/sig-maker.exe"
     } else {
-        "../../target/release/sig-maker"
+        "../../target/release/sig-maker.exe"
     };
 
     let output = Command::new(binary_path)

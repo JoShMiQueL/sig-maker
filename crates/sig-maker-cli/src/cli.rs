@@ -1,6 +1,7 @@
 //! Command-line argument parsing
 
-use crate::formats::Format;
+use colored::Colorize;
+use sig_maker_core::formats::Format;
 
 /// CLI configuration
 pub struct Config {
@@ -10,6 +11,12 @@ pub struct Config {
     pub verbose: bool,
     pub quiet: bool,
     pub check_only: bool,
+}
+
+/// Print error and exit
+pub fn error_exit(msg: &str) -> ! {
+    eprintln!("{}: {}", "ERROR".red().bold(), msg);
+    std::process::exit(1);
 }
 
 impl Config {

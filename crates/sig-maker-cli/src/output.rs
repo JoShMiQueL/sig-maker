@@ -1,88 +1,10 @@
 //! Output formatting and printing
 
-use crate::analyzer::{AobInstance, aob_matches_pattern};
-use crate::formats::{BytePattern, Format, format_pattern};
-use atty;
+use atty::is;
 use colored::Colorize;
-
-/// Statistics about pattern optimization
-pub struct PatternStats {
-    fixed: usize,
-    high_nibble: usize,
-    low_nibble: usize,
-    wildcard: usize,
-    entropy: f64,
-    compression_ratio: f64,
-}
-
-impl PatternStats {
-    pub fn from_patterns(patterns: &[BytePattern]) -> Self {
-        let mut stats = Self {
-            fixed: 0,
-            high_nibble: 0,
-            low_nibble: 0,
-            wildcard: 0,
-            entropy: 0.0,
-            compression_ratio: 0.0,
-        };
-
-        for p in patterns {
-            match p {
-                BytePattern::Fixed(_) => stats.fixed += 1,
-                BytePattern::Wildcard => stats.wildcard += 1,
-                BytePattern::HighNibble(_) => stats.high_nibble += 1,
-                BytePattern::LowNibble(_) => stats.low_nibble += 1,
-            }
-        }
-
-        // Calculate entropy (simplified: based on pattern type distribution)
-        let total = stats.total_bytes();
-        if total > 0 {
-            let mut entropy = 0.0;
-            let counts = [
-                stats.fixed,
-                stats.high_nibble,
-                stats.low_nibble,
-                stats.wildcard,
-            ];
-            for &count in &counts {
-                if count > 0 {
-                    let p = count as f64 / total as f64;
-                    entropy -= p * p.log2();
-                }
-            }
-            stats.entropy = entropy;
-
-            // Compression ratio: fixed bytes / total bytes
-            stats.compression_ratio = stats.fixed as f64 / total as f64;
-        }
-
-        stats
-    }
-
-    pub fn total_bytes(&self) -> usize {
-        self.fixed + self.high_nibble + self.low_nibble + self.wildcard
-    }
-
-    pub fn fixed_bytes(&self) -> usize {
-        self.fixed
-    }
-    pub fn high_nibble_wildcards(&self) -> usize {
-        self.high_nibble
-    }
-    pub fn low_nibble_wildcards(&self) -> usize {
-        self.low_nibble
-    }
-    pub fn full_wildcards(&self) -> usize {
-        self.wildcard
-    }
-    pub fn entropy(&self) -> f64 {
-        self.entropy
-    }
-    pub fn compression_ratio(&self) -> f64 {
-        self.compression_ratio
-    }
-}
+use sig_maker_core::PatternStats;
+use sig_maker_core::analyzer::{AobInstance, aob_matches_pattern};
+use sig_maker_core::formats::{BytePattern, Format, format_pattern};
 
 /// Print the diff table showing byte-by-byte comparison
 pub fn print_diff_table(result: &[BytePattern], aobs: &[AobInstance], _first_len: usize) {
@@ -170,7 +92,7 @@ pub fn print_analysis_results(
     verbose: bool,
 ) {
     // Disable colors when writing to file or not in a terminal
-    let use_colors = output_file.is_none() && atty::is(atty::Stream::Stdout);
+    let use_colors = output_file.is_none() && is(atty::Stream::Stdout);
 
     let output = if let Some(fmt) = to_format {
         // Single format requested

@@ -1,6 +1,5 @@
 //! Input/output operations and content detection
 
-use colored::Colorize;
 use std::fs;
 use std::path::PathBuf;
 
@@ -124,10 +123,4 @@ impl Input {
 
         Some(cleaned)
     }
-}
-
-/// Print error and exit
-pub fn error_exit(msg: &str) -> ! {
-    eprintln!("{}: {}", "ERROR".red().bold(), msg);
-    std::process::exit(1);
 }

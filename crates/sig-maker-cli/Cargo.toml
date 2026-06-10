@@ -15,6 +15,6 @@ name = "sig-maker"
 path = "src/main.rs"
 
 [dependencies]
-sig-maker-lib = { path = "../sig-maker-lib" }
+sig-maker-core = { path = "../sig-maker-core" }
 colored = { workspace = true }
 atty = { workspace = true }

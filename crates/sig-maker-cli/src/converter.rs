@@ -1,8 +1,9 @@
 //! Pattern conversion - convert single pattern between formats
 
-use crate::formats::{BytePattern, Format, format_pattern, parse_pattern};
-use atty;
+use atty::is;
 use colored::Colorize;
+use sig_maker_core::PatternStats;
+use sig_maker_core::formats::{BytePattern, Format, format_pattern, parse_pattern};
 
 /// Convert a single pattern and display results
 pub fn convert_pattern(
@@ -14,13 +15,13 @@ pub fn convert_pattern(
 ) {
     let pattern = match parse_pattern(content) {
         Some(p) => p,
-        None => crate::io::error_exit("Could not parse input pattern"),
+        None => crate::cli::error_exit("Could not parse input pattern"),
     };
 
     let input_line = content.lines().next().unwrap_or("").trim();
 
     // Disable colors when writing to file or not in a terminal
-    let use_colors = output_file.is_none() && atty::is(atty::Stream::Stdout);
+    let use_colors = output_file.is_none() && is(atty::Stream::Stdout);
 
     let output = if let Some(fmt) = to_format {
         // Single format requested
@@ -85,7 +86,7 @@ fn format_single_format(
     output.push('\n');
 
     if verbose {
-        let stats = crate::output::PatternStats::from_patterns(pattern);
+        let stats = PatternStats::from_patterns(pattern);
         output.push_str(&format!("Entropy: {:.3} bits\n", stats.entropy()));
         output.push_str(&format!(
             "Compression ratio: {:.2}%\n",
@@ -148,7 +149,7 @@ fn format_all_formats(
     }
 
     if verbose {
-        let stats = crate::output::PatternStats::from_patterns(pattern);
+        let stats = PatternStats::from_patterns(pattern);
         output.push_str(&format!("Entropy: {:.3} bits\n", stats.entropy()));
         output.push_str(&format!(
             "Compression ratio: {:.2}%\n",
@@ -201,10 +202,4 @@ fn format_all_formats(
     }
 
     output
-}
-
-/// Get pattern in a specific format (for programmatic use)
-#[allow(dead_code)]
-pub fn convert_to_format(pattern: &[BytePattern], format: Format) -> String {
-    format_pattern(pattern, format)
 }
