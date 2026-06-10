@@ -23,7 +23,28 @@ All notable changes to this project will be documented in this file.
 
 ### CI/CD
 
+- Use GH_PAT secret for changelog PR creation by [@JoShMiQueL](https://github.com/JoShMiQueL) ([0ab8b7c](https://github.com/JoShMiQueL/sig-maker/commit/0ab8b7c613bb72ec44ee01769976418e1669c201))
+
+- Change changelog workflow to use PR with auto-merge by [@JoShMiQueL](https://github.com/JoShMiQueL) ([0242063](https://github.com/JoShMiQueL/sig-maker/commit/024206355fb54ccdcc83602d79c4e42ac2e0dd6e))
+
+- Change changelog workflow to use PR with auto-merge by [@JoShMiQueL](https://github.com/JoShMiQueL) ([f90336d](https://github.com/JoShMiQueL/sig-maker/commit/f90336d74639c75bc60e4e1cbc1ed6f1b06ded02))
+
+- Add Dependabot and Stale bot, add PR template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([65c1952](https://github.com/JoShMiQueL/sig-maker/commit/65c1952269e7caf916d4f407eeda9f888c7881f0))
+
 - Add git-cliff for automatic CHANGELOG.md generation by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1e862e6](https://github.com/JoShMiQueL/sig-maker/commit/1e862e68a2869c128b5b26f5711cbdc1048d536d))
+
+
+### Documentation
+
+- Update README with badges, releases, and documentation links by [@JoShMiQueL](https://github.com/JoShMiQueL) ([56aad26](https://github.com/JoShMiQueL/sig-maker/commit/56aad260e341368dbf65b1dd02ff3fe9ba08198d))
+
+- Update TODO.md - mark Repository Quality as complete by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ead45fd](https://github.com/JoShMiQueL/sig-maker/commit/ead45fd098a4efeec3294ec8b4fd41bcb863d1a8))
+
+- Add Pull Request template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([99b3b7a](https://github.com/JoShMiQueL/sig-maker/commit/99b3b7ab7a5a8f0f0a33182204fd232e92e450ad))
+
+- Add AGENTS.md with project context for AI agents by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ef6932f](https://github.com/JoShMiQueL/sig-maker/commit/ef6932fa7be2c5228513e8162cce741a397d3f7f))
+
+- Document PR workflow and branch protection strategy by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6fc6014](https://github.com/JoShMiQueL/sig-maker/commit/6fc6014bb88ea62087b5982f964dc83b31d7fdb1))
 
 
 ### Features
@@ -52,7 +73,7 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-* [@JoShMiQueL](https://github.com/JoShMiQueL) — [`1f54d25`](https://github.com/JoShMiQueL/sig-maker/commit/1f54d25d3ac67db457d1371bcbcd454d42bfb115), [`f598cb8`](https://github.com/JoShMiQueL/sig-maker/commit/f598cb8fd92125741266e1cfa671278d41ec57c9), [`df74b97`](https://github.com/JoShMiQueL/sig-maker/commit/df74b97379e9a43098cec0193fb64db0879e9e90), [`758f338`](https://github.com/JoShMiQueL/sig-maker/commit/758f338173433ce20afefdef45af5a800ae20af1), [`319452c`](https://github.com/JoShMiQueL/sig-maker/commit/319452cb73ec55998235e6d90d03e6289e8e9f39), [`1497c29`](https://github.com/JoShMiQueL/sig-maker/commit/1497c29f6327f21379ba0d940fe1c8dc95995f3c), [`5449986`](https://github.com/JoShMiQueL/sig-maker/commit/5449986a52d7df3bae618265ec33d95895b161d8), [`0e2fa51`](https://github.com/JoShMiQueL/sig-maker/commit/0e2fa51dcac0683c19a0f0fe339f5c48767da475), [`16fc195`](https://github.com/JoShMiQueL/sig-maker/commit/16fc1953de99f18fc7200d1717f4e5b487273662), [`2f1b68d`](https://github.com/JoShMiQueL/sig-maker/commit/2f1b68d94a1f14e30035ab569305f323a40241cb), [`0fbe551`](https://github.com/JoShMiQueL/sig-maker/commit/0fbe551e9814049e7bb93bb533324340921512f1), [`5eabffb`](https://github.com/JoShMiQueL/sig-maker/commit/5eabffbe7077ddf6499b209ba6f735e4728f9be9), [`4e3e2c3`](https://github.com/JoShMiQueL/sig-maker/commit/4e3e2c3597eba1167a3dff96b9fa62b7d2c679bb), [`0845ab1`](https://github.com/JoShMiQueL/sig-maker/commit/0845ab18d8cf7a9f13ea1dad3fea789549c6f6cb), [`1e862e6`](https://github.com/JoShMiQueL/sig-maker/commit/1e862e68a2869c128b5b26f5711cbdc1048d536d)
+* [@JoShMiQueL](https://github.com/JoShMiQueL) — [`0ab8b7c`](https://github.com/JoShMiQueL/sig-maker/commit/0ab8b7c613bb72ec44ee01769976418e1669c201), [`0242063`](https://github.com/JoShMiQueL/sig-maker/commit/024206355fb54ccdcc83602d79c4e42ac2e0dd6e), [`f90336d`](https://github.com/JoShMiQueL/sig-maker/commit/f90336d74639c75bc60e4e1cbc1ed6f1b06ded02), [`56aad26`](https://github.com/JoShMiQueL/sig-maker/commit/56aad260e341368dbf65b1dd02ff3fe9ba08198d), [`ead45fd`](https://github.com/JoShMiQueL/sig-maker/commit/ead45fd098a4efeec3294ec8b4fd41bcb863d1a8), [`65c1952`](https://github.com/JoShMiQueL/sig-maker/commit/65c1952269e7caf916d4f407eeda9f888c7881f0), [`99b3b7a`](https://github.com/JoShMiQueL/sig-maker/commit/99b3b7ab7a5a8f0f0a33182204fd232e92e450ad), [`ef6932f`](https://github.com/JoShMiQueL/sig-maker/commit/ef6932fa7be2c5228513e8162cce741a397d3f7f), [`6fc6014`](https://github.com/JoShMiQueL/sig-maker/commit/6fc6014bb88ea62087b5982f964dc83b31d7fdb1), [`1f54d25`](https://github.com/JoShMiQueL/sig-maker/commit/1f54d25d3ac67db457d1371bcbcd454d42bfb115), [`f598cb8`](https://github.com/JoShMiQueL/sig-maker/commit/f598cb8fd92125741266e1cfa671278d41ec57c9), [`df74b97`](https://github.com/JoShMiQueL/sig-maker/commit/df74b97379e9a43098cec0193fb64db0879e9e90), [`758f338`](https://github.com/JoShMiQueL/sig-maker/commit/758f338173433ce20afefdef45af5a800ae20af1), [`319452c`](https://github.com/JoShMiQueL/sig-maker/commit/319452cb73ec55998235e6d90d03e6289e8e9f39), [`1497c29`](https://github.com/JoShMiQueL/sig-maker/commit/1497c29f6327f21379ba0d940fe1c8dc95995f3c), [`5449986`](https://github.com/JoShMiQueL/sig-maker/commit/5449986a52d7df3bae618265ec33d95895b161d8), [`0e2fa51`](https://github.com/JoShMiQueL/sig-maker/commit/0e2fa51dcac0683c19a0f0fe339f5c48767da475), [`16fc195`](https://github.com/JoShMiQueL/sig-maker/commit/16fc1953de99f18fc7200d1717f4e5b487273662), [`2f1b68d`](https://github.com/JoShMiQueL/sig-maker/commit/2f1b68d94a1f14e30035ab569305f323a40241cb), [`0fbe551`](https://github.com/JoShMiQueL/sig-maker/commit/0fbe551e9814049e7bb93bb533324340921512f1), [`5eabffb`](https://github.com/JoShMiQueL/sig-maker/commit/5eabffbe7077ddf6499b209ba6f735e4728f9be9), [`4e3e2c3`](https://github.com/JoShMiQueL/sig-maker/commit/4e3e2c3597eba1167a3dff96b9fa62b7d2c679bb), [`0845ab1`](https://github.com/JoShMiQueL/sig-maker/commit/0845ab18d8cf7a9f13ea1dad3fea789549c6f6cb), [`1e862e6`](https://github.com/JoShMiQueL/sig-maker/commit/1e862e68a2869c128b5b26f5711cbdc1048d536d)
 
 
 
