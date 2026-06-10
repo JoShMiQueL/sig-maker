@@ -59,9 +59,11 @@ fn parse_cheat_engine(input: &str) -> Option<Vec<BytePattern>> {
         let pattern = if token == "??" || token == "?" {
             BytePattern::Wildcard
         } else if token.len() == 2 && token.starts_with('?') {
+            // ?X = LowNibble (X is the low nibble)
             let low = u8::from_str_radix(&token[1..2], 16).ok()?;
             BytePattern::LowNibble(low)
         } else if token.len() == 2 && token.ends_with('?') {
+            // X? = HighNibble (X is the high nibble)
             let high = u8::from_str_radix(&token[0..1], 16).ok()?;
             BytePattern::HighNibble(high)
         } else if token.len() == 2 {
