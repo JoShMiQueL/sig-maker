@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Pre-commit hook: runs fmt, clippy, and tests before allowing a commit.
+# Install with: git config core.hooksPath .githooks
+
+set -e
+
+echo "==> Running cargo fmt --check..."
+cargo fmt -- --check
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "ERROR: Code is not formatted. Run 'cargo fmt' and try again."
+    exit 1
+fi
+
+echo "==> Running cargo clippy..."
+cargo clippy -- -D warnings
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "ERROR: Clippy found warnings. Fix them and try again."
+    exit 1
+fi
+
+echo "==> Running cargo test..."
+cargo test --quiet
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "ERROR: Tests failed. Fix them and try again."
+    exit 1
+fi
+
+echo "==> All checks passed!"

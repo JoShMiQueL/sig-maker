@@ -39,6 +39,16 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/JoShMi
 - Rust 1.85 or later
 - Git
 
+### Git Hooks
+
+This project uses pre-commit hooks to ensure code quality. After cloning, set them up:
+
+```bash
+sh .githooks/setup.sh
+```
+
+This will run `cargo fmt --check`, `cargo clippy`, and `cargo test` before every commit.
+
 ### Building
 
 ```bash
