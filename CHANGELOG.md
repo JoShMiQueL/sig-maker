@@ -2,17 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [Unreleased]
 
-### Added
-- Initial release
-- Pattern optimization from multiple AOB instances
-- Support for 8 output formats: Cheat Engine, C++, Rust, Ghidra, IDA Pro, x64dbg, Python, JSON
-- Nibble-level wildcard detection (high/low nibble patterns)
-- Auto-detection of input formats
-- Comprehensive test suite
-- Benchmark suite with Criterion
-- GitHub Actions workflows for CI/CD
+### CI/CD
+
+- Add git-cliff for automatic CHANGELOG.md generation by @JoShMiQueL
+## [0.1.0-beta] - 2026-06-10
+
+### CI/CD
+
+- Migrate to cargo-dist for releases by @JoShMiQueL
+- Upgrade changelog-builder to v6 and gh-release to v3 (Node.js 24) by @JoShMiQueL
+- Remove Codecov coverage job by @JoShMiQueL
+- Update GitHub Actions for Node.js 24 and Windows 2025 by @JoShMiQueL
+
+### Fix
+
+- Resolve clippy warnings and formatting issues by @JoShMiQueL
+
+### Miscellaneous
+
+- Set version to 0.1.0-beta by @JoShMiQueL
+- Remove temporary commit message file by @JoShMiQueL
+
+### Styling
+
+- Apply cargo fmt formatting by @JoShMiQueL
+
