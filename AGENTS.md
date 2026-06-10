@@ -53,19 +53,23 @@ sig-maker/                    # Cargo workspace
 ├── crates/
 │   ├── sig-maker-core/      # Core library (zero external dependencies)
 │   │   ├── src/
-│   │   │   ├── lib.rs       # Library re-exports
-│   │   │   ├── analyzer.rs  # Multi-AOB analysis
-│   │   │   ├── converter.rs # Single pattern format conversion
-│   │   │   ├── formats/     # Pattern parsing, formatting
-│   │   │   └── io.rs        # File I/O, input type detection
+│   │   │   ├── lib.rs       # Library interface
+│   │   │   ├── analyzer.rs  # Pattern optimization engine
+│   │   │   ├── converter.rs # Format conversion
+│   │   │   ├── io.rs        # File I/O, format detection
+│   │   │   └── formats/     # Format definitions
+│   │   │       ├── mod.rs
+│   │   │       ├── parser.rs
+│   │   │       └── formatter.rs
 │   │   └── tests/           # Unit tests
 │   └── sig-maker-cli/       # CLI binary
 │       ├── src/
-│       │   ├── main.rs      # Entry point, CLI dispatch
+│       │   ├── main.rs      # CLI entry point
 │       │   ├── cli.rs       # CLI argument parsing
 │       │   ├── converter.rs # Pattern conversion logic
 │       │   └── output.rs    # Output formatting
 │       └── tests/           # Integration tests
+└── .github/workflows/       # CI/CD
 ```
 
 ## Commit Conventions
