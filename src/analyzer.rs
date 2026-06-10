@@ -11,11 +11,19 @@ pub struct AobInstance {
 }
 
 /// Analyze multiple AOB instances and generate optimized pattern
-pub fn analyze_aobs(content: &str, to_format: Option<Format>, output_file: Option<&str>) {
-    println!("==============================================");
-    println!("  Sig-Maker");
-    println!("==============================================");
-    println!();
+pub fn analyze_aobs(
+    content: &str,
+    to_format: Option<Format>,
+    output_file: Option<&str>,
+    verbose: bool,
+    quiet: bool,
+) {
+    if !quiet {
+        println!("==============================================");
+        println!("  Sig-Maker");
+        println!("==============================================");
+        println!();
+    }
 
     // Parse AOBs from content
     let aobs = parse_aobs(content);
@@ -24,11 +32,13 @@ pub fn analyze_aobs(content: &str, to_format: Option<Format>, output_file: Optio
         crate::io::error_exit("Need at least 2 valid AOB instances");
     }
 
-    println!("Analyzing {} valid AOB instances:", aobs.len());
-    for (i, aob) in aobs.iter().enumerate() {
-        println!("  [{}] {} bytes", i + 1, aob.bytes.len());
+    if !quiet {
+        println!("Analyzing {} valid AOB instances:", aobs.len());
+        for (i, aob) in aobs.iter().enumerate() {
+            println!("  [{}] {} bytes", i + 1, aob.bytes.len());
+        }
+        println!();
     }
-    println!();
 
     // Verify all have same length
     let first_len = aobs[0].bytes.len();
@@ -43,11 +53,15 @@ pub fn analyze_aobs(content: &str, to_format: Option<Format>, output_file: Optio
         }
     }
 
-    println!("All AOBs have {} bytes", first_len);
-    println!();
+    if !quiet {
+        println!("All AOBs have {} bytes", first_len);
+        println!();
+    }
 
     // Analyze byte-by-byte
-    println!("[1/2] Comparing byte-by-byte...");
+    if !quiet {
+        println!("[1/2] Comparing byte-by-byte...");
+    }
     let mut result: Vec<BytePattern> = Vec::with_capacity(first_len);
 
     for byte_idx in 0..first_len {
@@ -59,22 +73,35 @@ pub fn analyze_aobs(content: &str, to_format: Option<Format>, output_file: Optio
     let stats = PatternStats::from_patterns(&result);
 
     // Print stats
-    println!("    Fixed bytes: {}", stats.fixed_bytes());
-    println!(
-        "    High nibble wildcards: {}",
-        stats.high_nibble_wildcards()
-    );
-    println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
-    println!("    Full wildcards: {}", stats.full_wildcards());
-    println!();
+    if !quiet {
+        println!("    Fixed bytes: {}", stats.fixed_bytes());
+        println!(
+            "    High nibble wildcards: {}",
+            stats.high_nibble_wildcards()
+        );
+        println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
+        println!("    Full wildcards: {}", stats.full_wildcards());
+        println!();
+    }
 
-    // Show diff table (only for CE output or when showing all, and not writing to file)
-    if output_file.is_none() && (to_format.is_none() || to_format == Some(Format::CheatEngine)) {
+    // Show diff table (only for CE output or when showing all, and not writing to file, and not quiet)
+    if !quiet
+        && output_file.is_none()
+        && (to_format.is_none() || to_format == Some(Format::CheatEngine))
+    {
         print_diff_table(&result, &aobs, first_len);
     }
 
     // Print results
-    print_analysis_results(&result, &stats, to_format, &aobs, output_file);
+    print_analysis_results(
+        &result,
+        &stats,
+        to_format,
+        &aobs,
+        output_file,
+        quiet,
+        verbose,
+    );
 }
 
 /// Parse AOB instances from file content

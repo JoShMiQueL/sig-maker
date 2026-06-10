@@ -23,6 +23,8 @@ fn main() {
                 &input.content,
                 config.to_format,
                 config.output_file.as_deref(),
+                config.verbose,
+                config.quiet,
             );
         }
         io::InputType::CodePattern | io::InputType::SimplePattern => {
@@ -30,7 +32,13 @@ fn main() {
             let pattern = input
                 .extract_pattern()
                 .unwrap_or_else(|| io::error_exit("No valid pattern found"));
-            converter::convert_pattern(&pattern, config.to_format, config.output_file.as_deref());
+            converter::convert_pattern(
+                &pattern,
+                config.to_format,
+                config.output_file.as_deref(),
+                config.quiet,
+                config.verbose,
+            );
         }
     }
 }

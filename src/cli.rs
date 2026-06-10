@@ -7,6 +7,8 @@ pub struct Config {
     pub input_file: String,
     pub to_format: Option<Format>, // None = show all formats
     pub output_file: Option<String>,
+    pub verbose: bool,
+    pub quiet: bool,
 }
 
 impl Config {
@@ -24,6 +26,9 @@ impl Config {
         let mut to_format: Option<Format> = None;
         let mut input_file: Option<String> = None;
         let mut output_file: Option<String> = None;
+        let mut verbose = false;
+        let mut quiet = false;
+        let mut show_version = false;
 
         let mut i = 1;
         while i < args.len() {
@@ -55,6 +60,18 @@ impl Config {
                         std::process::exit(1);
                     }
                 }
+                "--version" | "-v" => {
+                    show_version = true;
+                    i += 1;
+                }
+                "--verbose" => {
+                    verbose = true;
+                    i += 1;
+                }
+                "--quiet" | "-q" => {
+                    quiet = true;
+                    i += 1;
+                }
                 arg => {
                     if input_file.is_none() && !arg.starts_with("-") {
                         input_file = Some(arg.to_string());
@@ -62,6 +79,18 @@ impl Config {
                     i += 1;
                 }
             }
+        }
+
+        // Show version and exit
+        if show_version {
+            println!("sig-maker {}", env!("CARGO_PKG_VERSION"));
+            std::process::exit(0);
+        }
+
+        // Validate conflicting options
+        if verbose && quiet {
+            eprintln!("ERROR: --verbose and --quiet are mutually exclusive");
+            std::process::exit(1);
         }
 
         Self {
@@ -73,6 +102,8 @@ impl Config {
             }),
             to_format,
             output_file,
+            verbose,
+            quiet,
         }
     }
 }
@@ -88,7 +119,8 @@ fn print_usage() {
     println!("Options:");
     println!("  --to <FORMAT>     Output format (default: show all formats)");
     println!("  -o, --output      Write output to file");
-    println!("  -v, --verbose     Verbose output with detailed stats");
+    println!("  -v, --version     Show version information");
+    println!("  --verbose        Verbose output with detailed stats");
     println!("  -q, --quiet       Quiet mode (only output, no headers)");
     println!("  -c, --check       Validate pattern without converting");
     println!();

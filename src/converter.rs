@@ -3,7 +3,13 @@
 use crate::formats::{BytePattern, Format, format_pattern, parse_pattern};
 
 /// Convert a single pattern and display results
-pub fn convert_pattern(content: &str, to_format: Option<Format>, output_file: Option<&str>) {
+pub fn convert_pattern(
+    content: &str,
+    to_format: Option<Format>,
+    output_file: Option<&str>,
+    quiet: bool,
+    verbose: bool,
+) {
     let pattern = match parse_pattern(content) {
         Some(p) => p,
         None => crate::io::error_exit("Could not parse input pattern"),
@@ -13,10 +19,10 @@ pub fn convert_pattern(content: &str, to_format: Option<Format>, output_file: Op
 
     let output = if let Some(fmt) = to_format {
         // Single format requested
-        format_single_format(&pattern, fmt, input_line)
+        format_single_format(&pattern, fmt, input_line, quiet, verbose)
     } else {
         // Show all formats
-        format_all_formats(&pattern, input_line)
+        format_all_formats(&pattern, input_line, quiet, verbose)
     };
 
     if let Some(file) = output_file {
@@ -25,43 +31,67 @@ pub fn convert_pattern(content: &str, to_format: Option<Format>, output_file: Op
             eprintln!("ERROR: Failed to write to '{}': {}", file, e);
             std::process::exit(1);
         }
-        println!("Output written to: {}", file);
+        if !quiet {
+            println!("Output written to: {}", file);
+        }
     } else {
         // Print to stdout
         print!("{}", output);
     }
 }
 
-fn format_single_format(pattern: &[BytePattern], fmt: Format, input_line: &str) -> String {
+fn format_single_format(
+    pattern: &[BytePattern],
+    fmt: Format,
+    input_line: &str,
+    quiet: bool,
+    _verbose: bool,
+) -> String {
     let mut output = String::new();
-    output.push_str("==============================================\n");
-    output.push_str("  Sig-Maker Pattern Converter\n");
-    output.push_str("==============================================\n");
-    output.push('\n');
-    output.push_str(&format!("Input: {}\n", input_line));
-    output.push_str(&format!("Length: {} bytes\n", pattern.len()));
-    output.push('\n');
+
+    if !quiet {
+        output.push_str("==============================================\n");
+        output.push_str("  Sig-Maker Pattern Converter\n");
+        output.push_str("==============================================\n");
+        output.push('\n');
+        output.push_str(&format!("Input: {}\n", input_line));
+        output.push_str(&format!("Length: {} bytes\n", pattern.len()));
+        output.push('\n');
+    }
+
     output.push_str(&format!("Output ({}):\n", fmt.name()));
     output.push_str(&format_pattern(pattern, fmt));
     output.push('\n');
-    output.push('\n');
-    output.push_str("==============================================\n");
+
+    if !quiet {
+        output.push('\n');
+        output.push_str("==============================================\n");
+    }
+
     output
 }
 
-fn format_all_formats(pattern: &[BytePattern], input_line: &str) -> String {
+fn format_all_formats(
+    pattern: &[BytePattern],
+    input_line: &str,
+    quiet: bool,
+    _verbose: bool,
+) -> String {
     let mut output = String::new();
-    output.push_str("==============================================\n");
-    output.push_str("  Sig-Maker Pattern Converter\n");
-    output.push_str("==============================================\n");
-    output.push('\n');
-    if !input_line.is_empty() {
-        output.push_str(&format!("Input: {}\n", input_line));
+
+    if !quiet {
+        output.push_str("==============================================\n");
+        output.push_str("  Sig-Maker Pattern Converter\n");
+        output.push_str("==============================================\n");
+        output.push('\n');
+        if !input_line.is_empty() {
+            output.push_str(&format!("Input: {}\n", input_line));
+        }
+        output.push_str(&format!("Length: {} bytes\n", pattern.len()));
+        output.push('\n');
+        output.push_str("All Output Formats:\n");
+        output.push('\n');
     }
-    output.push_str(&format!("Length: {} bytes\n", pattern.len()));
-    output.push('\n');
-    output.push_str("All Output Formats:\n");
-    output.push('\n');
 
     let formats = [
         (Format::CheatEngine, "CE"),
@@ -94,8 +124,11 @@ fn format_all_formats(pattern: &[BytePattern], input_line: &str) -> String {
         }
     }
 
-    output.push('\n');
-    output.push_str("==============================================\n");
+    if !quiet {
+        output.push('\n');
+        output.push_str("==============================================\n");
+    }
+
     output
 }
 

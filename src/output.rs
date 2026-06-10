@@ -132,13 +132,15 @@ pub fn print_analysis_results(
     to_format: Option<Format>,
     aobs: &[AobInstance],
     output_file: Option<&str>,
+    quiet: bool,
+    verbose: bool,
 ) {
     let output = if let Some(fmt) = to_format {
         // Single format requested
-        format_single_format_result(result, stats, fmt, aobs)
+        format_single_format_result(result, stats, fmt, aobs, quiet, verbose)
     } else {
         // Show all formats
-        format_all_formats_result(result, stats, aobs)
+        format_all_formats_result(result, stats, aobs, quiet, verbose)
     };
 
     if let Some(file) = output_file {
@@ -147,7 +149,9 @@ pub fn print_analysis_results(
             eprintln!("ERROR: Failed to write to '{}': {}", file, e);
             std::process::exit(1);
         }
-        println!("Output written to: {}", file);
+        if !quiet {
+            println!("Output written to: {}", file);
+        }
     } else {
         // Print to stdout
         print!("{}", output);
@@ -159,38 +163,46 @@ fn format_single_format_result(
     stats: &PatternStats,
     fmt: Format,
     aobs: &[AobInstance],
+    quiet: bool,
+    verbose: bool,
 ) -> String {
     let mut output = String::new();
-    output.push_str("==============================================\n");
-    output.push_str(&format!("  ANALYSIS RESULT ({})\n", fmt.name()));
-    output.push_str("==============================================\n");
-    output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
-    output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
-    output.push_str(&format!(
-        "High nibble wildcards: {} bytes\n",
-        stats.high_nibble_wildcards()
-    ));
-    output.push_str(&format!(
-        "Low nibble wildcards: {} bytes\n",
-        stats.low_nibble_wildcards()
-    ));
-    output.push_str(&format!(
-        "Full wildcards: {} bytes\n",
-        stats.full_wildcards()
-    ));
-    output.push('\n');
+
+    if !quiet {
+        output.push_str("==============================================\n");
+        output.push_str(&format!("  ANALYSIS RESULT ({})\n", fmt.name()));
+        output.push_str("==============================================\n");
+        output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
+        output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
+        output.push_str(&format!(
+            "High nibble wildcards: {} bytes\n",
+            stats.high_nibble_wildcards()
+        ));
+        output.push_str(&format!(
+            "Low nibble wildcards: {} bytes\n",
+            stats.low_nibble_wildcards()
+        ));
+        output.push_str(&format!(
+            "Full wildcards: {} bytes\n",
+            stats.full_wildcards()
+        ));
+        output.push('\n');
+    }
+
     output.push_str("Optimized Pattern:\n");
     output.push_str(&format_pattern(result, fmt));
     output.push('\n');
 
-    if fmt == Format::CheatEngine {
+    if verbose && fmt == Format::CheatEngine {
         output.push_str(&format_verification(aobs, result));
     }
 
-    output.push('\n');
-    output.push_str("==============================================\n");
-    output.push_str("  Analysis Complete!\n");
-    output.push_str("==============================================\n");
+    if !quiet {
+        output.push('\n');
+        output.push_str("==============================================\n");
+        output.push_str("  Analysis Complete!\n");
+        output.push_str("==============================================\n");
+    }
 
     output
 }
@@ -199,26 +211,32 @@ fn format_all_formats_result(
     result: &[BytePattern],
     stats: &PatternStats,
     aobs: &[AobInstance],
+    quiet: bool,
+    verbose: bool,
 ) -> String {
     let mut output = String::new();
-    output.push_str("==============================================\n");
-    output.push_str("  ANALYSIS RESULT - All Formats\n");
-    output.push_str("==============================================\n");
-    output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
-    output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
-    output.push_str(&format!(
-        "High nibble wildcards: {} bytes\n",
-        stats.high_nibble_wildcards()
-    ));
-    output.push_str(&format!(
-        "Low nibble wildcards: {} bytes\n",
-        stats.low_nibble_wildcards()
-    ));
-    output.push_str(&format!(
-        "Full wildcards: {} bytes\n",
-        stats.full_wildcards()
-    ));
-    output.push('\n');
+
+    if !quiet {
+        output.push_str("==============================================\n");
+        output.push_str("  ANALYSIS RESULT - All Formats\n");
+        output.push_str("==============================================\n");
+        output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
+        output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
+        output.push_str(&format!(
+            "High nibble wildcards: {} bytes\n",
+            stats.high_nibble_wildcards()
+        ));
+        output.push_str(&format!(
+            "Low nibble wildcards: {} bytes\n",
+            stats.low_nibble_wildcards()
+        ));
+        output.push_str(&format!(
+            "Full wildcards: {} bytes\n",
+            stats.full_wildcards()
+        ));
+        output.push('\n');
+    }
+
     output.push_str("Optimized Patterns:\n");
     output.push('\n');
 
@@ -246,12 +264,16 @@ fn format_all_formats_result(
         }
     }
 
-    output.push_str(&format_verification(aobs, result));
+    if verbose {
+        output.push_str(&format_verification(aobs, result));
+    }
 
-    output.push('\n');
-    output.push_str("==============================================\n");
-    output.push_str("  Analysis Complete!\n");
-    output.push_str("==============================================\n");
+    if !quiet {
+        output.push('\n');
+        output.push_str("==============================================\n");
+        output.push_str("  Analysis Complete!\n");
+        output.push_str("==============================================\n");
+    }
 
     output
 }
