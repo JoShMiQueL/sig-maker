@@ -13,9 +13,10 @@ impl Config {
     pub fn parse() -> Self {
         let args: Vec<String> = std::env::args().collect();
 
-        // Check for help
-        if args.len() > 1 && (args[1] == "-h" || args[1] == "--help") {
+        // Check for help or no arguments
+        if args.len() <= 1 || args[1] == "-h" || args[1] == "--help" {
             print_usage();
+            pause_if_no_terminal();
             std::process::exit(0);
         }
 
@@ -53,7 +54,12 @@ impl Config {
         }
 
         Self {
-            input_file: input_file.unwrap_or_else(|| "aobs.txt".to_string()),
+            input_file: input_file.unwrap_or_else(|| {
+                eprintln!("ERROR: No input file specified");
+                print_usage();
+                pause_if_no_terminal();
+                std::process::exit(1);
+            }),
             to_format,
         }
     }
@@ -90,4 +96,35 @@ fn print_usage() {
     println!("  sig-maker --to rust aobs.txt        # Output only Rust format");
     println!("  sig-maker pattern.txt -o out.txt    # Save to file");
     println!("  sig-maker pattern.txt -v            # Verbose with stats");
+}
+
+/// Pause and wait for Enter if running without a proper terminal (e.g. double-click on Windows)
+fn pause_if_no_terminal() {
+    use std::io::{Read, stdin};
+
+    // Check if stdin is a terminal; if not attached to a pipe, pause
+    if atty_check() {
+        println!();
+        println!("Press Enter to exit...");
+        let _ = stdin().read(&mut [0u8]);
+    }
+}
+
+/// Returns true if we should pause (i.e. likely launched via double-click)
+fn atty_check() -> bool {
+    // On Windows, check if we're running in a console that was created for us
+    #[cfg(windows)]
+    {
+        unsafe extern "system" {
+            fn GetConsoleProcessList(list: *mut u32, count: u32) -> u32;
+        }
+        // If only 1 process is attached to the console, we own it (double-click)
+        let mut pids = [0u32; 4];
+        let count = unsafe { GetConsoleProcessList(pids.as_mut_ptr(), 4) };
+        count <= 1
+    }
+    #[cfg(not(windows))]
+    {
+        false
+    }
 }
