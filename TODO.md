@@ -8,6 +8,7 @@
 - ⏳ **Terminal colors** (crate: `colored` or `owo-colors`)
 - ⏳ **Pattern validation** (`-c, --check` - detect if valid without converting)
 - ⏳ **Detailed statistics** (entropy, compression ratio, etc.)
+- ✅ **Pause on double-click** (Windows: shows usage and waits for Enter)
 
 ### Testing & Quality
 - ⏳ **More integration tests** (test complete end-to-end flow)
@@ -73,11 +74,15 @@
 - ✅ **CONTRIBUTING.md** (contributor guidelines)
 - ✅ **CODE_OF_CONDUCT.md** (code of conduct)
 - ✅ **Issue templates** (bug report, feature request)
-- ⏳ **Pull request template**
+- ⏳ **Pull request template** (`.github/PULL_REQUEST_TEMPLATE.md`)
+- ✅ **AGENTS.md** (project context for AI agents)
 
 ### Automation
-- ✅ **CI workflow** (test, build, clippy, fmt)
-- ✅ **Release workflow** (changelog, multi-platform builds)
+- ✅ **CI workflow** (test, build, clippy, fmt on Linux/Windows/macOS)
+- ✅ **Release workflow** (changelog, multi-platform builds via cargo-dist)
+- ✅ **Changelog generation** (git-cliff auto-updates CHANGELOG.md)
+- ✅ **Git hooks** (pre-commit: fmt/clippy/build/test, commit-msg: Conventional Commits)
+- ✅ **Branch protection** (PRs required, CI check required, admin bypass)
 - ⏳ **Dependabot** (automatic dependency updates)
 - ⏳ **Stale bot** (close inactive issues/PRs)
 
