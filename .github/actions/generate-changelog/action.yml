@@ -1,0 +1,42 @@
+name: 'Generate Changelog'
+description: 'Generate changelog using git-cliff and commit it'
+
+inputs:
+  commit:
+    description: 'Whether to commit and push the changelog'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install git-cliff
+      shell: bash
+      run: |
+        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orhun/git-cliff/releases/download/v2.6.1/git-cliff-2.6.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
+        sudo mv git-cliff-2.6.1-x86_64-unknown-linux-gnu/git-cliff /usr/local/bin/
+
+    - name: Generate changelog
+      shell: bash
+      run: |
+        git cliff -o CHANGELOG.md
+
+    - name: Check if changelog changed
+      id: check_changes
+      shell: bash
+      run: |
+        if git diff --quiet CHANGELOG.md; then
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Commit changes
+      if: inputs.commit == 'true' && steps.check_changes.outputs.changed == 'true'
+      shell: bash
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add CHANGELOG.md
+        git commit -m "docs: update CHANGELOG.md [skip ci]"
+        git push origin main

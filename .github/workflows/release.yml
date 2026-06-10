@@ -56,22 +56,11 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
-      - name: Install git-cliff
-        run: |
-          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orhun/git-cliff/releases/download/v2.6.1/git-cliff-2.6.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          sudo mv git-cliff-2.6.1-x86_64-unknown-linux-gnu/git-cliff /usr/local/bin/
+
       - name: Generate changelog
-        run: |
-          git cliff -o CHANGELOG.md
-      - name: Commit changelog
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add CHANGELOG.md
-          git diff --staged --quiet || git commit -m "docs: update CHANGELOG.md [skip ci]"
-          git push origin main
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ./.github/actions/generate-changelog
+        with:
+          commit: 'true'
 
   # Run 'dist plan' (or host) to determine what tasks we need to do
   plan:
