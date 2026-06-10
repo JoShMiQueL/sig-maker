@@ -2,6 +2,8 @@
 
 use crate::analyzer::{AobInstance, aob_matches_pattern};
 use crate::formats::{BytePattern, Format, format_pattern};
+use atty;
+use colored::Colorize;
 
 /// Statistics about pattern optimization
 pub struct PatternStats {
@@ -135,12 +137,15 @@ pub fn print_analysis_results(
     quiet: bool,
     verbose: bool,
 ) {
+    // Disable colors when writing to file or not in a terminal
+    let use_colors = output_file.is_none() && atty::is(atty::Stream::Stdout);
+
     let output = if let Some(fmt) = to_format {
         // Single format requested
-        format_single_format_result(result, stats, fmt, aobs, quiet, verbose)
+        format_single_format_result(result, stats, fmt, aobs, quiet, verbose, use_colors)
     } else {
         // Show all formats
-        format_all_formats_result(result, stats, aobs, quiet, verbose)
+        format_all_formats_result(result, stats, aobs, quiet, verbose, use_colors)
     };
 
     if let Some(file) = output_file {
@@ -165,13 +170,29 @@ fn format_single_format_result(
     aobs: &[AobInstance],
     quiet: bool,
     verbose: bool,
+    use_colors: bool,
 ) -> String {
     let mut output = String::new();
 
     if !quiet {
-        output.push_str("==============================================\n");
-        output.push_str(&format!("  ANALYSIS RESULT ({})\n", fmt.name()));
-        output.push_str("==============================================\n");
+        if use_colors {
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+            output.push_str(&format!(
+                "  {}\n",
+                format!("ANALYSIS RESULT ({})", fmt.name()).cyan().bold()
+            ));
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+        } else {
+            output.push_str("==============================================\n");
+            output.push_str(&format!("  ANALYSIS RESULT ({})\n", fmt.name()));
+            output.push_str("==============================================\n");
+        }
         output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
         output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
         output.push_str(&format!(
@@ -199,9 +220,21 @@ fn format_single_format_result(
 
     if !quiet {
         output.push('\n');
-        output.push_str("==============================================\n");
-        output.push_str("  Analysis Complete!\n");
-        output.push_str("==============================================\n");
+        if use_colors {
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+            output.push_str(&format!("  {}\n", "Analysis Complete!".green().bold()));
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+        } else {
+            output.push_str("==============================================\n");
+            output.push_str("  Analysis Complete!\n");
+            output.push_str("==============================================\n");
+        }
     }
 
     output
@@ -213,13 +246,29 @@ fn format_all_formats_result(
     aobs: &[AobInstance],
     quiet: bool,
     verbose: bool,
+    use_colors: bool,
 ) -> String {
     let mut output = String::new();
 
     if !quiet {
-        output.push_str("==============================================\n");
-        output.push_str("  ANALYSIS RESULT - All Formats\n");
-        output.push_str("==============================================\n");
+        if use_colors {
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+            output.push_str(&format!(
+                "  {}\n",
+                "ANALYSIS RESULT - All Formats".cyan().bold()
+            ));
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+        } else {
+            output.push_str("==============================================\n");
+            output.push_str("  ANALYSIS RESULT - All Formats\n");
+            output.push_str("==============================================\n");
+        }
         output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
         output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
         output.push_str(&format!(
@@ -270,9 +319,21 @@ fn format_all_formats_result(
 
     if !quiet {
         output.push('\n');
-        output.push_str("==============================================\n");
-        output.push_str("  Analysis Complete!\n");
-        output.push_str("==============================================\n");
+        if use_colors {
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+            output.push_str(&format!("  {}\n", "Analysis Complete!".green().bold()));
+            output.push_str(&format!(
+                "{}\n",
+                "==============================================".cyan()
+            ));
+        } else {
+            output.push_str("==============================================\n");
+            output.push_str("  Analysis Complete!\n");
+            output.push_str("==============================================\n");
+        }
     }
 
     output

@@ -2,6 +2,8 @@
 
 use crate::formats::{BytePattern, Format, optimize_byte};
 use crate::output::{PatternStats, print_analysis_results, print_diff_table};
+use atty;
+use colored::Colorize;
 
 /// AOB instance with source line info
 pub struct AobInstance {
@@ -18,10 +20,25 @@ pub fn analyze_aobs(
     verbose: bool,
     quiet: bool,
 ) {
+    // Disable colors when writing to file or not in a terminal
+    let use_colors = output_file.is_none() && atty::is(atty::Stream::Stdout);
+
     if !quiet {
-        println!("==============================================");
-        println!("  Sig-Maker");
-        println!("==============================================");
+        if use_colors {
+            println!(
+                "{}",
+                "==============================================".cyan()
+            );
+            println!("  {}", "Sig-Maker".cyan().bold());
+            println!(
+                "{}",
+                "==============================================".cyan()
+            );
+        } else {
+            println!("==============================================");
+            println!("  Sig-Maker");
+            println!("==============================================");
+        }
         println!();
     }
 
@@ -33,9 +50,23 @@ pub fn analyze_aobs(
     }
 
     if !quiet {
-        println!("Analyzing {} valid AOB instances:", aobs.len());
-        for (i, aob) in aobs.iter().enumerate() {
-            println!("  [{}] {} bytes", i + 1, aob.bytes.len());
+        if use_colors {
+            println!(
+                "Analyzing {} valid AOB instances:",
+                aobs.len().to_string().green()
+            );
+            for (i, aob) in aobs.iter().enumerate() {
+                println!(
+                    "  [{}] {} bytes",
+                    (i + 1).to_string().cyan(),
+                    aob.bytes.len()
+                );
+            }
+        } else {
+            println!("Analyzing {} valid AOB instances:", aobs.len());
+            for (i, aob) in aobs.iter().enumerate() {
+                println!("  [{}] {} bytes", i + 1, aob.bytes.len());
+            }
         }
         println!();
     }
@@ -54,13 +85,21 @@ pub fn analyze_aobs(
     }
 
     if !quiet {
-        println!("All AOBs have {} bytes", first_len);
+        if use_colors {
+            println!("All AOBs have {} bytes", first_len.to_string().green());
+        } else {
+            println!("All AOBs have {} bytes", first_len);
+        }
         println!();
     }
 
     // Analyze byte-by-byte
     if !quiet {
-        println!("[1/2] Comparing byte-by-byte...");
+        if use_colors {
+            println!("{} Comparing byte-by-byte...", "[1/2]".yellow());
+        } else {
+            println!("[1/2] Comparing byte-by-byte...");
+        }
     }
     let mut result: Vec<BytePattern> = Vec::with_capacity(first_len);
 
@@ -74,13 +113,32 @@ pub fn analyze_aobs(
 
     // Print stats
     if !quiet {
-        println!("    Fixed bytes: {}", stats.fixed_bytes());
-        println!(
-            "    High nibble wildcards: {}",
-            stats.high_nibble_wildcards()
-        );
-        println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
-        println!("    Full wildcards: {}", stats.full_wildcards());
+        if use_colors {
+            println!(
+                "    Fixed bytes: {}",
+                stats.fixed_bytes().to_string().green()
+            );
+            println!(
+                "    High nibble wildcards: {}",
+                stats.high_nibble_wildcards().to_string().yellow()
+            );
+            println!(
+                "    Low nibble wildcards: {}",
+                stats.low_nibble_wildcards().to_string().yellow()
+            );
+            println!(
+                "    Full wildcards: {}",
+                stats.full_wildcards().to_string().red()
+            );
+        } else {
+            println!("    Fixed bytes: {}", stats.fixed_bytes());
+            println!(
+                "    High nibble wildcards: {}",
+                stats.high_nibble_wildcards()
+            );
+            println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
+            println!("    Full wildcards: {}", stats.full_wildcards());
+        }
         println!();
     }
 
