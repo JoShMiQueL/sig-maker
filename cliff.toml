@@ -28,12 +28,21 @@ body = """
 {% endfor %}
 
 {%- if github -%}
-{%- if github.contributors | filter(attribute="is_first_time", value=true) | length != 0 %}
+{%- set new_contributors = github.contributors | filter(attribute="is_first_time", value=true) %}
+{%- set_global has_new_human = false -%}
+{%- for contributor in new_contributors -%}
+    {%- if not contributor.username is containing("[bot]") -%}
+        {%- set_global has_new_human = true -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- if has_new_human %}
 
     ### New Contributors
-{% for contributor in github.contributors | filter(attribute="is_first_time", value=true) %}
+{% for contributor in new_contributors -%}
+    {%- if not contributor.username is containing("[bot]") %}
     * [@{{ contributor.username }}](https://github.com/{{ contributor.username }}) made their first contribution\
         {%- if contributor.pr_number %} in [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}){%- endif %}
+{%- endif -%}
 {%- endfor %}
 {%- endif %}
 {%- endif %}
