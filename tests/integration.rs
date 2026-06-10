@@ -5,7 +5,14 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn run_sig_maker(args: &[&str]) -> (String, String, i32) {
-    let output = Command::new("target/release/sig-maker.exe")
+    // Use debug binary for CI, release for local
+    let binary_path = if std::env::var("CI").is_ok() {
+        "target/debug/sig-maker"
+    } else {
+        "target/release/sig-maker"
+    };
+
+    let output = Command::new(binary_path)
         .args(args)
         .output()
         .expect("Failed to run sig-maker");
