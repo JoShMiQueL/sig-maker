@@ -22,6 +22,11 @@ pub fn error_exit(msg: &str) -> ! {
 
 /// Pause and wait for Enter if not in a terminal (e.g., double-click on Windows)
 pub fn pause_if_no_terminal() {
+    // Skip pause in tests or CI
+    if std::env::var("SIG_MAKER_NO_PAUSE").is_ok() {
+        return;
+    }
+
     // On Windows, check if we're running in a console that was created for us (double-click)
     #[cfg(windows)]
     {

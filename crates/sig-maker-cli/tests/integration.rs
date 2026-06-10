@@ -14,6 +14,7 @@ fn run_sig_maker(args: &[&str]) -> (String, String, i32) {
 
     let output = Command::new(binary_path)
         .args(args)
+        .env("SIG_MAKER_NO_PAUSE", "1")
         .output()
         .expect("Failed to run sig-maker");
 

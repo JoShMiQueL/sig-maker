@@ -83,12 +83,16 @@ impl Input {
                 line
             };
 
-            // Check if it looks like a pattern
-            if cleaned.contains('?')
-                || cleaned.contains("0x")
-                || cleaned.contains('[')
-                || cleaned.contains('.')
-            {
+            // Check if it looks like a pattern (more lenient check)
+            // Cheat Engine patterns have wildcards (?), x64dbg has dots, IDA has brackets
+            // Also check for hex bytes (space-separated)
+            let has_wildcards = cleaned.contains('?') || cleaned.contains('.');
+            let has_brackets = cleaned.contains('[');
+            let has_hex = cleaned
+                .split_whitespace()
+                .any(|t| t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit()));
+
+            if has_wildcards || has_brackets || has_hex {
                 InputType::SimplePattern
             } else {
                 // Doesn't look like a pattern, assume it's meant to be a file
