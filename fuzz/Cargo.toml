@@ -10,8 +10,8 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 
-[dependencies.sig-maker]
-path = ".."
+[dependencies.sig-maker-core]
+path = "../crates/sig-maker-core"
 
 [[bin]]
 name = "fuzz_target_1"
