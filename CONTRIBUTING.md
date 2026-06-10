@@ -106,18 +106,28 @@ cargo run -- your_pattern.txt
 ### Project Structure
 
 ```
-src/
-├── main.rs        # CLI entry point
-├── lib.rs         # Library exports
-├── cli.rs         # Argument parsing
-├── io.rs          # File I/O, format detection
-├── analyzer.rs    # Pattern optimization engine
-├── converter.rs   # Format conversion
-├── output.rs      # Result formatting
-└── formats/       # Format definitions
-    ├── mod.rs     # Format enum, BytePattern
-    ├── parser.rs  # Format parsers
-    └── formatter.rs # Format formatters
+sig-maker/                    # Cargo workspace
+├── Cargo.toml               # Workspace configuration
+├── crates/
+│   ├── sig-maker-core/      # Core library (zero external dependencies)
+│   │   ├── src/
+│   │   │   ├── lib.rs       # Library exports
+│   │   │   ├── analyzer.rs  # Pattern optimization engine
+│   │   │   ├── converter.rs # Format conversion
+│   │   │   ├── io.rs        # File I/O, format detection
+│   │   │   └── formats/     # Format definitions
+│   │   │       ├── mod.rs   # Format enum, BytePattern
+│   │   │       ├── parser.rs # Format parsers
+│   │   │       └── formatter.rs # Format formatters
+│   │   └── tests/           # Unit tests
+│   └── sig-maker-cli/       # CLI binary
+│       ├── src/
+│       │   ├── main.rs      # CLI entry point
+│       │   ├── cli.rs       # Argument parsing
+│       │   ├── converter.rs # Pattern conversion logic
+│       │   └── output.rs    # Output formatting
+│       └── tests/           # Integration tests
+└── .github/workflows/       # CI/CD
 ```
 
 ## Style Guidelines

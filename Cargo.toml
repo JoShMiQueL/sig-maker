@@ -19,10 +19,6 @@ keywords = ["signature", "pattern", "aob", "reverse-engineering", "cheat-engine"
 categories = ["command-line-utilities", "development-tools"]
 rust-version = "1.85"
 
-[workspace.dependencies]
-colored = "2.1"
-atty = "0.2"
-
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"

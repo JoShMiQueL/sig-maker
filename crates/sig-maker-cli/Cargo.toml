@@ -16,5 +16,3 @@ path = "src/main.rs"
 
 [dependencies]
 sig-maker-core = { path = "../sig-maker-core" }
-colored = { workspace = true }
-atty = { workspace = true }

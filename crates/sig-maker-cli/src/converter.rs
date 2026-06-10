@@ -1,7 +1,5 @@
 //! Pattern conversion - convert single pattern between formats
 
-use atty::is;
-use colored::Colorize;
 use sig_maker_core::PatternStats;
 use sig_maker_core::formats::{BytePattern, Format, format_pattern, parse_pattern};
 
@@ -20,15 +18,12 @@ pub fn convert_pattern(
 
     let input_line = content.lines().next().unwrap_or("").trim();
 
-    // Disable colors when writing to file or not in a terminal
-    let use_colors = output_file.is_none() && is(atty::Stream::Stdout);
-
     let output = if let Some(fmt) = to_format {
         // Single format requested
-        format_single_format(&pattern, fmt, input_line, quiet, use_colors, verbose)
+        format_single_format(&pattern, fmt, input_line, quiet, verbose)
     } else {
         // Show all formats
-        format_all_formats(&pattern, input_line, quiet, use_colors, verbose)
+        format_all_formats(&pattern, input_line, quiet, verbose)
     };
 
     if let Some(file) = output_file {
@@ -51,37 +46,17 @@ fn format_single_format(
     fmt: Format,
     input_line: &str,
     quiet: bool,
-    use_colors: bool,
     verbose: bool,
 ) -> String {
     let mut output = String::new();
 
     if !quiet {
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-            output.push_str(&format!(
-                "  {}\n",
-                "Sig-Maker Pattern Converter".cyan().bold()
-            ));
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-            output.push_str("  Sig-Maker Pattern Converter\n");
-            output.push_str("==============================================\n");
-        }
-        output.push('\n');
+        output.push_str(&format!("Sig-Maker: {}\n", fmt.name()));
         output.push_str(&format!("Input: {}\n", input_line));
         output.push_str(&format!("Length: {} bytes\n", pattern.len()));
         output.push('\n');
     }
 
-    output.push_str(&format!("Output ({}):\n", fmt.name()));
     output.push_str(&format_pattern(pattern, fmt));
     output.push('\n');
 
@@ -92,19 +67,6 @@ fn format_single_format(
             "Compression ratio: {:.2}%\n",
             stats.compression_ratio() * 100.0
         ));
-        output.push('\n');
-    }
-
-    if !quiet {
-        output.push('\n');
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-        }
     }
 
     output
@@ -114,37 +76,14 @@ fn format_all_formats(
     pattern: &[BytePattern],
     input_line: &str,
     quiet: bool,
-    use_colors: bool,
     verbose: bool,
 ) -> String {
     let mut output = String::new();
 
     if !quiet {
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-            output.push_str(&format!(
-                "  {}\n",
-                "Sig-Maker Pattern Converter".cyan().bold()
-            ));
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-            output.push_str("  Sig-Maker Pattern Converter\n");
-            output.push_str("==============================================\n");
-        }
-        output.push('\n');
-        if !input_line.is_empty() {
-            output.push_str(&format!("Input: {}\n", input_line));
-        }
+        output.push_str("Sig-Maker: All Formats\n");
+        output.push_str(&format!("Input: {}\n", input_line));
         output.push_str(&format!("Length: {} bytes\n", pattern.len()));
-        output.push('\n');
-        output.push_str("All Output Formats:\n");
         output.push('\n');
     }
 
@@ -163,7 +102,7 @@ fn format_all_formats(
         (Format::Cpp, "C++"),
         (Format::Rust, "Rust"),
         (Format::Ghidra, "Ghidra"),
-        (Format::IdaPro, "IDA Pro"),
+        (Format::IdaPro, "IDA"),
         (Format::X64dbg, "x64dbg"),
         (Format::Python, "Python"),
         (Format::Json, "JSON"),
@@ -175,7 +114,7 @@ fn format_all_formats(
         if !pattern_str.contains('\n') && pattern_str.len() < 70 {
             // Single line output
             output.push_str(&format!(
-                "{:12} {}\n",
+                "{:8} {}\n",
                 format!("{}:", short_name),
                 pattern_str
             ));
@@ -186,18 +125,6 @@ fn format_all_formats(
                 output.push_str(&format!("  {}\n", line));
             }
             output.push('\n');
-        }
-    }
-
-    if !quiet {
-        output.push('\n');
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
         }
     }
 

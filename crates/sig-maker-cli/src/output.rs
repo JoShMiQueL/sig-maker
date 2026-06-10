@@ -1,20 +1,16 @@
 //! Output formatting and printing
 
-use atty::is;
-use colored::Colorize;
 use sig_maker_core::PatternStats;
 use sig_maker_core::analyzer::{AobInstance, aob_matches_pattern};
 use sig_maker_core::formats::{BytePattern, Format, format_pattern};
+use std::collections::HashSet;
 
 /// Print the diff table showing byte-by-byte comparison
 pub fn print_diff_table(result: &[BytePattern], aobs: &[AobInstance], _first_len: usize) {
-    use std::collections::HashSet;
-
-    println!("[2/2] Difference Analysis:");
+    println!("Difference Analysis:");
     println!();
-    println!("{:-<90}", "");
-    println!("{:<5} {:<15} Values", "Byte", "Pattern");
-    println!("{:-<90}", "");
+    println!("Byte  Pattern         Values");
+    println!("----  --------         ------");
 
     for (byte_idx, pattern) in result.iter().enumerate() {
         // Show values from each AOB
@@ -42,7 +38,7 @@ pub fn print_diff_table(result: &[BytePattern], aobs: &[AobInstance], _first_len
                     .into_iter()
                     .collect();
                 if unique.len() == 1 {
-                    format!(" <-- optimized to {}", unique[0])
+                    format!(" -> {}", unique[0])
                 } else {
                     String::new()
                 }
@@ -59,25 +55,21 @@ pub fn print_diff_table(result: &[BytePattern], aobs: &[AobInstance], _first_len
                     .into_iter()
                     .collect();
                 if unique.len() == 1 {
-                    format!(" <-- optimized to {}", unique[0])
+                    format!(" -> {}", unique[0])
                 } else {
                     String::new()
                 }
             }
-            BytePattern::Wildcard => " <-- CHANGES".to_string(),
+            BytePattern::Wildcard => "*".to_string(),
         };
 
         let pattern_str = format_pattern(&[*pattern], Format::CheatEngine);
 
         println!(
-            "{:<5} {:<15} {}{}",
-            format!("[{}]", byte_idx),
-            pattern_str,
-            values_str,
-            marker
+            "[{:2}]  {:15} {}{}",
+            byte_idx, pattern_str, values_str, marker
         );
     }
-    println!("{:-<90}", "");
     println!();
 }
 
@@ -91,15 +83,12 @@ pub fn print_analysis_results(
     quiet: bool,
     verbose: bool,
 ) {
-    // Disable colors when writing to file or not in a terminal
-    let use_colors = output_file.is_none() && is(atty::Stream::Stdout);
-
     let output = if let Some(fmt) = to_format {
         // Single format requested
-        format_single_format_result(result, stats, fmt, aobs, quiet, verbose, use_colors)
+        format_single_format_result(result, stats, fmt, aobs, quiet, verbose)
     } else {
         // Show all formats
-        format_all_formats_result(result, stats, aobs, quiet, verbose, use_colors)
+        format_all_formats_result(result, stats, aobs, quiet, verbose)
     };
 
     if let Some(file) = output_file {
@@ -124,29 +113,11 @@ fn format_single_format_result(
     aobs: &[AobInstance],
     quiet: bool,
     verbose: bool,
-    use_colors: bool,
 ) -> String {
     let mut output = String::new();
 
     if !quiet {
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-            output.push_str(&format!(
-                "  {}\n",
-                format!("ANALYSIS RESULT ({})", fmt.name()).cyan().bold()
-            ));
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-            output.push_str(&format!("  ANALYSIS RESULT ({})\n", fmt.name()));
-            output.push_str("==============================================\n");
-        }
+        output.push_str(&format!("Sig-Maker: Analysis ({})\n", fmt.name()));
         output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
         output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
         output.push_str(&format!(
@@ -181,25 +152,6 @@ fn format_single_format_result(
         output.push_str(&format_verification(aobs, result));
     }
 
-    if !quiet {
-        output.push('\n');
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-            output.push_str(&format!("  {}\n", "Analysis Complete!".green().bold()));
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-            output.push_str("  Analysis Complete!\n");
-            output.push_str("==============================================\n");
-        }
-    }
-
     output
 }
 
@@ -209,29 +161,11 @@ fn format_all_formats_result(
     aobs: &[AobInstance],
     quiet: bool,
     verbose: bool,
-    use_colors: bool,
 ) -> String {
     let mut output = String::new();
 
     if !quiet {
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-            output.push_str(&format!(
-                "  {}\n",
-                "ANALYSIS RESULT - All Formats".cyan().bold()
-            ));
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-            output.push_str("  ANALYSIS RESULT - All Formats\n");
-            output.push_str("==============================================\n");
-        }
+        output.push_str("Sig-Maker: Analysis (All Formats)\n");
         output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
         output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
         output.push_str(&format!(
@@ -262,11 +196,11 @@ fn format_all_formats_result(
     output.push('\n');
 
     let formats = [
-        (Format::CheatEngine, "Cheat Engine"),
+        (Format::CheatEngine, "CE"),
         (Format::Cpp, "C++"),
         (Format::Rust, "Rust"),
         (Format::Ghidra, "Ghidra"),
-        (Format::IdaPro, "IDA Pro"),
+        (Format::IdaPro, "IDA"),
         (Format::X64dbg, "x64dbg"),
         (Format::Python, "Python"),
         (Format::Json, "JSON"),
@@ -275,7 +209,7 @@ fn format_all_formats_result(
     for (fmt, name) in formats {
         let pattern = format_pattern(result, fmt);
         if !pattern.contains('\n') && pattern.len() < 70 {
-            output.push_str(&format!("{:15} {}\n", format!("{}:", name), pattern));
+            output.push_str(&format!("{:12} {}\n", format!("{}:", name), pattern));
         } else {
             output.push_str(&format!("{}:\n", name));
             for line in pattern.lines() {
@@ -287,25 +221,6 @@ fn format_all_formats_result(
 
     if verbose {
         output.push_str(&format_verification(aobs, result));
-    }
-
-    if !quiet {
-        output.push('\n');
-        if use_colors {
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-            output.push_str(&format!("  {}\n", "Analysis Complete!".green().bold()));
-            output.push_str(&format!(
-                "{}\n",
-                "==============================================".cyan()
-            ));
-        } else {
-            output.push_str("==============================================\n");
-            output.push_str("  Analysis Complete!\n");
-            output.push_str("==============================================\n");
-        }
     }
 
     output

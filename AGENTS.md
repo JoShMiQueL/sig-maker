@@ -28,9 +28,6 @@ cargo fmt -- --check
 # Format fix
 cargo fmt
 
-# Run benchmarks
-cargo bench --workspace
-
 # Run the CLI
 cargo run --bin sig-maker -- <input_file> [--to <format>]
 ```
@@ -54,22 +51,21 @@ These are the same checks enforced by the pre-commit hook and CI.
 sig-maker/                    # Cargo workspace
 ├── Cargo.toml               # Workspace configuration
 ├── crates/
-│   ├── sig-maker-lib/       # Core library
+│   ├── sig-maker-core/      # Core library (zero external dependencies)
 │   │   ├── src/
 │   │   │   ├── lib.rs       # Library re-exports
-│   │   │   ├── analyzer.rs    # Multi-AOB analysis
-│   │   │   ├── converter.rs   # Single pattern format conversion
-│   │   │   ├── formats/      # Pattern parsing, formatting
-│   │   │   ├── io.rs         # File I/O, input type detection
-│   │   │   ├── output.rs     # Output formatting and display
-│   │   │   └── cli.rs        # CLI logic
-│   │   ├── benches/          # Criterion benchmarks
-│   │   └── tests/            # Unit tests
+│   │   │   ├── analyzer.rs  # Multi-AOB analysis
+│   │   │   ├── converter.rs # Single pattern format conversion
+│   │   │   ├── formats/     # Pattern parsing, formatting
+│   │   │   └── io.rs        # File I/O, input type detection
+│   │   └── tests/           # Unit tests
 │   └── sig-maker-cli/       # CLI binary
 │       ├── src/
-│       │   └── main.rs      # Entry point, CLI dispatch
-│       └── tests/            # Integration tests
-└── benches/                 # Workspace-level benchmarks
+│       │   ├── main.rs      # Entry point, CLI dispatch
+│       │   ├── cli.rs       # CLI argument parsing
+│       │   ├── converter.rs # Pattern conversion logic
+│       │   └── output.rs    # Output formatting
+│       └── tests/           # Integration tests
 ```
 
 ## Commit Conventions
@@ -158,6 +154,8 @@ cargo-dist builds binaries for: Linux x64/ARM64, macOS x64/ARM64, Windows x64, p
 
 ## Important Notes
 
-- The CLI pauses with "Press Enter to exit..." when launched via double-click on Windows (no terminal). This is intentional — do not remove it.
-- The `GetConsoleProcessList` Windows API is used to detect double-click vs terminal launch.
+- The CLI automatically detects pipe output (TTY detection via `std::io::IsTerminal`)
+- When outputting to a pipe or when `--to <format>` is specified, output is simplified for clean piping
+- On Windows, the CLI pauses with "Press Enter to exit..." when launched via double-click (detected via `GetConsoleProcessList` Windows API)
+- On Unix, the CLI pauses when stdout is not a TTY
 - `dist-workspace.toml` and the release workflow are managed by cargo-dist — do not edit manually. Use `dist init` to reconfigure.

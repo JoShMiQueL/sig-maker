@@ -1,11 +1,10 @@
 //! Sig-Maker - Multi-format signature/pattern converter and optimizer
 
-use atty::is;
-use colored::Colorize;
 use sig_maker_core::analyzer;
 use sig_maker_core::formats;
 use sig_maker_core::io::{self, Input};
 use sig_maker_core::parse_aobs;
+use std::io::IsTerminal;
 
 mod cli;
 mod converter;
@@ -15,8 +14,16 @@ fn main() {
     // Parse command-line arguments
     let config = cli::Config::parse();
 
-    // Read input file
-    let input = match Input::read(&config.input_file) {
+    // Auto-detect if we're in a pipe (not a TTY)
+    let is_tty = std::io::stdout().is_terminal();
+    let auto_quiet = !is_tty || config.quiet;
+
+    // Check if we should read from stdin (input is "-" or pipe detected)
+    let use_stdin = config.input_file == "-" || !is_tty;
+    let input_source = if use_stdin { "-" } else { &config.input_file };
+
+    // Read input file or stdin
+    let input = match Input::read_with_stdin(input_source, use_stdin) {
         Ok(i) => i,
         Err(e) => cli::error_exit(&e),
     };
@@ -26,7 +33,7 @@ fn main() {
         let pattern_str = input.content.lines().next().unwrap_or("").trim();
         match formats::validate_pattern(pattern_str) {
             Ok(_) => {
-                if !config.quiet {
+                if !auto_quiet {
                     println!("Pattern is valid: {}", pattern_str);
                 }
                 std::process::exit(0);
@@ -48,24 +55,9 @@ fn main() {
             }
             let (result, stats) = analyzer::analyze_aobs(&input.content);
 
-            // Print header
-            if !config.quiet {
-                let use_colors = config.output_file.is_none() && is(atty::Stream::Stdout);
-                if use_colors {
-                    println!(
-                        "{}",
-                        "==============================================".cyan()
-                    );
-                    println!("  {}", "Sig-Maker".cyan().bold());
-                    println!(
-                        "{}",
-                        "==============================================".cyan()
-                    );
-                } else {
-                    println!("==============================================");
-                    println!("  Sig-Maker");
-                    println!("==============================================");
-                }
+            // Print header (only in TTY mode)
+            if !auto_quiet {
+                println!("Sig-Maker");
                 println!();
                 println!("Analyzing {} valid AOB instances:", aobs.len());
                 for (i, aob) in aobs.iter().enumerate() {
@@ -74,20 +66,16 @@ fn main() {
                 println!();
                 println!("All AOBs have {} bytes", aobs[0].bytes.len());
                 println!();
-                println!("[1/2] Comparing byte-by-byte...");
-                println!();
-                println!("    Fixed bytes: {}", stats.fixed_bytes());
-                println!(
-                    "    High nibble wildcards: {}",
-                    stats.high_nibble_wildcards()
-                );
-                println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
-                println!("    Full wildcards: {}", stats.full_wildcards());
+                println!("Analysis:");
+                println!("  Fixed: {} bytes", stats.fixed_bytes());
+                println!("  High nibble wildcards: {}", stats.high_nibble_wildcards());
+                println!("  Low nibble wildcards: {}", stats.low_nibble_wildcards());
+                println!("  Full wildcards: {}", stats.full_wildcards());
                 println!();
             }
 
-            // Show diff table
-            if !config.quiet
+            // Show diff table (only in TTY mode and CE format)
+            if !auto_quiet
                 && config.output_file.is_none()
                 && (config.to_format.is_none()
                     || config.to_format == Some(formats::Format::CheatEngine))
@@ -114,7 +102,7 @@ fn main() {
                 &pattern,
                 config.to_format,
                 config.output_file.as_deref(),
-                config.quiet,
+                auto_quiet,
                 config.verbose,
             );
         }

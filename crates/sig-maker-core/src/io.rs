@@ -1,6 +1,7 @@
 //! Input/output operations and content detection
 
 use std::fs;
+use std::io::{self, Read};
 use std::path::PathBuf;
 
 /// Input content
@@ -20,9 +21,21 @@ pub enum InputType {
 }
 
 impl Input {
-    /// Read input from file or use as direct input
+    /// Read input from file, stdin, or use as direct input
     pub fn read(source: &str) -> Result<Self, String> {
-        let (content, _source_name) = if PathBuf::from(source).exists() {
+        Self::read_with_stdin(source, false)
+    }
+
+    /// Read input from file, stdin, or use as direct input
+    /// If `use_stdin` is true, reads from stdin when source is "-"
+    pub fn read_with_stdin(source: &str, use_stdin: bool) -> Result<Self, String> {
+        let (content, _source_name) = if use_stdin && source == "-" {
+            let mut buffer = String::new();
+            io::stdin()
+                .read_to_string(&mut buffer)
+                .map_err(|e| format!("Could not read from stdin: {}", e))?;
+            (buffer, "<stdin>".to_string())
+        } else if PathBuf::from(source).exists() {
             let content = fs::read_to_string(source)
                 .map_err(|e| format!("Could not read file '{}': {}", source, e))?;
             (content, source.to_string())
