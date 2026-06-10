@@ -4,7 +4,9 @@
 
 ### CLI Features
 - ✅ **Output to file** (`-o, --output output.txt`)
-- ⏳ **Verbose/quiet modes** (`-v, --verbose`, `-q, --quiet`)
+- ✅ **Version flag** (`-v, --version`)
+- ✅ **Quiet mode** (`-q, --quiet`)
+- ⏳ **Verbose mode** (`--verbose` - reserved for future detailed output)
 - ⏳ **Terminal colors** (crate: `colored` or `owo-colors`)
 - ⏳ **Pattern validation** (`-c, --check` - detect if valid without converting)
 - ⏳ **Detailed statistics** (entropy, compression ratio, etc.)
