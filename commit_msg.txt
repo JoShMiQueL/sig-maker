@@ -1,9 +1,0 @@
-Fix: Resolve clippy warnings and formatting issues
-
-Changes:
-- Apply cargo fmt formatting to all source files
-- Fix needless_question_mark warnings in parser.rs
-- Fix manual_strip warnings using strip_prefix()
-- Rename from_str() to from_string() to avoid trait confusion
-- Fix print_literal warning in output.rs
-- Fix needless_range_loop using iter().enumerate()
