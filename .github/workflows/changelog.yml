@@ -58,8 +58,25 @@ jobs:
           git push origin "${{ steps.branch.outputs.branch }}"
 
       - name: Create PR
+        id: pr
         if: steps.check_changes.outputs.changed == 'true'
         run: |
-          gh pr create --title "docs: update CHANGELOG.md" --body "Auto-generated changelog update" --base main --head "${{ steps.branch.outputs.branch }}" --label "automated"
+          PR_URL=$(gh pr create --title "docs: update CHANGELOG.md" --body "Auto-generated changelog update" --base main --head "${{ steps.branch.outputs.branch }}" --label "automated")
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_number=$(echo $PR_URL | grep -oP 'pull/\K[0-9]+')" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for CI checks
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          gh pr checks "${{ steps.pr.outputs.pr_number }}" --watch --interval 30
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge PR
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          gh pr merge "${{ steps.pr.outputs.pr_number }}" --squash --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
