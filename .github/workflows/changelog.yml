@@ -25,3 +25,4 @@ jobs:
         with:
           commit: 'true'
           auto-merge: 'true'
+          admin-token: ${{ secrets.ADMIN_TOKEN }}

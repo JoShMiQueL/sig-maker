@@ -10,6 +10,10 @@ inputs:
     description: 'Whether to auto-merge the PR (requires commit=true)'
     required: false
     default: 'false'
+  admin-token:
+    description: 'Admin token for bypassing branch protection (required if auto-merge=true)'
+    required: false
+    default: ''
 
 outputs:
   changed:
@@ -89,4 +93,4 @@ runs:
       run: |
         gh pr merge "${{ steps.pr.outputs.pr_number }}" --squash --delete-branch --admin
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.admin-token }}
