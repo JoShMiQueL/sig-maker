@@ -13,8 +13,8 @@
 - ✅ **Pause on double-click** (Windows: shows usage and waits for Enter)
 
 ### Testing & Quality
-- ⏳ **More integration tests** (test complete end-to-end flow)
-- ⏳ **Fuzzing** (generate random inputs to find crashes - crate: `cargo-fuzz`)
+- ✅ **More integration tests** (test complete end-to-end flow)
+- ⏳ **Fuzzing** (requires nightly Rust - run `rustup default nightly` first)
 
 ---
 
