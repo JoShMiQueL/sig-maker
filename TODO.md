@@ -74,7 +74,7 @@
 - ✅ **CONTRIBUTING.md** (contributor guidelines)
 - ✅ **CODE_OF_CONDUCT.md** (code of conduct)
 - ✅ **Issue templates** (bug report, feature request)
-- ⏳ **Pull request template** (`.github/PULL_REQUEST_TEMPLATE.md`)
+- ✅ **Pull request template** (`.github/PULL_REQUEST_TEMPLATE.md`)
 - ✅ **AGENTS.md** (project context for AI agents)
 
 ### Automation
@@ -83,8 +83,8 @@
 - ✅ **Changelog generation** (git-cliff auto-updates CHANGELOG.md)
 - ✅ **Git hooks** (pre-commit: fmt/clippy/build/test, commit-msg: Conventional Commits)
 - ✅ **Branch protection** (PRs required, CI check required, admin bypass)
-- ⏳ **Dependabot** (automatic dependency updates)
-- ⏳ **Stale bot** (close inactive issues/PRs)
+- ✅ **Dependabot** (automatic dependency updates for GitHub Actions and Cargo)
+- ✅ **Stale bot** (marks stale after 30 days, closes after 7)
 
 ---
 
