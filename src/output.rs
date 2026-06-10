@@ -131,68 +131,96 @@ pub fn print_analysis_results(
     stats: &PatternStats,
     to_format: Option<Format>,
     aobs: &[AobInstance],
+    output_file: Option<&str>,
 ) {
-    if let Some(fmt) = to_format {
+    let output = if let Some(fmt) = to_format {
         // Single format requested
-        print_single_format_result(result, stats, fmt, aobs);
+        format_single_format_result(result, stats, fmt, aobs)
     } else {
         // Show all formats
-        print_all_formats_result(result, stats, aobs);
-    }
+        format_all_formats_result(result, stats, aobs)
+    };
 
-    println!();
-    println!("==============================================");
-    println!("  Analysis Complete!");
-    println!("==============================================");
+    if let Some(file) = output_file {
+        // Write to file
+        if let Err(e) = std::fs::write(file, &output) {
+            eprintln!("ERROR: Failed to write to '{}': {}", file, e);
+            std::process::exit(1);
+        }
+        println!("Output written to: {}", file);
+    } else {
+        // Print to stdout
+        print!("{}", output);
+    }
 }
 
-fn print_single_format_result(
+fn format_single_format_result(
     result: &[BytePattern],
     stats: &PatternStats,
     fmt: Format,
     aobs: &[AobInstance],
-) {
-    println!("==============================================");
-    println!("  ANALYSIS RESULT ({})", fmt.name());
-    println!("==============================================");
-    println!("Length: {} bytes", stats.total_bytes());
-    println!("Fixed: {} bytes", stats.fixed_bytes());
-    println!(
-        "High nibble wildcards: {} bytes",
+) -> String {
+    let mut output = String::new();
+    output.push_str("==============================================\n");
+    output.push_str(&format!("  ANALYSIS RESULT ({})\n", fmt.name()));
+    output.push_str("==============================================\n");
+    output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
+    output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
+    output.push_str(&format!(
+        "High nibble wildcards: {} bytes\n",
         stats.high_nibble_wildcards()
-    );
-    println!(
-        "Low nibble wildcards: {} bytes",
+    ));
+    output.push_str(&format!(
+        "Low nibble wildcards: {} bytes\n",
         stats.low_nibble_wildcards()
-    );
-    println!("Full wildcards: {} bytes", stats.full_wildcards());
-    println!();
-    println!("Optimized Pattern:");
-    println!("{}", format_pattern(result, fmt));
+    ));
+    output.push_str(&format!(
+        "Full wildcards: {} bytes\n",
+        stats.full_wildcards()
+    ));
+    output.push('\n');
+    output.push_str("Optimized Pattern:\n");
+    output.push_str(&format_pattern(result, fmt));
+    output.push('\n');
 
     if fmt == Format::CheatEngine {
-        print_verification(aobs, result);
+        output.push_str(&format_verification(aobs, result));
     }
+
+    output.push('\n');
+    output.push_str("==============================================\n");
+    output.push_str("  Analysis Complete!\n");
+    output.push_str("==============================================\n");
+
+    output
 }
 
-fn print_all_formats_result(result: &[BytePattern], stats: &PatternStats, aobs: &[AobInstance]) {
-    println!("==============================================");
-    println!("  ANALYSIS RESULT - All Formats");
-    println!("==============================================");
-    println!("Length: {} bytes", stats.total_bytes());
-    println!("Fixed: {} bytes", stats.fixed_bytes());
-    println!(
-        "High nibble wildcards: {} bytes",
+fn format_all_formats_result(
+    result: &[BytePattern],
+    stats: &PatternStats,
+    aobs: &[AobInstance],
+) -> String {
+    let mut output = String::new();
+    output.push_str("==============================================\n");
+    output.push_str("  ANALYSIS RESULT - All Formats\n");
+    output.push_str("==============================================\n");
+    output.push_str(&format!("Length: {} bytes\n", stats.total_bytes()));
+    output.push_str(&format!("Fixed: {} bytes\n", stats.fixed_bytes()));
+    output.push_str(&format!(
+        "High nibble wildcards: {} bytes\n",
         stats.high_nibble_wildcards()
-    );
-    println!(
-        "Low nibble wildcards: {} bytes",
+    ));
+    output.push_str(&format!(
+        "Low nibble wildcards: {} bytes\n",
         stats.low_nibble_wildcards()
-    );
-    println!("Full wildcards: {} bytes", stats.full_wildcards());
-    println!();
-    println!("Optimized Patterns:");
-    println!();
+    ));
+    output.push_str(&format!(
+        "Full wildcards: {} bytes\n",
+        stats.full_wildcards()
+    ));
+    output.push('\n');
+    output.push_str("Optimized Patterns:\n");
+    output.push('\n');
 
     let formats = [
         (Format::CheatEngine, "Cheat Engine"),
@@ -206,32 +234,41 @@ fn print_all_formats_result(result: &[BytePattern], stats: &PatternStats, aobs: 
     ];
 
     for (fmt, name) in formats {
-        let output = format_pattern(result, fmt);
-        if !output.contains('\n') && output.len() < 70 {
-            println!("{:15} {}", format!("{}:", name), output);
+        let pattern = format_pattern(result, fmt);
+        if !pattern.contains('\n') && pattern.len() < 70 {
+            output.push_str(&format!("{:15} {}\n", format!("{}:", name), pattern));
         } else {
-            println!("{}:", name);
-            for line in output.lines() {
-                println!("  {}", line);
+            output.push_str(&format!("{}:\n", name));
+            for line in pattern.lines() {
+                output.push_str(&format!("  {}\n", line));
             }
-            println!();
+            output.push('\n');
         }
     }
 
-    print_verification(aobs, result);
+    output.push_str(&format_verification(aobs, result));
+
+    output.push('\n');
+    output.push_str("==============================================\n");
+    output.push_str("  Analysis Complete!\n");
+    output.push_str("==============================================\n");
+
+    output
 }
 
-fn print_verification(aobs: &[AobInstance], result: &[BytePattern]) {
-    println!();
-    println!("Verification:");
+fn format_verification(aobs: &[AobInstance], result: &[BytePattern]) -> String {
+    let mut output = String::new();
+    output.push('\n');
+    output.push_str("Verification:\n");
     for (i, aob) in aobs.iter().enumerate() {
         let matches = aob_matches_pattern(&aob.bytes, result);
         let status = if matches { "✓" } else { "✗" };
-        println!(
-            "  {} [{}]: {}",
+        output.push_str(&format!(
+            "  {} [{}]: {}\n",
             status,
             i + 1,
             if matches { "matches" } else { "MISMATCH" }
-        );
+        ));
     }
+    output
 }

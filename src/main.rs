@@ -19,14 +19,18 @@ fn main() {
     match input.detect_type() {
         io::InputType::MultipleAobs => {
             // Analyze multiple AOB instances
-            analyzer::analyze_aobs(&input.content, config.to_format);
+            analyzer::analyze_aobs(
+                &input.content,
+                config.to_format,
+                config.output_file.as_deref(),
+            );
         }
         io::InputType::CodePattern | io::InputType::SimplePattern => {
             // Convert single pattern
             let pattern = input
                 .extract_pattern()
                 .unwrap_or_else(|| io::error_exit("No valid pattern found"));
-            converter::convert_pattern(&pattern, config.to_format);
+            converter::convert_pattern(&pattern, config.to_format, config.output_file.as_deref());
         }
     }
 }

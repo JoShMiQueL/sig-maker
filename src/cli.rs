@@ -6,6 +6,7 @@ use crate::formats::Format;
 pub struct Config {
     pub input_file: String,
     pub to_format: Option<Format>, // None = show all formats
+    pub output_file: Option<String>,
 }
 
 impl Config {
@@ -22,6 +23,7 @@ impl Config {
 
         let mut to_format: Option<Format> = None;
         let mut input_file: Option<String> = None;
+        let mut output_file: Option<String> = None;
 
         let mut i = 1;
         while i < args.len() {
@@ -44,6 +46,15 @@ impl Config {
                         std::process::exit(1);
                     }
                 }
+                "--output" | "-o" => {
+                    if i + 1 < args.len() {
+                        output_file = Some(args[i + 1].to_string());
+                        i += 2;
+                    } else {
+                        eprintln!("ERROR: --output requires an argument");
+                        std::process::exit(1);
+                    }
+                }
                 arg => {
                     if input_file.is_none() && !arg.starts_with("-") {
                         input_file = Some(arg.to_string());
@@ -61,6 +72,7 @@ impl Config {
                 std::process::exit(1);
             }),
             to_format,
+            output_file,
         }
     }
 }

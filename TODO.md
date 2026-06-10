@@ -80,9 +80,9 @@
 ### Automation
 - ✅ **CI workflow** (test, build, clippy, fmt on Linux/Windows/macOS)
 - ✅ **Release workflow** (changelog, multi-platform builds via cargo-dist)
-- ✅ **Changelog generation** (git-cliff auto-updates CHANGELOG.md)
+- ✅ **Changelog generation** (git-cliff auto-updates CHANGELOG.md via PR with auto-merge)
 - ✅ **Git hooks** (pre-commit: fmt/clippy/build/test, commit-msg: Conventional Commits)
-- ✅ **Branch protection** (PRs required, CI check required, admin bypass)
+- ✅ **Branch protection** (PRs required, CI check required, admin bypass for changelog bot)
 - ✅ **Dependabot** (automatic dependency updates for GitHub Actions and Cargo)
 - ✅ **Stale bot** (marks stale after 30 days, closes after 7)
 

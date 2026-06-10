@@ -11,7 +11,7 @@ pub struct AobInstance {
 }
 
 /// Analyze multiple AOB instances and generate optimized pattern
-pub fn analyze_aobs(content: &str, to_format: Option<Format>) {
+pub fn analyze_aobs(content: &str, to_format: Option<Format>, output_file: Option<&str>) {
     println!("==============================================");
     println!("  Sig-Maker");
     println!("==============================================");
@@ -68,13 +68,13 @@ pub fn analyze_aobs(content: &str, to_format: Option<Format>) {
     println!("    Full wildcards: {}", stats.full_wildcards());
     println!();
 
-    // Show diff table (only for CE output or when showing all)
-    if to_format.is_none() || to_format == Some(Format::CheatEngine) {
+    // Show diff table (only for CE output or when showing all, and not writing to file)
+    if output_file.is_none() && (to_format.is_none() || to_format == Some(Format::CheatEngine)) {
         print_diff_table(&result, &aobs, first_len);
     }
 
     // Print results
-    print_analysis_results(&result, &stats, to_format, &aobs);
+    print_analysis_results(&result, &stats, to_format, &aobs, output_file);
 }
 
 /// Parse AOB instances from file content
