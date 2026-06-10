@@ -76,6 +76,7 @@ impl Input {
         if non_empty_lines.len() >= 2 {
             InputType::MultipleAobs
         } else if non_empty_lines.len() == 1 {
+            // Single line - check if it looks like a pattern
             let line = non_empty_lines[0];
             let cleaned = if line.starts_with("- ") || line.starts_with("* ") {
                 &line[2..]
@@ -83,14 +84,13 @@ impl Input {
                 line
             };
 
-            // Check if it looks like a pattern (more lenient check)
-            // Cheat Engine patterns have wildcards (?), x64dbg has dots, IDA has brackets
-            // Also check for hex bytes (space-separated)
+            // Check if it looks like a pattern (wildcards, dots, brackets, or hex bytes)
             let has_wildcards = cleaned.contains('?') || cleaned.contains('.');
             let has_brackets = cleaned.contains('[');
-            let has_hex = cleaned
-                .split_whitespace()
-                .any(|t| t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit()));
+            let has_hex = cleaned.split_whitespace().count() >= 2
+                && cleaned
+                    .split_whitespace()
+                    .all(|t| t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit()));
 
             if has_wildcards || has_brackets || has_hex {
                 InputType::SimplePattern
