@@ -3,7 +3,6 @@ members = [
     "crates/sig-maker-core",
     "crates/sig-maker-cli",
 ]
-exclude = ["fuzz"]
 resolver = "2"
 
 [workspace.metadata.cargo-sig-maker]
