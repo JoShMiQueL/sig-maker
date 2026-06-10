@@ -13,8 +13,10 @@ runs:
     - name: Install git-cliff
       shell: bash
       run: |
-        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orhun/git-cliff/releases/download/v2.6.1/git-cliff-2.6.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
+        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orhun/git-cliff/releases/download/v2.6.1/git-cliff-2.6.1-x86_64-unknown-linux-gnu.tar.gz -o git-cliff.tar.gz
+        tar xzf git-cliff.tar.gz
         sudo mv git-cliff-2.6.1-x86_64-unknown-linux-gnu/git-cliff /usr/local/bin/
+        rm git-cliff.tar.gz
 
     - name: Generate changelog
       shell: bash
