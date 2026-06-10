@@ -11,6 +11,8 @@ pub struct PatternStats {
     high_nibble: usize,
     low_nibble: usize,
     wildcard: usize,
+    entropy: f64,
+    compression_ratio: f64,
 }
 
 impl PatternStats {
@@ -20,6 +22,8 @@ impl PatternStats {
             high_nibble: 0,
             low_nibble: 0,
             wildcard: 0,
+            entropy: 0.0,
+            compression_ratio: 0.0,
         };
 
         for p in patterns {
@@ -29,6 +33,28 @@ impl PatternStats {
                 BytePattern::HighNibble(_) => stats.high_nibble += 1,
                 BytePattern::LowNibble(_) => stats.low_nibble += 1,
             }
+        }
+
+        // Calculate entropy (simplified: based on pattern type distribution)
+        let total = stats.total_bytes();
+        if total > 0 {
+            let mut entropy = 0.0;
+            let counts = [
+                stats.fixed,
+                stats.high_nibble,
+                stats.low_nibble,
+                stats.wildcard,
+            ];
+            for &count in &counts {
+                if count > 0 {
+                    let p = count as f64 / total as f64;
+                    entropy -= p * p.log2();
+                }
+            }
+            stats.entropy = entropy;
+
+            // Compression ratio: fixed bytes / total bytes
+            stats.compression_ratio = stats.fixed as f64 / total as f64;
         }
 
         stats
@@ -49,6 +75,12 @@ impl PatternStats {
     }
     pub fn full_wildcards(&self) -> usize {
         self.wildcard
+    }
+    pub fn entropy(&self) -> f64 {
+        self.entropy
+    }
+    pub fn compression_ratio(&self) -> f64 {
+        self.compression_ratio
     }
 }
 
@@ -210,6 +242,15 @@ fn format_single_format_result(
         output.push('\n');
     }
 
+    if verbose {
+        output.push_str(&format!("Entropy: {:.3} bits\n", stats.entropy()));
+        output.push_str(&format!(
+            "Compression ratio: {:.2}%\n",
+            stats.compression_ratio() * 100.0
+        ));
+        output.push('\n');
+    }
+
     output.push_str("Optimized Pattern:\n");
     output.push_str(&format_pattern(result, fmt));
     output.push('\n');
@@ -282,6 +323,15 @@ fn format_all_formats_result(
         output.push_str(&format!(
             "Full wildcards: {} bytes\n",
             stats.full_wildcards()
+        ));
+        output.push('\n');
+    }
+
+    if verbose {
+        output.push_str(&format!("Entropy: {:.3} bits\n", stats.entropy()));
+        output.push_str(&format!(
+            "Compression ratio: {:.2}%\n",
+            stats.compression_ratio() * 100.0
         ));
         output.push('\n');
     }

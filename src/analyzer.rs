@@ -142,6 +142,27 @@ pub fn analyze_aobs(
         println!();
     }
 
+    // Print detailed stats in verbose mode
+    if verbose {
+        if use_colors {
+            println!(
+                "    Entropy: {:.3} bits",
+                stats.entropy().to_string().cyan()
+            );
+            println!(
+                "    Compression ratio: {:.2}%",
+                (stats.compression_ratio() * 100.0).to_string().green()
+            );
+        } else {
+            println!("    Entropy: {:.3} bits", stats.entropy());
+            println!(
+                "    Compression ratio: {:.2}%",
+                stats.compression_ratio() * 100.0
+            );
+        }
+        println!();
+    }
+
     // Show diff table (only for CE output or when showing all, and not writing to file, and not quiet)
     if !quiet
         && output_file.is_none()

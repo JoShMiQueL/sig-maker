@@ -10,7 +10,7 @@ pub fn convert_pattern(
     to_format: Option<Format>,
     output_file: Option<&str>,
     quiet: bool,
-    _verbose: bool,
+    verbose: bool,
 ) {
     let pattern = match parse_pattern(content) {
         Some(p) => p,
@@ -24,10 +24,10 @@ pub fn convert_pattern(
 
     let output = if let Some(fmt) = to_format {
         // Single format requested
-        format_single_format(&pattern, fmt, input_line, quiet, use_colors)
+        format_single_format(&pattern, fmt, input_line, quiet, use_colors, verbose)
     } else {
         // Show all formats
-        format_all_formats(&pattern, input_line, quiet, use_colors)
+        format_all_formats(&pattern, input_line, quiet, use_colors, verbose)
     };
 
     if let Some(file) = output_file {
@@ -51,6 +51,7 @@ fn format_single_format(
     input_line: &str,
     quiet: bool,
     use_colors: bool,
+    verbose: bool,
 ) -> String {
     let mut output = String::new();
 
@@ -83,6 +84,16 @@ fn format_single_format(
     output.push_str(&format_pattern(pattern, fmt));
     output.push('\n');
 
+    if verbose {
+        let stats = crate::output::PatternStats::from_patterns(pattern);
+        output.push_str(&format!("Entropy: {:.3} bits\n", stats.entropy()));
+        output.push_str(&format!(
+            "Compression ratio: {:.2}%\n",
+            stats.compression_ratio() * 100.0
+        ));
+        output.push('\n');
+    }
+
     if !quiet {
         output.push('\n');
         if use_colors {
@@ -103,6 +114,7 @@ fn format_all_formats(
     input_line: &str,
     quiet: bool,
     use_colors: bool,
+    verbose: bool,
 ) -> String {
     let mut output = String::new();
 
@@ -132,6 +144,16 @@ fn format_all_formats(
         output.push_str(&format!("Length: {} bytes\n", pattern.len()));
         output.push('\n');
         output.push_str("All Output Formats:\n");
+        output.push('\n');
+    }
+
+    if verbose {
+        let stats = crate::output::PatternStats::from_patterns(pattern);
+        output.push_str(&format!("Entropy: {:.3} bits\n", stats.entropy()));
+        output.push_str(&format!(
+            "Compression ratio: {:.2}%\n",
+            stats.compression_ratio() * 100.0
+        ));
         output.push('\n');
     }
 
