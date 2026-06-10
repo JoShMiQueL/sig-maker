@@ -37,10 +37,21 @@ cargo run --bin sig-maker -- <input_file> [--to <format>]
 Before considering any change complete, run **all** of these:
 
 ```bash
+# Option 1: Use the pre-commit hook (recommended)
+# The hook runs automatically on commit, but you can also run it manually:
+sh .githooks/pre-commit
+
+# Option 2: Use the CI validation script (simulates GitHub CI)
+# Windows:
+powershell -ExecutionPolicy Bypass -File ci-check.ps1
+# Unix/Linux/Mac:
+sh ci-check.sh
+
+# Option 3: Run checks manually
 cargo fmt -- --check
-cargo clippy -- -D warnings
-cargo build
-cargo test
+cargo clippy --workspace -- -D warnings
+cargo build --workspace
+cargo test --workspace
 ```
 
 These are the same checks enforced by the pre-commit hook and CI.
