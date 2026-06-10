@@ -69,6 +69,7 @@ commit_parsers = [
     # Skip changelog bot commits (must be before other doc/chore rules)
     { message = "^docs: update CHANGELOG", skip = true },
     { message = "^chore\\(release\\)", skip = true },
+    { author = ".*\\[bot\\]", skip = true },
     # Group rules
     { message = "^feat", group = "Features" },
     { message = "^fix", group = "Bug Fixes" },
