@@ -61,7 +61,6 @@ pub fn print_diff_table(result: &[BytePattern], aobs: &[AobInstance], _first_len
     println!("{:-<90}", "");
 
     for (byte_idx, pattern) in result.iter().enumerate() {
-
         // Show values from each AOB
         let values_str: String = aobs
             .iter()
