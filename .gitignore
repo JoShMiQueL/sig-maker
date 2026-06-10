@@ -3,12 +3,6 @@
 **/*.rs.bk
 Cargo.lock
 
-# Cargo-dist
-dist-workspace.toml
-
-# Git-cliff
-cliff.toml
-
 # IDE
 .idea/
 .vscode/
