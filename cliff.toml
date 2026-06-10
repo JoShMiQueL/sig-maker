@@ -36,14 +36,22 @@ body = """
         {%- if contributor.pr_number %} in [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}){%- endif %}
 {%- endfor %}
 {%- endif %}
-{%- if github.contributors | length != 0 %}
+{%- endif %}
+
+{%- set contributors_list = commits | filter(attribute="github.username") | map(attribute="github.username") | unique %}
+{%- if contributors_list | length != 0 %}
 
     ### Contributors
-{% for contributor in github.contributors %}
-    * [@{{ contributor.username }}](https://github.com/{{ contributor.username }})\
-        {%- if contributor.pr_number %} ([#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }})){%- endif %}
+{% for username in contributors_list %}
+    * [@{{ username }}](https://github.com/{{ username }}) — \
+        {%- set user_commits = commits | filter(attribute="github.username", value=username) -%}
+        {%- for commit in user_commits -%}
+            {%- if commit.github.pr_number %} [#{{ commit.github.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.github.pr_number }})\
+            {%- else %} [`{{ commit.id | truncate(length=7, end="") }}`]({{ self::remote_url() }}/commit/{{ commit.id }})\
+            {%- endif -%}
+            {%- if not loop.last %},{% endif -%}
+        {%- endfor %}
 {%- endfor %}
-{%- endif %}
 {%- endif %}
 
 {% if version -%}
