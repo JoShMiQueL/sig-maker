@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
+- *(changelog)* Filter bots from New Contributors section in template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([f598cb8](https://github.com/JoShMiQueL/sig-maker/commit/f598cb8fd92125741266e1cfa671278d41ec57c9))
+
 - *(changelog)* Filter out bot accounts from contributors by [@JoShMiQueL](https://github.com/JoShMiQueL) ([df74b97](https://github.com/JoShMiQueL/sig-maker/commit/df74b97379e9a43098cec0193fb64db0879e9e90))
 
 - *(changelog)* Fix template errors (deprecated fields, missing release) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([758f338](https://github.com/JoShMiQueL/sig-maker/commit/758f338173433ce20afefdef45af5a800ae20af1))
@@ -46,13 +48,9 @@ All notable changes to this project will be documented in this file.
 
 
 
-### New Contributors
-
-* [@github-actions[bot]](https://github.com/github-actions[bot]) made their first contribution
-
 ### Contributors
 
-* [@JoShMiQueL](https://github.com/JoShMiQueL) — [`df74b97`](https://github.com/JoShMiQueL/sig-maker/commit/df74b97379e9a43098cec0193fb64db0879e9e90), [`758f338`](https://github.com/JoShMiQueL/sig-maker/commit/758f338173433ce20afefdef45af5a800ae20af1), [`319452c`](https://github.com/JoShMiQueL/sig-maker/commit/319452cb73ec55998235e6d90d03e6289e8e9f39), [`1497c29`](https://github.com/JoShMiQueL/sig-maker/commit/1497c29f6327f21379ba0d940fe1c8dc95995f3c), [`5449986`](https://github.com/JoShMiQueL/sig-maker/commit/5449986a52d7df3bae618265ec33d95895b161d8), [`0e2fa51`](https://github.com/JoShMiQueL/sig-maker/commit/0e2fa51dcac0683c19a0f0fe339f5c48767da475), [`16fc195`](https://github.com/JoShMiQueL/sig-maker/commit/16fc1953de99f18fc7200d1717f4e5b487273662), [`2f1b68d`](https://github.com/JoShMiQueL/sig-maker/commit/2f1b68d94a1f14e30035ab569305f323a40241cb), [`0fbe551`](https://github.com/JoShMiQueL/sig-maker/commit/0fbe551e9814049e7bb93bb533324340921512f1), [`5eabffb`](https://github.com/JoShMiQueL/sig-maker/commit/5eabffbe7077ddf6499b209ba6f735e4728f9be9), [`4e3e2c3`](https://github.com/JoShMiQueL/sig-maker/commit/4e3e2c3597eba1167a3dff96b9fa62b7d2c679bb), [`0845ab1`](https://github.com/JoShMiQueL/sig-maker/commit/0845ab18d8cf7a9f13ea1dad3fea789549c6f6cb), [`1e862e6`](https://github.com/JoShMiQueL/sig-maker/commit/1e862e68a2869c128b5b26f5711cbdc1048d536d)
+* [@JoShMiQueL](https://github.com/JoShMiQueL) — [`f598cb8`](https://github.com/JoShMiQueL/sig-maker/commit/f598cb8fd92125741266e1cfa671278d41ec57c9), [`df74b97`](https://github.com/JoShMiQueL/sig-maker/commit/df74b97379e9a43098cec0193fb64db0879e9e90), [`758f338`](https://github.com/JoShMiQueL/sig-maker/commit/758f338173433ce20afefdef45af5a800ae20af1), [`319452c`](https://github.com/JoShMiQueL/sig-maker/commit/319452cb73ec55998235e6d90d03e6289e8e9f39), [`1497c29`](https://github.com/JoShMiQueL/sig-maker/commit/1497c29f6327f21379ba0d940fe1c8dc95995f3c), [`5449986`](https://github.com/JoShMiQueL/sig-maker/commit/5449986a52d7df3bae618265ec33d95895b161d8), [`0e2fa51`](https://github.com/JoShMiQueL/sig-maker/commit/0e2fa51dcac0683c19a0f0fe339f5c48767da475), [`16fc195`](https://github.com/JoShMiQueL/sig-maker/commit/16fc1953de99f18fc7200d1717f4e5b487273662), [`2f1b68d`](https://github.com/JoShMiQueL/sig-maker/commit/2f1b68d94a1f14e30035ab569305f323a40241cb), [`0fbe551`](https://github.com/JoShMiQueL/sig-maker/commit/0fbe551e9814049e7bb93bb533324340921512f1), [`5eabffb`](https://github.com/JoShMiQueL/sig-maker/commit/5eabffbe7077ddf6499b209ba6f735e4728f9be9), [`4e3e2c3`](https://github.com/JoShMiQueL/sig-maker/commit/4e3e2c3597eba1167a3dff96b9fa62b7d2c679bb), [`0845ab1`](https://github.com/JoShMiQueL/sig-maker/commit/0845ab18d8cf7a9f13ea1dad3fea789549c6f6cb), [`1e862e6`](https://github.com/JoShMiQueL/sig-maker/commit/1e862e68a2869c128b5b26f5711cbdc1048d536d)
 
 ## [0.1.0-beta] - 2026-06-10
 
