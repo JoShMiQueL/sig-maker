@@ -58,6 +58,6 @@ jobs:
 
       - name: Auto-merge PR
         run: |
-          gh pr merge "${{ steps.pr.outputs.pr_url }}" --squash --auto --delete-branch
+          gh pr merge "${{ steps.pr.outputs.pr_url }}" --squash --admin --delete-branch
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
