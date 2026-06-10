@@ -8,7 +8,7 @@
 - ✅ **Quiet mode** (`-q, --quiet`)
 - ⏳ **Verbose mode** (`--verbose` - reserved for future detailed output)
 - ⏳ **Terminal colors** (crate: `colored` or `owo-colors`)
-- ⏳ **Pattern validation** (`-c, --check` - detect if valid without converting)
+- ✅ **Pattern validation** (`-c, --check` - detect if valid without converting)
 - ⏳ **Detailed statistics** (entropy, compression ratio, etc.)
 - ✅ **Pause on double-click** (Windows: shows usage and waits for Enter)
 
