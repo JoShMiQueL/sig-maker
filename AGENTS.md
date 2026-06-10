@@ -34,35 +34,23 @@ cargo run --bin sig-maker -- <input_file> [--to <format>]
 
 ## Verification
 
+**IMPORTANT: NEVER commit or push without explicit user confirmation.**
+
 Before considering any change complete, run **all** of these:
 
 ```bash
-# Option 1: Use act to reproduce GitHub Actions locally (recommended)
-# This runs the actual CI workflows with the same environment
-# Install: https://github.com/nektos/act
-# Windows:
-act -j Test
-# Unix/Linux/Mac:
-act -j Test --container-architecture linux/amd64
-
-# Option 2: Use the pre-commit hook
+# Option 1: Use the pre-commit hook (recommended)
 # The hook runs automatically on commit, but you can also run it manually:
 sh .githooks/pre-commit
 
-# Option 3: Use the CI validation script (simulates GitHub CI)
-# Windows:
-powershell -ExecutionPolicy Bypass -File ci-check.ps1
-# Unix/Linux/Mac:
-sh ci-check.sh
-
-# Option 4: Run checks manually
+# Option 2: Run checks manually
 cargo fmt -- --check
 cargo clippy --workspace -- -D warnings
 cargo build --workspace
 cargo test --workspace
 ```
 
-**Recommendation:** Use `act` (Option 1) for the most accurate local reproduction of CI.
+These are the same checks enforced by the pre-commit hook and CI.
 
 ## Project Structure
 
