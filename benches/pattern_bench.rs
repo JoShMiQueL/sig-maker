@@ -1,5 +1,5 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use sig_maker::formats::{optimize_byte, parse_pattern, format_pattern, BytePattern, Format};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use sig_maker::formats::{BytePattern, Format, format_pattern, optimize_byte, parse_pattern};
 
 fn bench_optimize_byte(c: &mut Criterion) {
     c.bench_function("optimize_byte/fixed", |b| {
@@ -39,9 +39,7 @@ fn bench_parse_cheat_engine(c: &mut Criterion) {
 fn bench_parse_cpp(c: &mut Criterion) {
     let input = "const uint8_t pattern[] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0xE0, 0xFF, 0xFF, 0xFF, 0x00 };";
 
-    c.bench_function("parse/cpp", |b| {
-        b.iter(|| parse_pattern(black_box(input)))
-    });
+    c.bench_function("parse/cpp", |b| b.iter(|| parse_pattern(black_box(input))));
 }
 
 fn bench_format(c: &mut Criterion) {
@@ -90,13 +88,15 @@ fn bench_full_workflow(c: &mut Criterion) {
     c.bench_function("workflow/parse_and_optimize", |b| {
         b.iter(|| {
             // Parse lines
-            let lines: Vec<_> = input.lines()
+            let lines: Vec<_> = input
+                .lines()
                 .map(|l| l.trim())
                 .filter(|l| !l.is_empty() && !l.starts_with('#'))
                 .collect();
 
             // Parse each AOB
-            let aobs: Vec<Vec<u8>> = lines.iter()
+            let aobs: Vec<Vec<u8>> = lines
+                .iter()
                 .map(|line| {
                     line.split_whitespace()
                         .filter_map(|s| u8::from_str_radix(s, 16).ok())
@@ -109,9 +109,7 @@ fn bench_full_workflow(c: &mut Criterion) {
             let mut result = Vec::with_capacity(first_len);
 
             for byte_idx in 0..first_len {
-                let values: Vec<u8> = aobs.iter()
-                    .map(|aob| aob[byte_idx])
-                    .collect();
+                let values: Vec<u8> = aobs.iter().map(|aob| aob[byte_idx]).collect();
                 result.push(optimize_byte(black_box(&values)));
             }
 
@@ -120,5 +118,12 @@ fn bench_full_workflow(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_optimize_byte, bench_parse_cheat_engine, bench_parse_cpp, bench_format, bench_full_workflow);
+criterion_group!(
+    benches,
+    bench_optimize_byte,
+    bench_parse_cheat_engine,
+    bench_parse_cpp,
+    bench_format,
+    bench_full_workflow
+);
 criterion_main!(benches);

@@ -175,6 +175,8 @@ fn format_json(pattern: &[BytePattern]) -> String {
 
     format!(
         "{{ \"pattern\": {:?}, \"mask\": {:?}, \"length\": {} }}",
-        bytes, mask, pattern.len()
+        bytes,
+        mask,
+        pattern.len()
     )
 }

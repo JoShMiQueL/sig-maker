@@ -1,7 +1,7 @@
 //! AOB analysis - compare multiple instances and find optimal pattern
 
-use crate::formats::{optimize_byte, BytePattern, Format};
-use crate::output::{print_analysis_results, print_diff_table, PatternStats};
+use crate::formats::{BytePattern, Format, optimize_byte};
+use crate::output::{PatternStats, print_analysis_results, print_diff_table};
 
 /// AOB instance with source line info
 pub struct AobInstance {
@@ -60,7 +60,10 @@ pub fn analyze_aobs(content: &str, to_format: Option<Format>) {
 
     // Print stats
     println!("    Fixed bytes: {}", stats.fixed_bytes());
-    println!("    High nibble wildcards: {}", stats.high_nibble_wildcards());
+    println!(
+        "    High nibble wildcards: {}",
+        stats.high_nibble_wildcards()
+    );
     println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
     println!("    Full wildcards: {}", stats.full_wildcards());
     println!();

@@ -1,7 +1,7 @@
 //! Format definitions, parsers and formatters for AOB patterns
 
-pub mod parser;
 pub mod formatter;
+pub mod parser;
 
 /// Supported AOB pattern formats
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17,7 +17,7 @@ pub enum Format {
 }
 
 impl Format {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn from_string(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "ce" | "cheatengine" | "cheat-engine" => Some(Format::CheatEngine),
             "cpp" | "c++" | "c" => Some(Format::Cpp),
@@ -107,8 +107,8 @@ pub fn optimize_byte(values: &[u8]) -> BytePattern {
 }
 
 // Re-export main functions
-pub use parser::parse_pattern;
 pub use formatter::format_pattern;
+pub use parser::parse_pattern;
 
 #[cfg(test)]
 mod tests {
@@ -206,7 +206,11 @@ mod tests {
 
         for format in Format::all() {
             let output = format_pattern(&pattern, *format);
-            assert!(!output.is_empty(), "Format {:?} produced empty output", format);
+            assert!(
+                !output.is_empty(),
+                "Format {:?} produced empty output",
+                format
+            );
         }
     }
 }

@@ -25,21 +25,27 @@ pub fn parse_pattern(input: &str) -> Option<Vec<BytePattern>> {
 
     // Try x64dbg (uses dots)
     if trimmed.contains('.') && !trimmed.contains('?') && !trimmed.contains('[') {
-        return Some(parse_x64dbg(trimmed)?);
+        return parse_x64dbg(trimmed);
     }
 
     // Try IDA/Ghidra (uses brackets)
     if trimmed.contains('[') && trimmed.contains('-') {
-        return Some(parse_ida_pro(trimmed)?);
+        return parse_ida_pro(trimmed);
     }
 
     // Try Cheat Engine (uses ?? and ? nibbles)
     if trimmed.contains('?') {
-        return Some(parse_cheat_engine(trimmed)?);
+        return parse_cheat_engine(trimmed);
     }
 
     // Try raw hex (space-separated)
-    if trimmed.len() >= 2 && trimmed.chars().nth(1).map(|c| c.is_ascii_hexdigit()).unwrap_or(false) {
+    if trimmed.len() >= 2
+        && trimmed
+            .chars()
+            .nth(1)
+            .map(|c| c.is_ascii_hexdigit())
+            .unwrap_or(false)
+    {
         return parse_hex_bytes(trimmed);
     }
 
@@ -67,7 +73,11 @@ fn parse_cheat_engine(input: &str) -> Option<Vec<BytePattern>> {
         result.push(pattern);
     }
 
-    if result.is_empty() { None } else { Some(result) }
+    if result.is_empty() {
+        None
+    } else {
+        Some(result)
+    }
 }
 
 fn parse_x64dbg(input: &str) -> Option<Vec<BytePattern>> {
@@ -91,7 +101,11 @@ fn parse_x64dbg(input: &str) -> Option<Vec<BytePattern>> {
         result.push(pattern);
     }
 
-    if result.is_empty() { None } else { Some(result) }
+    if result.is_empty() {
+        None
+    } else {
+        Some(result)
+    }
 }
 
 fn parse_ida_pro(input: &str) -> Option<Vec<BytePattern>> {
@@ -102,7 +116,7 @@ fn parse_ida_pro(input: &str) -> Option<Vec<BytePattern>> {
             let byte = u8::from_str_radix(token, 16).ok()?;
             result.push(BytePattern::Fixed(byte));
         } else {
-            let inner = &token[1..token.len()-1];
+            let inner = &token[1..token.len() - 1];
             if inner.contains('-') {
                 let parts: Vec<&str> = inner.split('-').collect();
                 if parts.len() == 2 {
@@ -111,7 +125,10 @@ fn parse_ida_pro(input: &str) -> Option<Vec<BytePattern>> {
 
                     if (start >> 4) == (end >> 4) && (start & 0x0F) == 0 && (end & 0x0F) == 0x0F {
                         result.push(BytePattern::HighNibble(start >> 4));
-                    } else if (start & 0x0F) == (end & 0x0F) && (start & 0xF0) == 0 && (end & 0xF0) == 0xF0 {
+                    } else if (start & 0x0F) == (end & 0x0F)
+                        && (start & 0xF0) == 0
+                        && (end & 0xF0) == 0xF0
+                    {
                         result.push(BytePattern::LowNibble(start & 0x0F));
                     } else {
                         result.push(BytePattern::Wildcard);
@@ -121,7 +138,11 @@ fn parse_ida_pro(input: &str) -> Option<Vec<BytePattern>> {
         }
     }
 
-    if result.is_empty() { None } else { Some(result) }
+    if result.is_empty() {
+        None
+    } else {
+        Some(result)
+    }
 }
 
 fn parse_cpp_array(input: &str) -> Option<Vec<BytePattern>> {
@@ -133,8 +154,8 @@ fn parse_cpp_array(input: &str) -> Option<Vec<BytePattern>> {
             let content = &input[start + 1..end];
             for token in content.split(',') {
                 let trimmed = token.trim();
-                if trimmed.starts_with("0x") {
-                    let val = u8::from_str_radix(&trimmed[2..], 16).ok()?;
+                if let Some(hex) = trimmed.strip_prefix("0x") {
+                    let val = u8::from_str_radix(hex, 16).ok()?;
                     values.push(val);
                 }
             }
@@ -148,8 +169,8 @@ fn parse_cpp_array(input: &str) -> Option<Vec<BytePattern>> {
                 let content = &input[mask_start + 1..mask_end];
                 for token in content.split(',') {
                     let trimmed = token.trim();
-                    if trimmed.starts_with("0x") {
-                        let val = u8::from_str_radix(&trimmed[2..], 16).ok()?;
+                    if let Some(hex) = trimmed.strip_prefix("0x") {
+                        let val = u8::from_str_radix(hex, 16).ok()?;
                         masks.push(val);
                     }
                 }
@@ -169,8 +190,8 @@ fn parse_rust_array(input: &str) -> Option<Vec<BytePattern>> {
             let content = &input[start + 1..end];
             for token in content.split(',') {
                 let trimmed = token.trim();
-                if trimmed.starts_with("0x") {
-                    let val = u8::from_str_radix(&trimmed[2..], 16).ok()?;
+                if let Some(hex) = trimmed.strip_prefix("0x") {
+                    let val = u8::from_str_radix(hex, 16).ok()?;
                     values.push(val);
                 }
             }
@@ -184,8 +205,8 @@ fn parse_rust_array(input: &str) -> Option<Vec<BytePattern>> {
                 let content = &input[mask_start + 1..mask_end];
                 for token in content.split(',') {
                     let trimmed = token.trim();
-                    if trimmed.starts_with("0x") {
-                        let val = u8::from_str_radix(&trimmed[2..], 16).ok()?;
+                    if let Some(hex) = trimmed.strip_prefix("0x") {
+                        let val = u8::from_str_radix(hex, 16).ok()?;
                         masks.push(val);
                     }
                 }
@@ -205,8 +226,8 @@ fn parse_json(input: &str) -> Option<Vec<BytePattern>> {
     let mut values = Vec::new();
     for token in pattern_content.split(',') {
         let trimmed = token.trim();
-        let val = if trimmed.starts_with("0x") {
-            u8::from_str_radix(&trimmed[2..], 16).ok()?
+        let val = if let Some(hex) = trimmed.strip_prefix("0x") {
+            u8::from_str_radix(hex, 16).ok()?
         } else {
             trimmed.parse::<u8>().ok()?
         };
@@ -222,8 +243,8 @@ fn parse_json(input: &str) -> Option<Vec<BytePattern>> {
                 let mask_content = &input[mask_arr_start + 1..mask_arr_end];
                 for token in mask_content.split(',') {
                     let trimmed = token.trim();
-                    let val = if trimmed.starts_with("0x") {
-                        u8::from_str_radix(&trimmed[2..], 16).ok()?
+                    let val = if let Some(hex) = trimmed.strip_prefix("0x") {
+                        u8::from_str_radix(hex, 16).ok()?
                     } else {
                         trimmed.parse::<u8>().ok()?
                     };
@@ -246,7 +267,11 @@ fn parse_hex_bytes(input: &str) -> Option<Vec<BytePattern>> {
         }
     }
 
-    if result.is_empty() { None } else { Some(result) }
+    if result.is_empty() {
+        None
+    } else {
+        Some(result)
+    }
 }
 
 fn apply_mask(values: &[u8], masks: &[u8]) -> Vec<BytePattern> {

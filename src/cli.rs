@@ -27,11 +27,13 @@ impl Config {
             match args[i].as_str() {
                 "--to" | "-t" => {
                     if i + 1 < args.len() {
-                        match Format::from_str(&args[i + 1]) {
+                        match Format::from_string(&args[i + 1]) {
                             Some(f) => to_format = Some(f),
                             None => {
                                 eprintln!("ERROR: Unknown format '{}'", args[i + 1]);
-                                eprintln!("Valid: ce, cpp, rust, ghidra, ida, x64dbg, python, json");
+                                eprintln!(
+                                    "Valid: ce, cpp, rust, ghidra, ida, x64dbg, python, json"
+                                );
                                 std::process::exit(1);
                             }
                         }

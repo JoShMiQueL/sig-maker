@@ -1,7 +1,7 @@
 //! Output formatting and printing
 
-use crate::analyzer::{aob_matches_pattern, AobInstance};
-use crate::formats::{format_pattern, BytePattern, Format};
+use crate::analyzer::{AobInstance, aob_matches_pattern};
+use crate::formats::{BytePattern, Format, format_pattern};
 
 /// Statistics about pattern optimization
 pub struct PatternStats {
@@ -36,28 +36,31 @@ impl PatternStats {
         self.fixed + self.high_nibble + self.low_nibble + self.wildcard
     }
 
-    pub fn fixed_bytes(&self) -> usize { self.fixed }
-    pub fn high_nibble_wildcards(&self) -> usize { self.high_nibble }
-    pub fn low_nibble_wildcards(&self) -> usize { self.low_nibble }
-    pub fn full_wildcards(&self) -> usize { self.wildcard }
+    pub fn fixed_bytes(&self) -> usize {
+        self.fixed
+    }
+    pub fn high_nibble_wildcards(&self) -> usize {
+        self.high_nibble
+    }
+    pub fn low_nibble_wildcards(&self) -> usize {
+        self.low_nibble
+    }
+    pub fn full_wildcards(&self) -> usize {
+        self.wildcard
+    }
 }
 
 /// Print the diff table showing byte-by-byte comparison
-pub fn print_diff_table(
-    result: &[BytePattern],
-    aobs: &[AobInstance],
-    _first_len: usize,
-) {
+pub fn print_diff_table(result: &[BytePattern], aobs: &[AobInstance], _first_len: usize) {
     use std::collections::HashSet;
 
     println!("[2/2] Difference Analysis:");
     println!();
     println!("{:-<90}", "");
-    println!("{:<5} {:<15} {}", "Byte", "Pattern", "Values");
+    println!("{:<5} {:<15} Values", "Byte", "Pattern");
     println!("{:-<90}", "");
 
-    for byte_idx in 0..result.len() {
-        let pattern = result[byte_idx];
+    for (byte_idx, pattern) in result.iter().enumerate() {
 
         // Show values from each AOB
         let values_str: String = aobs
@@ -70,7 +73,7 @@ pub fn print_diff_table(
             .join(" ");
 
         // Show marker if optimized
-        let marker: String = match pattern {
+        let marker: String = match *pattern {
             BytePattern::Fixed(_) => String::new(),
             BytePattern::HighNibble(_) => {
                 let vals: Vec<String> = aobs
@@ -78,7 +81,11 @@ pub fn print_diff_table(
                     .filter_map(|aob| aob.bytes[byte_idx])
                     .map(|v| format!("{:X}?", v >> 4))
                     .collect();
-                let unique: Vec<String> = vals.into_iter().collect::<HashSet<_>>().into_iter().collect();
+                let unique: Vec<String> = vals
+                    .into_iter()
+                    .collect::<HashSet<_>>()
+                    .into_iter()
+                    .collect();
                 if unique.len() == 1 {
                     format!(" <-- optimized to {}", unique[0])
                 } else {
@@ -91,7 +98,11 @@ pub fn print_diff_table(
                     .filter_map(|aob| aob.bytes[byte_idx])
                     .map(|v| format!("?{:X}", v & 0x0F))
                     .collect();
-                let unique: Vec<String> = vals.into_iter().collect::<HashSet<_>>().into_iter().collect();
+                let unique: Vec<String> = vals
+                    .into_iter()
+                    .collect::<HashSet<_>>()
+                    .into_iter()
+                    .collect();
                 if unique.len() == 1 {
                     format!(" <-- optimized to {}", unique[0])
                 } else {
@@ -101,7 +112,7 @@ pub fn print_diff_table(
             BytePattern::Wildcard => " <-- CHANGES".to_string(),
         };
 
-        let pattern_str = format_pattern(&[pattern], Format::CheatEngine);
+        let pattern_str = format_pattern(&[*pattern], Format::CheatEngine);
 
         println!(
             "{:<5} {:<15} {}{}",
@@ -147,8 +158,14 @@ fn print_single_format_result(
     println!("==============================================");
     println!("Length: {} bytes", stats.total_bytes());
     println!("Fixed: {} bytes", stats.fixed_bytes());
-    println!("High nibble wildcards: {} bytes", stats.high_nibble_wildcards());
-    println!("Low nibble wildcards: {} bytes", stats.low_nibble_wildcards());
+    println!(
+        "High nibble wildcards: {} bytes",
+        stats.high_nibble_wildcards()
+    );
+    println!(
+        "Low nibble wildcards: {} bytes",
+        stats.low_nibble_wildcards()
+    );
     println!("Full wildcards: {} bytes", stats.full_wildcards());
     println!();
     println!("Optimized Pattern:");
@@ -159,18 +176,20 @@ fn print_single_format_result(
     }
 }
 
-fn print_all_formats_result(
-    result: &[BytePattern],
-    stats: &PatternStats,
-    aobs: &[AobInstance],
-) {
+fn print_all_formats_result(result: &[BytePattern], stats: &PatternStats, aobs: &[AobInstance]) {
     println!("==============================================");
     println!("  ANALYSIS RESULT - All Formats");
     println!("==============================================");
     println!("Length: {} bytes", stats.total_bytes());
     println!("Fixed: {} bytes", stats.fixed_bytes());
-    println!("High nibble wildcards: {} bytes", stats.high_nibble_wildcards());
-    println!("Low nibble wildcards: {} bytes", stats.low_nibble_wildcards());
+    println!(
+        "High nibble wildcards: {} bytes",
+        stats.high_nibble_wildcards()
+    );
+    println!(
+        "Low nibble wildcards: {} bytes",
+        stats.low_nibble_wildcards()
+    );
     println!("Full wildcards: {} bytes", stats.full_wildcards());
     println!();
     println!("Optimized Patterns:");

@@ -10,5 +10,7 @@ pub mod io;
 pub mod output;
 
 // Re-export commonly used types
-pub use analyzer::{analyze_aobs, aob_matches_pattern, AobInstance};
-pub use formats::{optimize_byte, parse_pattern, format_pattern, BytePattern, Format, matches_pattern};
+pub use analyzer::{AobInstance, analyze_aobs, aob_matches_pattern};
+pub use formats::{
+    BytePattern, Format, format_pattern, matches_pattern, optimize_byte, parse_pattern,
+};

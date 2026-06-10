@@ -1,6 +1,6 @@
 //! Pattern conversion - convert single pattern between formats
 
-use crate::formats::{format_pattern, parse_pattern, BytePattern, Format};
+use crate::formats::{BytePattern, Format, format_pattern, parse_pattern};
 
 /// Convert a single pattern and display results
 pub fn convert_pattern(content: &str, to_format: Option<Format>) {
