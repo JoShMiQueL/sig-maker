@@ -6,10 +6,10 @@
 - ✅ **Output to file** (`-o, --output output.txt`)
 - ✅ **Version flag** (`-v, --version`)
 - ✅ **Quiet mode** (`-q, --quiet`)
-- ⏳ **Verbose mode** (`--verbose` - reserved for future detailed output)
+- ✅ **Verbose mode** (`--verbose` - shows entropy and compression ratio)
 - ✅ **Terminal colors** (crate: `colored` or `owo-colors`)
 - ✅ **Pattern validation** (`-c, --check` - detect if valid without converting)
-- ⏳ **Detailed statistics** (entropy, compression ratio, etc.)
+- ✅ **Detailed statistics** (entropy, compression ratio, etc.)
 - ✅ **Pause on double-click** (Windows: shows usage and waits for Enter)
 
 ### Testing & Quality
