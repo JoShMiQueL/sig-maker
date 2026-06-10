@@ -1,0 +1,92 @@
+name: 'Generate Changelog'
+description: 'Generate changelog using git-cliff'
+
+inputs:
+  commit:
+    description: 'Whether to commit and push the changelog'
+    required: false
+    default: 'false'
+  auto-merge:
+    description: 'Whether to auto-merge the PR (requires commit=true)'
+    required: false
+    default: 'false'
+
+outputs:
+  changed:
+    description: 'Whether the changelog was changed'
+    value: ${{ steps.check_changes.outputs.changed }}
+  branch:
+    description: 'The branch name created (if commit=true)'
+    value: ${{ steps.branch.outputs.branch }}
+  pr_number:
+    description: 'The PR number created (if auto-merge=true)'
+    value: ${{ steps.pr.outputs.pr_number }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install git-cliff
+      shell: bash
+      run: |
+        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orhun/git-cliff/releases/download/v2.6.1/git-cliff-2.6.1-x86_64-unknown-linux-gnu.tar.gz -o git-cliff.tar.gz
+        tar xzf git-cliff.tar.gz
+        sudo mv git-cliff /usr/local/bin/
+        rm git-cliff.tar.gz
+
+    - name: Generate changelog
+      shell: bash
+      run: |
+        git cliff -o CHANGELOG.md
+
+    - name: Check if changelog changed
+      id: check_changes
+      shell: bash
+      run: |
+        if git diff --quiet CHANGELOG.md; then
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create branch
+      id: branch
+      if: inputs.commit == 'true' && steps.check_changes.outputs.changed == 'true'
+      shell: bash
+      run: |
+        BRANCH="changelog/update-$(date +%Y%m%d-%H%M%S)"
+        echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+        git checkout -b "$BRANCH"
+
+    - name: Commit changes
+      if: inputs.commit == 'true' && steps.check_changes.outputs.changed == 'true'
+      shell: bash
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add CHANGELOG.md
+        git commit -m "docs: update CHANGELOG.md"
+
+    - name: Push branch
+      if: inputs.commit == 'true' && steps.check_changes.outputs.changed == 'true'
+      shell: bash
+      run: |
+        git push origin "${{ steps.branch.outputs.branch }}"
+
+    - name: Create PR
+      id: pr
+      if: inputs.commit == 'true' && steps.check_changes.outputs.changed == 'true'
+      shell: bash
+      run: |
+        PR_URL=$(gh pr create --title "docs: update CHANGELOG.md" --body "Auto-generated changelog update" --base main --head "${{ steps.branch.outputs.branch }}" --label "automated")
+        echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+        echo "pr_number=$(echo $PR_URL | grep -oP 'pull/\K[0-9]+')" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Auto-merge PR
+      if: inputs.auto-merge == 'true' && steps.check_changes.outputs.changed == 'true'
+      shell: bash
+      run: |
+        gh pr merge "${{ steps.pr.outputs.pr_number }}" --squash --delete-branch --admin
+      env:
+        GH_TOKEN: ${{ github.token }}
