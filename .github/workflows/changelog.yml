@@ -1,0 +1,72 @@
+name: Generate Changelog
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changelog:
+    name: Update CHANGELOG.md
+    runs-on: ubuntu-latest
+    # Don't run on commits made by the bot itself
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Install git-cliff
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orhun/git-cliff/releases/download/v2.6.1/git-cliff-2.6.1-x86_64-unknown-linux-gnu.tar.gz -o git-cliff.tar.gz
+          tar xzf git-cliff.tar.gz
+          sudo mv git-cliff /usr/local/bin/
+          rm git-cliff.tar.gz
+
+      - name: Generate changelog
+        run: |
+          git cliff -o CHANGELOG.md
+
+      - name: Check if changelog changed
+        id: check_changes
+        run: |
+          if git diff --quiet CHANGELOG.md; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create branch
+        id: branch
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          BRANCH="changelog/update-$(date +%Y%m%d-%H%M%S)"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          git checkout -b "$BRANCH"
+
+      - name: Commit changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md"
+
+      - name: Push branch
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git push origin "${{ steps.branch.outputs.branch }}"
+
+      - name: Create and auto-merge PR
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          PR_URL=$(gh pr create --title "docs: update CHANGELOG.md" --body "Auto-generated changelog update" --base main --head "${{ steps.branch.outputs.branch }}" --label "automated")
+          PR_NUMBER=$(echo $PR_URL | grep -oP 'pull/\K[0-9]+')
+          # Auto-merge immediately without waiting for CI
+          gh pr merge $PR_NUMBER --squash --delete-branch --admin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
