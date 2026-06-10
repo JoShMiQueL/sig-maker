@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
+- *(ci)* Move skip rules before group rules in cliff.toml by [@JoShMiQueL](https://github.com/JoShMiQueL)([16fc195](https://github.com/JoShMiQueL/sig-maker/commit/16fc1953de99f18fc7200d1717f4e5b487273662))
+
 - *(ci)* Remove paths-ignore from changelog workflow by [@JoShMiQueL](https://github.com/JoShMiQueL)([2f1b68d](https://github.com/JoShMiQueL/sig-maker/commit/2f1b68d94a1f14e30035ab569305f323a40241cb))
 
 - *(ci)* Improve changelog generation with links and anti-loop by [@JoShMiQueL](https://github.com/JoShMiQueL)([0fbe551](https://github.com/JoShMiQueL/sig-maker/commit/0fbe551e9814049e7bb93bb533324340921512f1))
@@ -14,17 +16,6 @@ All notable changes to this project will be documented in this file.
 ### CI/CD
 
 - Add git-cliff for automatic CHANGELOG.md generation by [@JoShMiQueL](https://github.com/JoShMiQueL)([1e862e6](https://github.com/JoShMiQueL/sig-maker/commit/1e862e68a2869c128b5b26f5711cbdc1048d536d))
-
-
-### Documentation
-
-- Update CHANGELOG.md by [@github-actions[bot]](https://github.com/github-actions[bot])([c658d03](https://github.com/JoShMiQueL/sig-maker/commit/c658d035f26ae6ce6f81fffa92594c7429a9dbb1))
-
-- Update CHANGELOG.md by [@github-actions[bot]](https://github.com/github-actions[bot])([5188b4d](https://github.com/JoShMiQueL/sig-maker/commit/5188b4dd474d5a6dc1f7a7ef0442657248d34e99))
-
-- Update CHANGELOG.md by [@github-actions[bot]](https://github.com/github-actions[bot])([0e958fa](https://github.com/JoShMiQueL/sig-maker/commit/0e958faddcc6ab1cb9f88949cfa63c5d1302c0c5))
-
-- Update CHANGELOG.md by [@github-actions[bot]](https://github.com/github-actions[bot])([be317b6](https://github.com/JoShMiQueL/sig-maker/commit/be317b6ca78022a05dd31372ad3be2d1d66f5ec2))
 
 
 ### Features
