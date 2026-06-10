@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.8"
 
 [[bench]]
 name = "pattern_bench"
