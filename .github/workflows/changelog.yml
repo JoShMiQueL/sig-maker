@@ -82,7 +82,7 @@ jobs:
       - name: Wait for CI checks
         if: steps.check_changes.outputs.changed == 'true'
         run: |
-          gh pr checks "${{ steps.pr.outputs.pr_number }}" --wait
+          gh pr checks "${{ steps.pr.outputs.pr_number }}" --watch --interval 30
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
@@ -97,6 +97,6 @@ jobs:
         if: always()
         run: |
           # Close PRs older than 1 hour with automated label
-          gh pr list --label automated --state open --json number,title,createdAt --jq '.[] | select(.createdAt < "'$(date -d '1 hour ago' -u +%Y-%m-%dT%H:%M:%SZ)'"') | .number' | xargs -I {} gh pr close {} --delete-branch --comment "Auto-closed stale automated PR" || true
+          gh pr list --label automated --state open --json number,title,createdAt --jq '.[] | select(.createdAt < "'$(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ)'"') | .number' | xargs -I {} gh pr close {} --delete-branch --comment "Auto-closed stale automated PR" || true
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
