@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": [
+	  "allow": [
       "Read(**)",
       "Exec(git)",
       "Exec(cargo)",
@@ -20,8 +20,7 @@
       "Exec(git rebase)",
       "Exec(gh repo delete)",
       "Exec(gh release delete)",
-	  "Exec(rm)",
-	  
+	  "Exec(rm)"
     ]
   },
   "read_config_from": {
