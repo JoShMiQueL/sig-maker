@@ -106,6 +106,9 @@ fn handle_connection(mut stream: TcpStream) {
         ("GET", "/") | ("GET", "/index.html") => serve_file("index.html", "text/html"),
         ("GET", "/styles.css") => serve_file("styles.css", "text/css"),
         ("GET", "/main.js") => serve_file("main.js", "application/javascript"),
+        // Astro paths
+        ("GET", "/src/styles/global.css") => serve_file("src/styles/global.css", "text/css"),
+        ("GET", "/src/scripts/main.js") => serve_file("src/scripts/main.js", "application/javascript"),
         ("GET", "/api/formats") => handle_get_formats(),
         ("POST", "/api/convert") => handle_post_convert(&body),
         ("OPTIONS", _) => cors_preflight(),
@@ -161,10 +164,15 @@ fn handle_post_convert(body: &str) -> String {
 // ── Static file serving ───────────────────────────────────────────────────────
 
 fn frontend_dir() -> PathBuf {
-    // When running via `cargo run`, __FILE__ is in src/, frontend/ is sibling
+    // Prefer Astro build output (dist/), fallback to vanilla frontend/
     let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     p.push("frontend");
-    p
+    let dist = p.join("dist");
+    if dist.exists() {
+        dist
+    } else {
+        p
+    }
 }
 
 fn serve_file(filename: &str, content_type: &str) -> String {

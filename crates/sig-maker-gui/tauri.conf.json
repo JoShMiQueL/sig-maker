@@ -4,7 +4,8 @@
   "version": "0.1.2-beta",
   "identifier": "com.joshmiguel.sig-maker",
   "build": {
-    "frontendDist": "./frontend"
+    "devUrl": "http://localhost:4321",
+    "frontendDist": "./frontend/dist"
   },
   "app": {
     "windows": [
