@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-* [@JoShMiQueL](https://github.com/JoShMiQueL)
+* [@JoShMiQueL](https://github.com/JoShMiQueL) —,,,
 
 
 
@@ -47,6 +47,8 @@ All notable changes to this project will be documented in this file.
 
 - Add Rust toolchain cache and pin Rust version by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
+- Add Rust toolchain cache and pin Rust version by [@JoShMiQueL](https://github.com/JoShMiQueL)
+
 - Use windows-latest instead of windows-2025-vs2026 by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 - Add Dependabot and Stale bot, add PR template by [@JoShMiQueL](https://github.com/JoShMiQueL)
@@ -54,19 +56,7 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
-- Update TODO.md - mark fuzzing as complete by [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-- Update TODO.md - mark verbose and detailed stats as complete by [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-- Update TODO.md - mark pattern validation as complete by [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-- Update TODO.md - mark version and quiet as complete by [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-- Update TODO.md - mark output to file as complete by [@JoShMiQueL](https://github.com/JoShMiQueL)
-
 - Update README with badges, releases, and documentation links by [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-- Update TODO.md - mark Repository Quality as complete by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 - Add Pull Request template by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
@@ -92,7 +82,7 @@ All notable changes to this project will be documented in this file.
 
 ### Miscellaneous
 
-- Remove TODO.md by [@JoShMiQueL](https://github.com/JoShMiQueL)
+- [#1](https://github.com/JoShMiQueL/sig-maker/pull/1)*(deps)* Bump actions/stale from 9 to 10 (#1) by [@dependabot[bot]](https://github.com/dependabot[bot])
 
 - Add build check and commit-msg hook for Conventional Commits by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
@@ -107,7 +97,8 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-* [@JoShMiQueL](https://github.com/JoShMiQueL)
+* [@JoShMiQueL](https://github.com/JoShMiQueL) —,,,,,,,,,,,,,,,,,,,,,
+* [@dependabot[bot]](https://github.com/dependabot[bot]) — [#1](https://github.com/JoShMiQueL/sig-maker/pull/1)
 
 
 
@@ -138,12 +129,10 @@ All notable changes to this project will be documented in this file.
 
 
 
-### New Contributors
-
-* [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
-
 ### Contributors
 
-* [@JoShMiQueL](https://github.com/JoShMiQueL)
+* [@JoShMiQueL](https://github.com/JoShMiQueL) —,,,,,
+
+
 
 
