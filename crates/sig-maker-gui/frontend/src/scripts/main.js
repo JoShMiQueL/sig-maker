@@ -1,15 +1,17 @@
 // Sig-Maker GUI — frontend logic
-// Runs inside Tauri (window.__TAURI__ present) or a plain browser hitting the
+// Runs inside Tauri (using @tauri-apps/api) or a plain browser hitting the
 // test HTTP server at the same origin (sig-maker-testserver).
 
-// ── Backend abstraction ───────────────────────────────────────────────────────
-// In Tauri: use the IPC bridge.
-// In a browser: call the REST API exposed by sig-maker-testserver.
-const isTauri = typeof window.__TAURI__ !== "undefined";
+import { invoke } from '@tauri-apps/api/core';
 
-async function invoke(command, args = {}) {
+// ── Backend abstraction ───────────────────────────────────────────────────────
+// In Tauri: use the IPC bridge via @tauri-apps/api.
+// In a browser: call the REST API exposed by sig-maker-testserver.
+const isTauri = typeof window.__TAURI_INTERNALS__ !== "undefined";
+
+async function invokeCommand(command, args = {}) {
   if (isTauri) {
-    return window.__TAURI__.core.invoke(command, args);
+    return invoke(command, args);
   }
   // HTTP fallback (test server)
   if (command === "get_formats") {
@@ -67,7 +69,7 @@ function triggerAutoConvert() {
 // ── Load formats on startup ───────────────────────────────────────────────────
 async function loadFormats() {
   try {
-    formats = await invoke("get_formats");
+    formats = await invokeCommand("get_formats");
     formatTogglesEl.innerHTML = "";
     selectedFormats = new Set(formats.map(f => f.id)); // all selected by default
 
@@ -111,7 +113,7 @@ async function doConvert() {
   try {
     const results = await Promise.all(
       formatIds.map(formatId =>
-        invoke("convert_pattern", { input, formatId })
+        invokeCommand("convert_pattern", { input, formatId })
           .then(result => ({ formatId, result }))
           .catch(err => ({ formatId, error: String(err) }))
       )

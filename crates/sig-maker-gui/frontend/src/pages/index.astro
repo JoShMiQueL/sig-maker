@@ -7,8 +7,6 @@ import '../styles/global.css';
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Sig-Maker</title>
-		<!-- Tauri IPC bridge script (injected by Tauri in production) -->
-		<script src="/__tauri__/ipc-bridge.js"></script>
 	</head>
 	<body data-tauri-drag-region>
 		<div class="app">
@@ -53,6 +51,6 @@ import '../styles/global.css';
 			</main>
 		</div>
 
-		<script src="../scripts/main.js"></script>
+		<script type="module" src="../scripts/main.js"></script>
 	</body>
 </html>
