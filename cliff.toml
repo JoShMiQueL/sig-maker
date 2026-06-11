@@ -68,21 +68,19 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
-    # Skip changelog/bot/merge commits
+    # Skip bot/automated commits
     { message = "^docs: update CHANGELOG", skip = true },
     { message = "^chore\\(release\\)", skip = true },
-    { message = "(?i)\\(changelog\\)", skip = true },
-    { message = "changelog", skip = true },
-    { message = "git-cliff", skip = true },
+    { message = "^chore\\(deps\\)", skip = true },
     { message = "^Merge branch", skip = true },
     { message = "^Merge pull request", skip = true },
     { author = ".*\\[bot\\]", skip = true },
     { author = "dependabot", skip = true },
-    { message = "^chore\\(deps\\)", skip = true },
-    # Skip internal/minor changes
+    # Skip commits about internal tooling (changelog setup, TODO, Devin config)
+    { message = "(?i)\\(changelog\\)", skip = true },
+    { message = "(?i)^[a-z]+[^:]*: .*\\b(changelog|git-cliff|cliff\\.toml|GH_PAT|ADMIN_TOKEN)\\b", skip = true },
     { message = "TODO\\.md", skip = true },
-    { message = "(?i)^chore\\(.*\\).*formatting", skip = true },
-    { message = "(?i)^chore\\(.*\\).*config", skip = true },
+    { message = "(?i)^(feat|fix|ci|docs|chore|refactor): .*(devin|mcp|act config|githook|\\.githook)", skip = true },
     # Group rules
     { message = "(?i)^feat", group = "Features" },
     { message = "(?i)^fix", group = "Bug Fixes" },
