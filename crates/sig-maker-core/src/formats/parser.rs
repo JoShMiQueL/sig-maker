@@ -38,15 +38,9 @@ pub fn parse_pattern(input: &str) -> Option<Vec<BytePattern>> {
         return parse_cheat_engine(trimmed);
     }
 
-    // Try raw hex (space-separated)
-    if trimmed.len() >= 2
-        && trimmed
-            .chars()
-            .nth(1)
-            .map(|c| c.is_ascii_hexdigit())
-            .unwrap_or(false)
-    {
-        return parse_hex_bytes(trimmed);
+    // Try raw hex (space-separated) - always try this as fallback
+    if let Some(result) = parse_hex_bytes(trimmed) {
+        return Some(result);
     }
 
     None
@@ -58,14 +52,14 @@ fn parse_cheat_engine(input: &str) -> Option<Vec<BytePattern>> {
     for token in input.split_whitespace() {
         let pattern = if token == "??" || token == "?" {
             BytePattern::Wildcard
-        } else if token.len() == 2 && token.starts_with('?') {
-            // ?X = LowNibble (X is the low nibble)
-            let low = u8::from_str_radix(&token[1..2], 16).ok()?;
-            BytePattern::LowNibble(low)
         } else if token.len() == 2 && token.ends_with('?') {
             // X? = HighNibble (X is the high nibble)
             let high = u8::from_str_radix(&token[0..1], 16).ok()?;
             BytePattern::HighNibble(high)
+        } else if token.len() == 2 && token.starts_with('?') {
+            // ?X = LowNibble (X is the low nibble)
+            let low = u8::from_str_radix(&token[1..2], 16).ok()?;
+            BytePattern::LowNibble(low)
         } else if token.len() == 2 {
             let byte = u8::from_str_radix(token, 16).ok()?;
             BytePattern::Fixed(byte)

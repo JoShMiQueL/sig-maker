@@ -79,7 +79,31 @@ impl Config {
                 std::process::exit(1);
             }
         } else {
-            args[1].clone()
+            // Find the first non-flag argument
+            let mut input = None;
+            let mut i = 1;
+            while i < args.len() {
+                match args[i].as_str() {
+                    "--to" | "-t" => i += 2,
+                    "--output" | "-o" => i += 2,
+                    "--version" | "-v" => i += 1,
+                    "--verbose" => i += 1,
+                    "--quiet" | "-q" => i += 1,
+                    "--check" | "-c" => i += 1,
+                    _ => {
+                        if input.is_none() && !args[i].starts_with('-') {
+                            input = Some(args[i].clone());
+                        }
+                        i += 1;
+                    }
+                }
+            }
+            input.unwrap_or_else(|| {
+                eprintln!("ERROR: No input file specified");
+                print_usage();
+                pause_if_no_terminal();
+                std::process::exit(1);
+            })
         };
 
         let mut to_format: Option<Format> = None;

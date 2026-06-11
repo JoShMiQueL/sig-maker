@@ -40,7 +40,7 @@ impl Input {
                 .map_err(|e| format!("Could not read file '{}': {}", source, e))?;
             (content, source.to_string())
         } else {
-            // Input might be a direct pattern
+            // Input is a direct pattern (not a file)
             (source.to_string(), "<input>".to_string())
         };
 
@@ -74,9 +74,30 @@ impl Input {
             .collect();
 
         if non_empty_lines.len() >= 2 {
-            InputType::MultipleAobs
+            // Multiple lines: check if each line is a separate AOB instance
+            // or if it's a single pattern split across multiple lines
+            let all_lines_look_like_patterns = non_empty_lines.iter().all(|line| {
+                let cleaned = if line.starts_with("- ") || line.starts_with("* ") {
+                    &line[2..]
+                } else {
+                    line
+                };
+                let tokens: Vec<&str> = cleaned.split_whitespace().collect();
+                tokens.len() >= 2
+                    && tokens.iter().all(|t| {
+                        t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit() || c == '?')
+                    })
+            });
+
+            if all_lines_look_like_patterns {
+                InputType::MultipleAobs
+            } else {
+                // Mixed content - treat as single pattern (take first line)
+                InputType::SimplePattern
+            }
         } else if non_empty_lines.len() == 1 {
-            // Single line - check if it looks like a pattern
+            // Single line - always treat as SimplePattern if it looks like a pattern
+            // This handles the case where a single pattern has multiple tokens
             let line = non_empty_lines[0];
             let cleaned = if line.starts_with("- ") || line.starts_with("* ") {
                 &line[2..]
@@ -103,8 +124,8 @@ impl Input {
                 InputType::MultipleAobs
             }
         } else {
-            // No valid input
-            InputType::MultipleAobs
+            // No valid input - treat as simple pattern (empty input is valid for some cases)
+            InputType::SimplePattern
         }
     }
 
@@ -142,6 +163,11 @@ impl Input {
             line.to_string()
         };
 
-        Some(cleaned)
+        // Return the cleaned line - let the parser decide if it's valid
+        if cleaned.is_empty() {
+            None
+        } else {
+            Some(cleaned)
+        }
     }
 }

@@ -5,6 +5,7 @@ use sig_maker_core::formats;
 use sig_maker_core::io::{self, Input};
 use sig_maker_core::parse_aobs;
 use std::io::IsTerminal;
+use std::path::PathBuf;
 
 mod cli;
 mod converter;
@@ -18,9 +19,9 @@ fn main() {
     let is_tty = std::io::stdout().is_terminal();
     let auto_quiet = !is_tty || config.quiet;
 
-    // Check if we should read from stdin (input is "-" or pipe detected)
-    let use_stdin = config.input_file == "-" || !is_tty;
-    let input_source = if use_stdin { "-" } else { &config.input_file };
+    // Check if we should read from stdin (input is "-")
+    let use_stdin = config.input_file == "-";
+    let input_source = &config.input_file;
 
     // Read input file or stdin
     let input = match Input::read_with_stdin(input_source, use_stdin) {
@@ -28,10 +29,19 @@ fn main() {
         Err(e) => cli::error_exit(&e),
     };
 
+    // If input doesn't come from a file (direct pattern), force SimplePattern
+    let input_type = if !PathBuf::from(input_source).exists() && !use_stdin {
+        io::InputType::SimplePattern
+    } else {
+        input.detect_type()
+    };
+
     // Check-only mode: validate pattern without converting
     if config.check_only {
-        let pattern_str = input.content.lines().next().unwrap_or("").trim();
-        match formats::validate_pattern(pattern_str) {
+        let pattern_str = input
+            .extract_pattern()
+            .unwrap_or_else(|| input.content.trim().to_string());
+        match formats::validate_pattern(&pattern_str) {
             Ok(_) => {
                 if !auto_quiet {
                     println!("Pattern is valid: {}", pattern_str);
@@ -46,7 +56,7 @@ fn main() {
     }
 
     // Detect input type and process accordingly
-    match input.detect_type() {
+    match input_type {
         io::InputType::MultipleAobs => {
             // Analyze multiple AOB instances
             let aobs = parse_aobs(&input.content);
@@ -97,7 +107,7 @@ fn main() {
             // Convert single pattern
             let pattern = input
                 .extract_pattern()
-                .unwrap_or_else(|| cli::error_exit("No valid pattern found"));
+                .unwrap_or_else(|| input.content.trim().to_string());
             converter::convert_pattern(
                 &pattern,
                 config.to_format,
