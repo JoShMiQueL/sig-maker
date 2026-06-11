@@ -1,0 +1,17 @@
+# Tauri generated files
+gen/
+
+# Astro build output
+frontend/dist/
+
+# Astro cache
+frontend/.astro/
+
+# Node modules
+frontend/node_modules/
+
+# Node lockfile (optional, but recommended)
+frontend/package-lock.json
+
+# Generated icon (re-generatable)
+icons/icon.ico
