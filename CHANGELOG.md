@@ -6,17 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### CI/CD
 
-- Fix cliff.toml template and filters by [@JoShMiQueL](https://github.com/JoShMiQueL) ([a8359d9](https://github.com/JoShMiQueL/sig-maker/commit/a8359d99e6713b4af1a16caf6635243829b2c96a))
 - Only run tests when code changes by [@JoShMiQueL](https://github.com/JoShMiQueL) ([bd8e1ec](https://github.com/JoShMiQueL/sig-maker/commit/bd8e1ec19c5db4fe1a1fdf4620ca89ec4be5be5b))
+- Only run tests when code changes by [@JoShMiQueL](https://github.com/JoShMiQueL) ([af1a27e](https://github.com/JoShMiQueL/sig-maker/commit/af1a27e12a5e947e7d560bc0436789c43f42221f))
 - Simplify workflow and remove redundant steps by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6136261](https://github.com/JoShMiQueL/sig-maker/commit/6136261aaa18fdb0f33f73a08879375c56debb51))
 
 ### Features
 
 - *(analyzer)* Support combining patterns with wildcards and raw AOBs by [@JoShMiQueL](https://github.com/JoShMiQueL) ([8ecbcde](https://github.com/JoShMiQueL/sig-maker/commit/8ecbcde6f1a2d778db3f36569f7e8145d78dd321))
-
-### Miscellaneous
-
-- Fix formatting in .devin/config.json by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6eb5482](https://github.com/JoShMiQueL/sig-maker/commit/6eb5482d0bfaec80226eaccfa49caa3d2b90beae))
 
 
 ### Contributors
@@ -29,10 +25,11 @@ All notable changes to this project will be documented in this file.
 
 - *(tests)* Use debug binary in CI, release locally by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ac70afb](https://github.com/JoShMiQueL/sig-maker/commit/ac70afb8a7c8a529eb8b21e2b3e2896cc8eb9c1c))
 - *(hooks)* Explicitly run integration tests by [@JoShMiQueL](https://github.com/JoShMiQueL) ([af16fa2](https://github.com/JoShMiQueL/sig-maker/commit/af16fa27fae4e866b88794ce31633c95777a2784))
-- *(ci)* Move skip rules before group rules in cliff.toml by [@JoShMiQueL](https://github.com/JoShMiQueL) ([16fc195](https://github.com/JoShMiQueL/sig-maker/commit/16fc1953de99f18fc7200d1717f4e5b487273662))
+- *(ci)* Run CI on all pull requests by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1909350](https://github.com/JoShMiQueL/sig-maker/commit/1909350e15e717059c0dbb8f1938f2fcaaf8fdaf))
 
 ### CI/CD
 
+- Update release.yml for cargo-dist compatibility by [@JoShMiQueL](https://github.com/JoShMiQueL) ([7a204d8](https://github.com/JoShMiQueL/sig-maker/commit/7a204d8a0890ad6cf2418c5a5b4678bf5b9d0ee0))
 - Update actions to latest versions by [@JoShMiQueL](https://github.com/JoShMiQueL) ([8c03fdb](https://github.com/JoShMiQueL/sig-maker/commit/8c03fdb7142b99874a6d20f00485efba50cb23ab))
 - Force Node.js 24 for GitHub Actions by [@JoShMiQueL](https://github.com/JoShMiQueL) ([79b60ed](https://github.com/JoShMiQueL/sig-maker/commit/79b60ede9160d2a6883dbbef239ce2c2e54b7dca))
 - Add Rust toolchain cache and pin Rust version by [@JoShMiQueL](https://github.com/JoShMiQueL) ([a214e6b](https://github.com/JoShMiQueL/sig-maker/commit/a214e6b2787fe0123118073446b619b5f0659afe))
@@ -78,6 +75,7 @@ All notable changes to this project will be documented in this file.
 
 ### CI/CD
 
+- Migrate to cargo-dist for releases by [@JoShMiQueL](https://github.com/JoShMiQueL) ([f7f11d1](https://github.com/JoShMiQueL/sig-maker/commit/f7f11d16d58213fe16f8386bd8e8b4c3debdf415))
 - Remove Codecov coverage job by [@JoShMiQueL](https://github.com/JoShMiQueL) ([f55d68f](https://github.com/JoShMiQueL/sig-maker/commit/f55d68f9b1e3ca67f1bc070429d2fed76d6ca6ba))
 - Update GitHub Actions for Node.js 24 and Windows 2025 by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1ba2088](https://github.com/JoShMiQueL/sig-maker/commit/1ba2088a9b31ad246ebd5ccb9d05a59c356393fc))
 
