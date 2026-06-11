@@ -9,6 +9,7 @@
     "beforeBuildCommand": "powershell -ExecutionPolicy Bypass -Command \"Set-Location frontend; npm run build\""
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Sig-Maker",

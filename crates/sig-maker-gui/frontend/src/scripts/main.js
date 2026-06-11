@@ -1,17 +1,13 @@
 // Sig-Maker GUI — frontend logic
-// Runs inside Tauri (using @tauri-apps/api) or a plain browser hitting the
-// test HTTP server at the same origin (sig-maker-testserver).
-
-import { invoke } from '@tauri-apps/api/core';
+// Runs inside Tauri (window.__TAURI__ available via withGlobalTauri) or
+// a plain browser hitting the test HTTP server (sig-maker-testserver).
 
 // ── Backend abstraction ───────────────────────────────────────────────────────
-// In Tauri: use the IPC bridge via @tauri-apps/api.
-// In a browser: call the REST API exposed by sig-maker-testserver.
-const isTauri = typeof window.__TAURI_INTERNALS__ !== "undefined";
+const isTauri = !!(window.__TAURI__ && window.__TAURI__.core);
 
 async function invokeCommand(command, args = {}) {
   if (isTauri) {
-    return invoke(command, args);
+    return window.__TAURI__.core.invoke(command, args);
   }
   // HTTP fallback (test server)
   if (command === "get_formats") {
@@ -70,6 +66,10 @@ function triggerAutoConvert() {
 async function loadFormats() {
   try {
     formats = await invokeCommand("get_formats");
+    if (!formats || !Array.isArray(formats)) {
+      showError(`Unexpected response from get_formats: ${JSON.stringify(formats)}`);
+      return;
+    }
     formatTogglesEl.innerHTML = "";
     selectedFormats = new Set(formats.map(f => f.id)); // all selected by default
 
@@ -82,7 +82,7 @@ async function loadFormats() {
       formatTogglesEl.appendChild(btn);
     }
   } catch (err) {
-    showError(`Failed to load formats: ${err}`);
+    showError(`Failed to load formats: ${err.message || err}`);
   }
 }
 

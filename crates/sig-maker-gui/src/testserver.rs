@@ -19,7 +19,9 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sig_maker_core::formats::Format;
-use sig_maker_core::{convert_to_format, get_pattern_stats, parse_single_pattern};
+use sig_maker_core::{
+    analyze_aobs, convert_to_format, get_pattern_stats, parse_aobs, parse_single_pattern,
+};
 
 const PORT: u16 = 7331;
 
@@ -108,7 +110,9 @@ fn handle_connection(mut stream: TcpStream) {
         ("GET", "/main.js") => serve_file("main.js", "application/javascript"),
         // Astro paths
         ("GET", "/src/styles/global.css") => serve_file("src/styles/global.css", "text/css"),
-        ("GET", "/src/scripts/main.js") => serve_file("src/scripts/main.js", "application/javascript"),
+        ("GET", "/src/scripts/main.js") => {
+            serve_file("src/scripts/main.js", "application/javascript")
+        }
         ("GET", "/api/formats") => handle_get_formats(),
         ("POST", "/api/convert") => handle_post_convert(&body),
         ("OPTIONS", _) => cors_preflight(),
@@ -139,18 +143,54 @@ fn handle_post_convert(body: &str) -> String {
         Err(e) => return json_error(400, &format!("Bad request: {e}")),
     };
 
-    let parsed = match parse_single_pattern(&req.input) {
-        Some(p) => p,
-        None => return json_error(422, "Could not parse pattern — check the input format"),
-    };
-
     let format = match Format::from_string(&req.format_id) {
         Some(f) => f,
         None => return json_error(400, &format!("Unknown format: {}", req.format_id)),
     };
 
+    // Check if input has multiple non-empty lines (AOB analysis mode)
+    let non_empty_lines: Vec<&str> = req
+        .input
+        .lines()
+        .map(|l| l.trim())
+        .filter(|l| !l.is_empty() && !l.starts_with('#') && !l.starts_with("//"))
+        .collect();
+
+    let (parsed, stats) = if non_empty_lines.len() >= 2 {
+        // Multiple lines: use AOB analysis
+        let aobs = parse_aobs(&req.input);
+        if aobs.len() < 2 {
+            return json_error(
+                422,
+                "Could not parse multiple AOB instances — check the input format",
+            );
+        }
+        let first_len = aobs[0].bytes.len();
+        for (i, aob) in aobs.iter().enumerate() {
+            if aob.bytes.len() != first_len {
+                return json_error(
+                    422,
+                    &format!(
+                        "Line {} has {} bytes, expected {}",
+                        i + 1,
+                        aob.bytes.len(),
+                        first_len
+                    ),
+                );
+            }
+        }
+        analyze_aobs(&req.input)
+    } else {
+        // Single pattern
+        let parsed = match parse_single_pattern(&req.input) {
+            Some(p) => p,
+            None => return json_error(422, "Could not parse pattern — check the input format"),
+        };
+        let stats = get_pattern_stats(&parsed);
+        (parsed, stats)
+    };
+
     let output = convert_to_format(&parsed, format);
-    let stats = get_pattern_stats(&parsed);
 
     let result = ConversionResult {
         output,
@@ -168,11 +208,7 @@ fn frontend_dir() -> PathBuf {
     let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     p.push("frontend");
     let dist = p.join("dist");
-    if dist.exists() {
-        dist
-    } else {
-        p
-    }
+    if dist.exists() { dist } else { p }
 }
 
 fn serve_file(filename: &str, content_type: &str) -> String {

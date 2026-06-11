@@ -2,7 +2,9 @@
 
 use serde::{Deserialize, Serialize};
 use sig_maker_core::formats::Format;
-use sig_maker_core::{convert_to_format, get_pattern_stats, parse_single_pattern};
+use sig_maker_core::{
+    analyze_aobs, convert_to_format, get_pattern_stats, parse_aobs, parse_single_pattern,
+};
 
 /// A format entry returned to the frontend
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,17 +36,54 @@ pub fn get_formats() -> Vec<FormatInfo> {
 
 /// Convert a pattern string to the requested format
 ///
-/// Returns an error string if the pattern cannot be parsed.
+/// If the input contains multiple lines (AOB instances), it will analyze them
+/// and generate an optimized pattern with wildcards where bytes differ.
+/// If the input is a single pattern, it converts directly.
 #[tauri::command]
 pub fn convert_pattern(input: String, format_id: String) -> Result<ConversionResult, String> {
-    let parsed = parse_single_pattern(&input)
-        .ok_or_else(|| "Could not parse pattern — check the input format".to_string())?;
-
     let format =
         Format::from_string(&format_id).ok_or_else(|| format!("Unknown format: {format_id}"))?;
 
+    // Check if input has multiple non-empty lines (AOB analysis mode)
+    let non_empty_lines: Vec<&str> = input
+        .lines()
+        .map(|l| l.trim())
+        .filter(|l| !l.is_empty() && !l.starts_with('#') && !l.starts_with("//"))
+        .collect();
+
+    let (parsed, stats) = if non_empty_lines.len() >= 2 {
+        // Multiple lines: use AOB analysis to find optimal pattern
+        let aobs = parse_aobs(&input);
+        if aobs.len() < 2 {
+            return Err(
+                "Could not parse multiple AOB instances — check the input format".to_string(),
+            );
+        }
+
+        // Verify all have same length
+        let first_len = aobs[0].bytes.len();
+        for (i, aob) in aobs.iter().enumerate() {
+            if aob.bytes.len() != first_len {
+                return Err(format!(
+                    "Line {} has {} bytes, expected {} (all lines must have the same length)",
+                    i + 1,
+                    aob.bytes.len(),
+                    first_len
+                ));
+            }
+        }
+
+        let (pattern, stats) = analyze_aobs(&input);
+        (pattern, stats)
+    } else {
+        // Single pattern: parse and convert directly
+        let parsed = parse_single_pattern(&input)
+            .ok_or_else(|| "Could not parse pattern — check the input format".to_string())?;
+        let stats = get_pattern_stats(&parsed);
+        (parsed, stats)
+    };
+
     let output = convert_to_format(&parsed, format);
-    let stats = get_pattern_stats(&parsed);
 
     Ok(ConversionResult {
         output,
