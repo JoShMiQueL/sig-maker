@@ -77,7 +77,16 @@ commit_parsers = [
     # Skip changelog bot commits (must be before other doc/chore rules)
     { message = "^docs: update CHANGELOG", skip = true },
     { message = "^chore\\(release\\)", skip = true },
+    { message = "^chore\\(changelog\\)", skip = true },
+    { message = "^ci\\(changelog\\)", skip = true },
+    { message = "^feat\\(changelog\\)", skip = true },
+    { message = "^fix\\(changelog\\)", skip = true },
+    { message = "^refactor\\(changelog\\)", skip = true },
+    { message = "changelog", skip = true },
+    { message = "git-cliff", skip = true },
+    { message = "^Merge branch", skip = true },
     { author = ".*\\[bot\\]", skip = true },
+    { author = "dependabot", skip = true },
     # Group rules
     { message = "^feat", group = "Features" },
     { message = "^fix", group = "Bug Fixes" },
