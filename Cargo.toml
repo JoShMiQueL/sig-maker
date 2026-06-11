@@ -1,5 +1,14 @@
-[package]
-name = "sig-maker"
+[workspace]
+members = [
+    "crates/sig-maker-core",
+    "crates/sig-maker-cli",
+]
+resolver = "2"
+
+[workspace.metadata.cargo-sig-maker]
+# Additional metadata can be added here
+
+[workspace.package]
 version = "0.1.1-beta"
 edition = "2024"
 authors = ["JoShMiQueL"]
@@ -9,25 +18,6 @@ repository = "https://github.com/JoShMiQueL/sig-maker"
 keywords = ["signature", "pattern", "aob", "reverse-engineering", "cheat-engine", "binary"]
 categories = ["command-line-utilities", "development-tools"]
 rust-version = "1.85"
-
-[lib]
-name = "sig_maker"
-path = "src/lib.rs"
-
-[[bin]]
-name = "sig-maker"
-path = "src/main.rs"
-
-[dependencies]
-colored = "2.1"
-atty = "0.2"
-
-[dev-dependencies]
-criterion = "0.5"
-
-[[bench]]
-name = "pattern_bench"
-harness = false
 
 # The profile that 'dist' will build with
 [profile.dist]
