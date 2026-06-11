@@ -9,62 +9,55 @@ body = """
 {%- endmacro -%}
 
 {% if version -%}
-    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
 {% else -%}
-    ## [Unreleased]
-{% endif -%}
+## [Unreleased]
+{% endif %}
+{% for group, commits in commits | group_by(attribute="group") -%}
+### {{ group | striptags | trim | upper_first }}
 
-{% for group, commits in commits | group_by(attribute="group") %}
-    ### {{ group | striptags | trim | upper_first }}
-    {% for commit in commits %}
-        - {% if commit.remote.pr_number %}\
-              [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}) \
-          {%- endif %}\
-          {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
-          {{ commit.message | upper_first }}\
-          {% if commit.remote.username %} by [@{{ commit.remote.username }}](https://github.com/{{ commit.remote.username }}){%- endif %}
-    {% endfor %}
+{% for commit in commits -%}
+- {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
+{{ commit.message | upper_first }}\
+{% if commit.remote.pr_number %} ([#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }})){% endif %}\
+{% if commit.remote.username %} by [@{{ commit.remote.username }}](https://github.com/{{ commit.remote.username }}){% endif %}
 {% endfor %}
+{% endfor -%}
 
 {%- if github -%}
-{%- set new_contributors = github.contributors | filter(attribute="is_first_time", value=true) %}
+{%- set new_contributors = github.contributors | filter(attribute="is_first_time", value=true) -%}
 {%- set_global has_new_human = false -%}
 {%- for contributor in new_contributors -%}
-    {%- if not contributor.username is containing("[bot]") -%}
-        {%- set_global has_new_human = true -%}
-    {%- endif -%}
+  {%- if not contributor.username is containing("[bot]") -%}
+    {%- set_global has_new_human = true -%}
+  {%- endif -%}
 {%- endfor -%}
 {%- if has_new_human %}
+### New Contributors
 
-    ### New Contributors
 {% for contributor in new_contributors -%}
-    {%- if not contributor.username is containing("[bot]") %}
-    * [@{{ contributor.username }}](https://github.com/{{ contributor.username }}) made their first contribution\
-        {%- if contributor.pr_number %} in [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}){%- endif %}
-{%- endif -%}
+  {%- if not contributor.username is containing("[bot]") -%}
+* [@{{ contributor.username }}](https://github.com/{{ contributor.username }}) made their first contribution\
+    {%- if contributor.pr_number %} in [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}){%- endif %}
+  {%- endif -%}
 {%- endfor %}
-{%- endif %}
+{%- endif -%}
 {%- endif %}
 
-{%- set contributors_list = commits | filter(attribute="remote.username") | map(attribute="remote.username") | unique %}
+{%- set contributors_list = commits | filter(attribute="remote.username") | map(attribute="remote.username") | unique | sort -%}
 {%- if contributors_list | length != 0 %}
+### Contributors
 
-    ### Contributors
-{% for username in contributors_list %}
-    * [@{{ username }}](https://github.com/{{ username }}) — \
-        {%- set user_commits = commits | filter(attribute="remote.username", value=username) -%}
-        {%- for commit in user_commits -%}
-            {%- if commit.remote.pr_number %} [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }})\
-            {%- endif -%}
-            {%- if not loop.last %},{% endif -%}
-        {%- endfor %}
+{% for username in contributors_list -%}
+  {%- if not username is containing("[bot]") -%}
+* [@{{ username }}](https://github.com/{{ username }})
+  {%- endif %}
 {%- endfor %}
 {%- endif %}
 
 {% if version and release.previous.version -%}
-    **Full Changelog**: [{{ release.previous.version }}...{{ version }}]({{ self::remote_url() }}/compare/{{ release.previous.version }}...{{ version }})
-{% endif %}
-{% raw %}\n{% endraw %}
+**Full Changelog**: [{{ release.previous.version }}...{{ version }}]({{ self::remote_url() }}/compare/{{ release.previous.version }}...{{ version }})
+{%- endif %}
 """
 footer = ""
 trim = true
@@ -74,7 +67,7 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
-    # Skip changelog bot commits (must be before other doc/chore rules)
+    # Skip changelog/bot/merge commits
     { message = "^docs: update CHANGELOG", skip = true },
     { message = "^chore\\(release\\)", skip = true },
     { message = "^chore\\(changelog\\)", skip = true },
@@ -85,22 +78,27 @@ commit_parsers = [
     { message = "changelog", skip = true },
     { message = "git-cliff", skip = true },
     { message = "^Merge branch", skip = true },
+    { message = "^Merge pull request", skip = true },
     { author = ".*\\[bot\\]", skip = true },
+    { author = "dependabot\\[bot\\]", skip = true },
     { author = "dependabot", skip = true },
-    # Skip internal TODO updates and minor config changes
-    { message = "TODO.md", skip = true },
-    { message = "^chore\\(.*\\).*formatting", skip = true },
-    { message = "^chore\\(.*\\).*config", skip = true },
+    { message = "^chore\\(deps\\)", skip = true },
+    # Skip internal/minor changes
+    { message = "TODO\\.md", skip = true },
+    { message = "(?i)^chore\\(.*\\).*formatting", skip = true },
+    { message = "(?i)^chore\\(.*\\).*config", skip = true },
     # Group rules
-    { message = "^feat", group = "Features" },
-    { message = "^fix", group = "Bug Fixes" },
-    { message = "^doc", group = "Documentation" },
-    { message = "^perf", group = "Performance" },
-    { message = "^refactor", group = "Refactor" },
-    { message = "^style", group = "Styling" },
-    { message = "^test", group = "Testing" },
-    { message = "^ci", group = "CI/CD" },
-    { message = "^chore", group = "Miscellaneous" },
+    { message = "(?i)^feat", group = "Features" },
+    { message = "(?i)^fix", group = "Bug Fixes" },
+    { message = "(?i)^docs?", group = "Documentation" },
+    { message = "(?i)^perf", group = "Performance" },
+    { message = "(?i)^refactor", group = "Refactor" },
+    { message = "(?i)^style", group = "Styling" },
+    { message = "(?i)^test", group = "Testing" },
+    { message = "(?i)^ci", group = "CI/CD" },
+    { message = "(?i)^chore", group = "Miscellaneous" },
+    { message = "(?i)^build", group = "Build" },
+    { message = "(?i)^revert", group = "Reverts" },
 ]
 filter_commits = false
 tag_pattern = "v[0-9].*"
