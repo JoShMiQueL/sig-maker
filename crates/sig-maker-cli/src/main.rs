@@ -43,7 +43,7 @@ fn main() {
             .unwrap_or_else(|| input.content.trim().to_string());
         match formats::validate_pattern(&pattern_str) {
             Ok(_) => {
-                if !auto_quiet {
+                if !config.quiet {
                     println!("Pattern is valid: {}", pattern_str);
                 }
                 std::process::exit(0);

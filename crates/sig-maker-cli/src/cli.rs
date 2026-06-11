@@ -58,10 +58,16 @@ impl Config {
     pub fn parse() -> Self {
         let args: Vec<String> = std::env::args().collect();
 
-        // Check for help
+        // Check for help (no input file needed)
         if args.len() > 1 && (args[1] == "-h" || args[1] == "--help") {
             print_usage();
             pause_if_no_terminal();
+            std::process::exit(0);
+        }
+
+        // Check for version (no input file needed)
+        if args.len() > 1 && (args[1] == "-v" || args[1] == "--version") {
+            println!("sig-maker {}", env!("CARGO_PKG_VERSION"));
             std::process::exit(0);
         }
 
@@ -86,7 +92,6 @@ impl Config {
                 match args[i].as_str() {
                     "--to" | "-t" => i += 2,
                     "--output" | "-o" => i += 2,
-                    "--version" | "-v" => i += 1,
                     "--verbose" => i += 1,
                     "--quiet" | "-q" => i += 1,
                     "--check" | "-c" => i += 1,
@@ -110,7 +115,6 @@ impl Config {
         let mut output_file: Option<String> = None;
         let mut verbose = false;
         let mut quiet = false;
-        let mut show_version = false;
         let mut check_only = false;
 
         let mut i = 1;
@@ -143,10 +147,6 @@ impl Config {
                         std::process::exit(1);
                     }
                 }
-                "--version" | "-v" => {
-                    show_version = true;
-                    i += 1;
-                }
                 "--verbose" => {
                     verbose = true;
                     i += 1;
@@ -163,12 +163,6 @@ impl Config {
                     i += 1;
                 }
             }
-        }
-
-        // Show version and exit
-        if show_version {
-            println!("sig-maker {}", env!("CARGO_PKG_VERSION"));
-            std::process::exit(0);
         }
 
         // Validate conflicting options
