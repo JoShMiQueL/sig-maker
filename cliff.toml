@@ -87,6 +87,10 @@ commit_parsers = [
     { message = "^Merge branch", skip = true },
     { author = ".*\\[bot\\]", skip = true },
     { author = "dependabot", skip = true },
+    # Skip internal TODO updates and minor config changes
+    { message = "TODO.md", skip = true },
+    { message = "^chore\\(.*\\).*formatting", skip = true },
+    { message = "^chore\\(.*\\).*config", skip = true },
     # Group rules
     { message = "^feat", group = "Features" },
     { message = "^fix", group = "Bug Fixes" },
