@@ -1,9 +1,6 @@
 //! AOB analysis - compare multiple instances and find optimal pattern
 
-use crate::formats::{BytePattern, Format, optimize_byte, parse_pattern};
-use crate::output::{PatternStats, print_analysis_results, print_diff_table};
-use atty;
-use colored::Colorize;
+use crate::formats::{BytePattern, optimize_byte, parse_pattern};
 
 /// AOB instance with source line info
 pub struct AobInstance {
@@ -16,95 +13,110 @@ pub struct AobInstance {
     pub wildcard_positions: Vec<bool>,
 }
 
-/// Analyze multiple AOB instances and generate optimized pattern
-pub fn analyze_aobs(
-    content: &str,
-    to_format: Option<Format>,
-    output_file: Option<&str>,
-    verbose: bool,
-    quiet: bool,
-) {
-    // Disable colors when writing to file or not in a terminal
-    let use_colors = output_file.is_none() && atty::is(atty::Stream::Stdout);
+/// Statistics about pattern optimization
+#[derive(Debug, Clone)]
+pub struct PatternStats {
+    fixed: usize,
+    high_nibble: usize,
+    low_nibble: usize,
+    wildcard: usize,
+    entropy: f64,
+    compression_ratio: f64,
+}
 
-    if !quiet {
-        if use_colors {
-            println!(
-                "{}",
-                "==============================================".cyan()
-            );
-            println!("  {}", "Sig-Maker".cyan().bold());
-            println!(
-                "{}",
-                "==============================================".cyan()
-            );
-        } else {
-            println!("==============================================");
-            println!("  Sig-Maker");
-            println!("==============================================");
+impl PatternStats {
+    pub fn from_patterns(patterns: &[BytePattern]) -> Self {
+        let mut stats = Self {
+            fixed: 0,
+            high_nibble: 0,
+            low_nibble: 0,
+            wildcard: 0,
+            entropy: 0.0,
+            compression_ratio: 0.0,
+        };
+
+        for p in patterns {
+            match p {
+                BytePattern::Fixed(_) => stats.fixed += 1,
+                BytePattern::Wildcard => stats.wildcard += 1,
+                BytePattern::HighNibble(_) => stats.high_nibble += 1,
+                BytePattern::LowNibble(_) => stats.low_nibble += 1,
+            }
         }
-        println!();
+
+        // Calculate entropy (simplified: based on pattern type distribution)
+        let total = stats.total_bytes();
+        if total > 0 {
+            let mut entropy = 0.0;
+            let counts = [
+                stats.fixed,
+                stats.high_nibble,
+                stats.low_nibble,
+                stats.wildcard,
+            ];
+            for &count in &counts {
+                if count > 0 {
+                    let p = count as f64 / total as f64;
+                    entropy -= p * p.log2();
+                }
+            }
+            stats.entropy = entropy;
+
+            // Compression ratio: fixed bytes / total bytes
+            stats.compression_ratio = stats.fixed as f64 / total as f64;
+        }
+
+        stats
     }
 
+    pub fn total_bytes(&self) -> usize {
+        self.fixed + self.high_nibble + self.low_nibble + self.wildcard
+    }
+
+    pub fn fixed_bytes(&self) -> usize {
+        self.fixed
+    }
+    pub fn high_nibble_wildcards(&self) -> usize {
+        self.high_nibble
+    }
+    pub fn low_nibble_wildcards(&self) -> usize {
+        self.low_nibble
+    }
+    pub fn full_wildcards(&self) -> usize {
+        self.wildcard
+    }
+    pub fn entropy(&self) -> f64 {
+        self.entropy
+    }
+    pub fn compression_ratio(&self) -> f64 {
+        self.compression_ratio
+    }
+}
+
+/// Analyze multiple AOB instances and generate optimized pattern
+/// Returns the optimized pattern and statistics
+pub fn analyze_aobs(content: &str) -> (Vec<BytePattern>, PatternStats) {
     // Parse AOBs from content
     let aobs = parse_aobs(content);
 
     if aobs.len() < 2 {
-        crate::io::error_exit("Need at least 2 valid AOB instances");
-    }
-
-    if !quiet {
-        if use_colors {
-            println!(
-                "Analyzing {} valid AOB instances:",
-                aobs.len().to_string().green()
-            );
-            for (i, aob) in aobs.iter().enumerate() {
-                println!(
-                    "  [{}] {} bytes",
-                    (i + 1).to_string().cyan(),
-                    aob.bytes.len()
-                );
-            }
-        } else {
-            println!("Analyzing {} valid AOB instances:", aobs.len());
-            for (i, aob) in aobs.iter().enumerate() {
-                println!("  [{}] {} bytes", i + 1, aob.bytes.len());
-            }
-        }
-        println!();
+        panic!("Need at least 2 valid AOB instances");
     }
 
     // Verify all have same length
     let first_len = aobs[0].bytes.len();
     for (i, aob) in aobs.iter().enumerate() {
         if aob.bytes.len() != first_len {
-            crate::io::error_exit(&format!(
+            panic!(
                 "AOB {} has {} bytes, expected {}",
                 i + 1,
                 aob.bytes.len(),
                 first_len
-            ));
+            );
         }
-    }
-
-    if !quiet {
-        if use_colors {
-            println!("All AOBs have {} bytes", first_len.to_string().green());
-        } else {
-            println!("All AOBs have {} bytes", first_len);
-        }
-        println!();
     }
 
     // Analyze byte-by-byte
-    if !quiet {
-        if use_colors {
-            println!("{} Comparing byte-by-byte...", "[1/2]".yellow());
-        } else {
-            println!("[1/2] Comparing byte-by-byte...");
-        }
-    }
     let mut result: Vec<BytePattern> = Vec::with_capacity(first_len);
 
     for byte_idx in 0..first_len {
@@ -139,82 +151,12 @@ pub fn analyze_aobs(
     }
 
     let stats = PatternStats::from_patterns(&result);
-
-    // Print stats
-    if !quiet {
-        if use_colors {
-            println!(
-                "    Fixed bytes: {}",
-                stats.fixed_bytes().to_string().green()
-            );
-            println!(
-                "    High nibble wildcards: {}",
-                stats.high_nibble_wildcards().to_string().yellow()
-            );
-            println!(
-                "    Low nibble wildcards: {}",
-                stats.low_nibble_wildcards().to_string().yellow()
-            );
-            println!(
-                "    Full wildcards: {}",
-                stats.full_wildcards().to_string().red()
-            );
-        } else {
-            println!("    Fixed bytes: {}", stats.fixed_bytes());
-            println!(
-                "    High nibble wildcards: {}",
-                stats.high_nibble_wildcards()
-            );
-            println!("    Low nibble wildcards: {}", stats.low_nibble_wildcards());
-            println!("    Full wildcards: {}", stats.full_wildcards());
-        }
-        println!();
-    }
-
-    // Print detailed stats in verbose mode
-    if verbose {
-        if use_colors {
-            println!(
-                "    Entropy: {:.3} bits",
-                stats.entropy().to_string().cyan()
-            );
-            println!(
-                "    Compression ratio: {:.2}%",
-                (stats.compression_ratio() * 100.0).to_string().green()
-            );
-        } else {
-            println!("    Entropy: {:.3} bits", stats.entropy());
-            println!(
-                "    Compression ratio: {:.2}%",
-                stats.compression_ratio() * 100.0
-            );
-        }
-        println!();
-    }
-
-    // Show diff table (only for CE output or when showing all, and not writing to file, and not quiet)
-    if !quiet
-        && output_file.is_none()
-        && (to_format.is_none() || to_format == Some(Format::CheatEngine))
-    {
-        print_diff_table(&result, &aobs, first_len);
-    }
-
-    // Print results
-    print_analysis_results(
-        &result,
-        &stats,
-        to_format,
-        &aobs,
-        output_file,
-        quiet,
-        verbose,
-    );
+    (result, stats)
 }
 
 /// Parse AOB instances from file content
 /// Supports both raw hex bytes and patterns with wildcards
-fn parse_aobs(content: &str) -> Vec<AobInstance> {
+pub fn parse_aobs(content: &str) -> Vec<AobInstance> {
     let lines: Vec<&str> = content.lines().collect();
     let mut aobs = Vec::new();
 

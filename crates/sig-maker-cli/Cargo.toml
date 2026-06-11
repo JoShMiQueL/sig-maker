@@ -1,0 +1,18 @@
+[package]
+name = "sig-maker-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "sig-maker"
+path = "src/main.rs"
+
+[dependencies]
+sig-maker-core = { path = "../sig-maker-core" }

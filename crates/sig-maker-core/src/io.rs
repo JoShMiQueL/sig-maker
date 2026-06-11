@@ -1,7 +1,7 @@
 //! Input/output operations and content detection
 
-use colored::Colorize;
 use std::fs;
+use std::io::{self, Read};
 use std::path::PathBuf;
 
 /// Input content
@@ -21,14 +21,26 @@ pub enum InputType {
 }
 
 impl Input {
-    /// Read input from file or use as direct input
+    /// Read input from file, stdin, or use as direct input
     pub fn read(source: &str) -> Result<Self, String> {
-        let (content, _source_name) = if PathBuf::from(source).exists() {
+        Self::read_with_stdin(source, false)
+    }
+
+    /// Read input from file, stdin, or use as direct input
+    /// If `use_stdin` is true, reads from stdin when source is "-"
+    pub fn read_with_stdin(source: &str, use_stdin: bool) -> Result<Self, String> {
+        let (content, _source_name) = if use_stdin && source == "-" {
+            let mut buffer = String::new();
+            io::stdin()
+                .read_to_string(&mut buffer)
+                .map_err(|e| format!("Could not read from stdin: {}", e))?;
+            (buffer, "<stdin>".to_string())
+        } else if PathBuf::from(source).exists() {
             let content = fs::read_to_string(source)
                 .map_err(|e| format!("Could not read file '{}': {}", source, e))?;
             (content, source.to_string())
         } else {
-            // Input might be a direct pattern
+            // Input is a direct pattern (not a file)
             (source.to_string(), "<input>".to_string())
         };
 
@@ -62,8 +74,30 @@ impl Input {
             .collect();
 
         if non_empty_lines.len() >= 2 {
-            InputType::MultipleAobs
+            // Multiple lines: check if each line is a separate AOB instance
+            // or if it's a single pattern split across multiple lines
+            let all_lines_look_like_patterns = non_empty_lines.iter().all(|line| {
+                let cleaned = if line.starts_with("- ") || line.starts_with("* ") {
+                    &line[2..]
+                } else {
+                    line
+                };
+                let tokens: Vec<&str> = cleaned.split_whitespace().collect();
+                tokens.len() >= 2
+                    && tokens.iter().all(|t| {
+                        t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit() || c == '?')
+                    })
+            });
+
+            if all_lines_look_like_patterns {
+                InputType::MultipleAobs
+            } else {
+                // Mixed content - treat as single pattern (take first line)
+                InputType::SimplePattern
+            }
         } else if non_empty_lines.len() == 1 {
+            // Single line - always treat as SimplePattern if it looks like a pattern
+            // This handles the case where a single pattern has multiple tokens
             let line = non_empty_lines[0];
             let cleaned = if line.starts_with("- ") || line.starts_with("* ") {
                 &line[2..]
@@ -71,20 +105,27 @@ impl Input {
                 line
             };
 
-            // Check if it looks like a pattern
-            if cleaned.contains('?')
-                || cleaned.contains("0x")
-                || cleaned.contains('[')
-                || cleaned.contains('.')
-            {
+            // Check if it looks like a pattern (wildcards, dots, brackets, or hex bytes)
+            let has_wildcards = cleaned.contains('?') || cleaned.contains('.');
+            let has_brackets = cleaned.contains('[');
+
+            // More lenient hex detection: allow wildcards mixed with hex
+            let tokens: Vec<&str> = cleaned.split_whitespace().collect();
+            let has_hex = tokens.len() >= 2
+                && tokens.iter().all(|t| {
+                    // Allow: "AB" (hex), "A?" (high nibble), "?B" (low nibble), "??" (wildcard)
+                    t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit() || c == '?')
+                });
+
+            if has_wildcards || has_brackets || has_hex {
                 InputType::SimplePattern
             } else {
                 // Doesn't look like a pattern, assume it's meant to be a file
                 InputType::MultipleAobs
             }
         } else {
-            // No valid input
-            InputType::MultipleAobs
+            // No valid input - treat as simple pattern (empty input is valid for some cases)
+            InputType::SimplePattern
         }
     }
 
@@ -122,12 +163,11 @@ impl Input {
             line.to_string()
         };
 
-        Some(cleaned)
+        // Return the cleaned line - let the parser decide if it's valid
+        if cleaned.is_empty() {
+            None
+        } else {
+            Some(cleaned)
+        }
     }
-}
-
-/// Print error and exit
-pub fn error_exit(msg: &str) -> ! {
-    eprintln!("{}: {}", "ERROR".red().bold(), msg);
-    std::process::exit(1);
 }

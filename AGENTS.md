@@ -7,20 +7,20 @@ Project context and rules for AI agents working on this codebase.
 **sig-maker** is a Rust CLI tool for converting and optimizing binary signatures/patterns between multiple formats (Cheat Engine, IDA, Ghidra, x64dbg, C++, Rust, Python, JSON).
 
 - **Language:** Rust (edition 2024, MSRV 1.85)
-- **Build system:** Cargo (no external dependencies for the main crate)
+- **Build system:** Cargo workspace with 2 crates
 - **Repository:** https://github.com/JoShMiQueL/sig-maker
 
 ## Commands
 
 ```bash
-# Build
-cargo build
+# Build workspace
+cargo build --workspace
 
 # Run tests
-cargo test
+cargo test --workspace
 
 # Lint
-cargo clippy -- -D warnings
+cargo clippy --workspace -- -D warnings
 
 # Format check
 cargo fmt -- --check
@@ -28,22 +28,26 @@ cargo fmt -- --check
 # Format fix
 cargo fmt
 
-# Run benchmarks
-cargo bench
-
-# Run the tool
-cargo run -- <input_file> [--to <format>]
+# Run the CLI
+cargo run --bin sig-maker -- <input_file> [--to <format>]
 ```
 
 ## Verification
 
+**IMPORTANT: NEVER commit or push without explicit user confirmation.**
+
 Before considering any change complete, run **all** of these:
 
 ```bash
+# Option 1: Use the pre-commit hook (recommended)
+# The hook runs automatically on commit, but you can also run it manually:
+sh .githooks/pre-commit
+
+# Option 2: Run checks manually
 cargo fmt -- --check
-cargo clippy -- -D warnings
-cargo build
-cargo test
+cargo clippy --workspace -- -D warnings
+cargo build --workspace
+cargo test --workspace
 ```
 
 These are the same checks enforced by the pre-commit hook and CI.
@@ -51,17 +55,28 @@ These are the same checks enforced by the pre-commit hook and CI.
 ## Project Structure
 
 ```
-src/
-├── main.rs        # Entry point, CLI dispatch
-├── lib.rs         # Library re-exports
-├── cli.rs         # Argument parsing, usage display, pause-on-double-click
-├── analyzer.rs    # Multi-AOB analysis (find common pattern from multiple instances)
-├── converter.rs   # Single pattern format conversion
-├── formats.rs     # Pattern parsing, formatting, all format definitions
-├── io.rs          # File I/O, input type detection
-└── output.rs      # Output formatting and display
-benches/
-└── pattern_bench.rs  # Criterion benchmarks
+sig-maker/                    # Cargo workspace
+├── Cargo.toml               # Workspace configuration
+├── crates/
+│   ├── sig-maker-core/      # Core library (zero external dependencies)
+│   │   ├── src/
+│   │   │   ├── lib.rs       # Library interface
+│   │   │   ├── analyzer.rs  # Pattern optimization engine
+│   │   │   ├── converter.rs # Format conversion
+│   │   │   ├── io.rs        # File I/O, format detection
+│   │   │   └── formats/     # Format definitions
+│   │   │       ├── mod.rs
+│   │   │       ├── parser.rs
+│   │   │       └── formatter.rs
+│   │   └── tests/           # Unit tests
+│   └── sig-maker-cli/       # CLI binary
+│       ├── src/
+│       │   ├── main.rs      # CLI entry point
+│       │   ├── cli.rs       # CLI argument parsing
+│       │   ├── converter.rs # Pattern conversion logic
+│       │   └── output.rs    # Output formatting
+│       └── tests/           # Integration tests
+└── .github/workflows/       # CI/CD
 ```
 
 ## Commit Conventions
@@ -150,6 +165,126 @@ cargo-dist builds binaries for: Linux x64/ARM64, macOS x64/ARM64, Windows x64, p
 
 ## Important Notes
 
-- The CLI pauses with "Press Enter to exit..." when launched via double-click on Windows (no terminal). This is intentional — do not remove it.
-- The `GetConsoleProcessList` Windows API is used to detect double-click vs terminal launch.
+- The CLI automatically detects pipe output (TTY detection via `std::io::IsTerminal`)
+- When outputting to a pipe or when `--to <format>` is specified, output is simplified for clean piping
+- On Windows, the CLI pauses with "Press Enter to exit..." when launched via double-click (detected via `GetConsoleProcessList` Windows API)
+- On Unix, the CLI pauses when stdout is not a TTY
 - `dist-workspace.toml` and the release workflow are managed by cargo-dist — do not edit manually. Use `dist init` to reconfigure.
+
+## Devin AI Agent Configuration
+
+This project is configured for optimal use with Devin CLI.
+
+### Configuration Structure
+
+Devin CLI configuration lives in `.devin/` directory:
+
+```
+.devin/
+├── config.json              # Project config (permissions, MCPs, imports) - committed
+├── config.local.json        # Personal overrides (MCP tokens) - gitignored
+├── hooks.v1.json            # Lifecycle hooks (optional) - committed
+├── scripts/                 # Hook support scripts - committed
+│   └── check-git-commit.sh
+└── skills/                  # Project-specific skills - committed
+    ├── verify-before-commit/
+    │   └── SKILL.md
+    ├── debug-pattern/
+    │   └── SKILL.md
+    ├── investigate-code/
+    │   └── SKILL.md
+    └── test-integration/
+        └── SKILL.md
+```
+
+**Setup steps:**
+1. Copy `.devin/config.local.json.example` to `.devin/config.local.json`
+2. Add your API keys for context7 and deepwiki
+3. Run `devin mcp login context7` and `devin mcp login deepwiki` if OAuth is required
+
+### Available Skills
+
+Skills are reusable procedures located in `.devin/skills/<skill-name>/SKILL.md`:
+
+- **`verify-before-commit`** - Run full verification (fmt, clippy, build, test) before committing
+- **`debug-pattern`** - Debug pattern parsing issues with detailed analysis
+- **`investigate-code`** - Read-only code exploration and analysis
+- **`test-integration`** - Run integration tests with detailed output
+
+Invoke skills by mentioning them: `@skills:verify-before-commit` or `@skills:debug-pattern <pattern>`
+
+### Available MCPs
+
+Model Context Protocol servers configured in `.devin/config.json`:
+
+- **context7** - Fetch up-to-date Rust/Cargo documentation
+- **deepwiki** - Access GitHub repository documentation and wiki
+
+**Note:** These MCPs use pnpm for installation. If authentication is required, create `.devin/config.local.json` with your tokens:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "env": {
+        "CONTEXT7_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+Use MCPs by asking Devin to query documentation or access external services.
+
+### Devin Hooks
+
+Lifecycle hooks configured in `.devin/hooks.v1.json`:
+
+- **`SessionStart`** - Runs `.githooks/setup.sh` to ensure git hooks are configured on session start
+- **`PreToolUse`** - Warns before `git commit` commands to remind user to run verification
+
+**Purpose:** Hooks provide automated guidance and reminders during development without being intrusive. They respect the "NEVER commit automatically" rule by only providing warnings, not blocking actions.
+
+**Configuration:** Hooks are defined in `.devin/hooks.v1.json` and use the Devin CLI hook format (compatible with Claude Code hooks).
+
+### Permissions
+
+Pre-approved permissions in `.devin/config.json`:
+- **Allow:** Read all files, git commands, cargo commands, shell scripts
+- **Deny:** sudo, destructive rm -rf, writing to .git/
+- **Ask:** git commit, git push, git reset --hard, git clean -fd, git branch -D, git push --force, git rebase, gh repo delete, gh release delete (requires explicit confirmation)
+
+### Devin CLI Workflow
+
+When using Devin CLI locally:
+
+1. **Start a session** in the project directory
+2. **Invoke skills** for common tasks:
+   - `@skills:verify-before-commit` before committing
+   - `@skills:debug-pattern` when patterns fail to parse
+   - `@skills:investigate-code <topic>` for code exploration
+3. **Use MCPs** for documentation:
+   - "Use context7 to check Rust 1.85 documentation for..."
+   - "Use deepwiki to check the repo's documentation for..."
+4. **Always verify** before committing/pushing (NEVER do this without confirmation)
+
+### Recommended Devin Workflow
+
+1. **Exploration phase:**
+   - Use `@skills:investigate-code` to understand the codebase
+   - Use deepwiki MCP for repo documentation
+   - Use context7 MCP for Rust documentation
+
+2. **Implementation phase:**
+   - Make code changes
+   - Use `@skills:verify-before-commit` to validate
+   - Fix any issues found
+
+3. **Testing phase:**
+   - Use `@skills:test-integration` to run tests
+   - Debug issues with `@skills:debug-pattern` if needed
+
+4. **Commit phase:**
+   - Ask for user confirmation before committing
+   - Use conventional commit format
+   - Verify with pre-commit hook

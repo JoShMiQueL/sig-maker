@@ -40,8 +40,6 @@ The following package managers are planned but not yet available:
 - [ ] Cargo Binstall
 - [ ] AUR (Arch Linux)
 
-See [TODO.md](TODO.md) for progress.
-
 ## Usage
 
 ### Analyze multiple AOB instances
@@ -59,6 +57,11 @@ Run:
 ./sig-maker aobs.txt
 ```
 
+Or pipe multiple AOBs via stdin:
+```bash
+printf "07 00 00 00 01 00 00 00 ED FF FF FF 00\n08 00 00 00 01 00 00 00 EC FF FF FF 00\n09 00 00 00 01 00 00 00 EB FF FF FF 00" | ./sig-maker
+```
+
 Output shows all formats + byte-by-byte diff.
 
 > **Note for Windows users:** If you double-click the `.exe` without arguments, it will show the usage message and wait for you to press Enter before closing. This is intentional to prevent the console from disappearing immediately.
@@ -67,10 +70,16 @@ Output shows all formats + byte-by-byte diff.
 
 ```bash
 # Auto-detect input, show all output formats
+./sig-maker pattern.txt
+
+# Read from stdin
 echo "0? 00 00 00 01 00 00 00 E? FF FF FF 00" | ./sig-maker
 
 # Specific output format
 ./sig-maker pattern.txt --to rust
+
+# Read from stdin with specific format
+echo "0? 00 00" | ./sig-maker --to rust
 ```
 
 ### Format detection
@@ -113,18 +122,42 @@ Example: Values `07`, `08`, `09` → optimized to `0?`
 ## Project Structure
 
 ```
-src/
-├── main.rs        # CLI entry
-├── cli.rs         # Argument parsing
-├── io.rs          # File I/O, format detection
-├── analyzer.rs    # Pattern optimization engine
-├── converter.rs   # Format conversion
-├── output.rs      # Result formatting
-└── formats/       # Format definitions
-    ├── mod.rs     # Format enum, BytePattern
-    ├── parser.rs  # 8 format parsers
-    └── formatter.rs # 8 format formatters
+sig-maker/                    # Cargo workspace
+├── Cargo.toml               # Workspace configuration
+├── crates/
+│   ├── sig-maker-core/      # Core library (zero external dependencies)
+│   │   ├── src/
+│   │   │   ├── lib.rs       # Library interface
+│   │   │   ├── analyzer.rs  # Pattern optimization engine
+│   │   │   ├── converter.rs # Format conversion
+│   │   │   ├── io.rs        # File I/O, format detection
+│   │   │   └── formats/     # Format definitions
+│   │   │       ├── mod.rs
+│   │   │       ├── parser.rs
+│   │   │       └── formatter.rs
+│   │   └── tests/           # Unit tests
+│   └── sig-maker-cli/       # CLI binary
+│       ├── src/
+│       │   ├── main.rs      # CLI entry point
+│       │   ├── cli.rs       # CLI argument parsing
+│       │   ├── converter.rs # Pattern conversion logic
+│       │   └── output.rs    # Output formatting
+│       └── tests/           # Integration tests
+└── .github/workflows/       # CI/CD
 ```
+
+## Architecture
+
+Sig-Maker is organized as a **Cargo workspace** with two crates:
+
+- **sig-maker-core**: Core library containing all pattern analysis and conversion logic (zero external dependencies)
+- **sig-maker-cli**: CLI binary that uses sig-maker-core
+
+This modular architecture enables:
+- Reuse of the core library in other tools (GUI, MCP servers, etc.)
+- Independent versioning and testing
+- Clean separation between CLI and core logic
+- Zero external runtime dependencies
 
 ## Performance
 
@@ -135,7 +168,6 @@ Typical analysis of 4-10 AOB instances completes in <1ms. Pattern parsing and fo
 - [CHANGELOG.md](CHANGELOG.md) — Version history and release notes
 - [AGENTS.md](AGENTS.md) — Project context for AI agents and contributors
 - [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
-- [TODO.md](TODO.md) — Planned features and improvements
 
 ## License
 
