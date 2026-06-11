@@ -12,7 +12,6 @@ env:
 
 jobs:
   test:
-    name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -41,7 +40,7 @@ jobs:
           components: clippy, rustfmt
 
       - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2.9.1
+        uses: Swatinem/rust-cache@v2.10.0
         with:
           key: ${{ matrix.os }}
 
@@ -52,9 +51,6 @@ jobs:
       - name: Run clippy
         run: cargo clippy --workspace -- -D warnings
         if: matrix.os == 'ubuntu-latest'
-
-      - name: Build
-        run: cargo build --workspace --verbose
 
       - name: Run tests
         run: cargo test --workspace --verbose
