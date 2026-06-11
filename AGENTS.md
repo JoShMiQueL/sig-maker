@@ -239,7 +239,6 @@ Use MCPs by asking Devin to query documentation or access external services.
 Pre-approved permissions in `.devin/config.json`:
 - **Allow:** Read all files, git commands, cargo commands, shell scripts
 - **Deny:** sudo, destructive rm -rf, writing to .git/
-- **Ask:** Write operations, pip, pip3
 
 ### Devin CLI Workflow
 
