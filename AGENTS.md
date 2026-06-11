@@ -170,3 +170,108 @@ cargo-dist builds binaries for: Linux x64/ARM64, macOS x64/ARM64, Windows x64, p
 - On Windows, the CLI pauses with "Press Enter to exit..." when launched via double-click (detected via `GetConsoleProcessList` Windows API)
 - On Unix, the CLI pauses when stdout is not a TTY
 - `dist-workspace.toml` and the release workflow are managed by cargo-dist — do not edit manually. Use `dist init` to reconfigure.
+
+## Devin AI Agent Configuration
+
+This project is configured for optimal use with Devin CLI.
+
+### Configuration Structure
+
+Devin CLI configuration lives in `.devin/` directory:
+
+```
+.devin/
+├── config.json              # Project config (permissions, MCPs, imports) - committed
+├── config.local.json        # Personal overrides (MCP tokens) - gitignored
+├── hooks.v1.json            # Lifecycle hooks (optional) - committed
+└── skills/                  # Project-specific skills - committed
+    ├── verify-before-commit/
+    │   └── SKILL.md
+    ├── debug-pattern/
+    │   └── SKILL.md
+    ├── investigate-code/
+    │   └── SKILL.md
+    └── test-integration/
+        └── SKILL.md
+```
+
+**Setup steps:**
+1. Copy `.devin/config.local.json.example` to `.devin/config.local.json`
+2. Add your API keys for context7 and deepwiki
+3. Run `devin mcp login context7` and `devin mcp login deepwiki` if OAuth is required
+
+### Available Skills
+
+Skills are reusable procedures located in `.devin/skills/<skill-name>/SKILL.md`:
+
+- **`verify-before-commit`** - Run full verification (fmt, clippy, build, test) before committing
+- **`debug-pattern`** - Debug pattern parsing issues with detailed analysis
+- **`investigate-code`** - Read-only code exploration and analysis
+- **`test-integration`** - Run integration tests with detailed output
+
+Invoke skills by mentioning them: `@skills:verify-before-commit` or `@skills:debug-pattern <pattern>`
+
+### Available MCPs
+
+Model Context Protocol servers configured in `.devin/config.json`:
+
+- **context7** - Fetch up-to-date Rust/Cargo documentation
+- **deepwiki** - Access GitHub repository documentation and wiki
+
+**Note:** These MCPs use pnpm for installation. If authentication is required, create `.devin/config.local.json` with your tokens:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "env": {
+        "CONTEXT7_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+Use MCPs by asking Devin to query documentation or access external services.
+
+### Permissions
+
+Pre-approved permissions in `.devin/config.json`:
+- **Allow:** Read all files, git commands, cargo commands, shell scripts
+- **Deny:** sudo, destructive rm -rf, writing to .git/
+- **Ask:** Write operations, pnpm, pip, pip3
+
+### Devin CLI Workflow
+
+When using Devin CLI locally:
+
+1. **Start a session** in the project directory
+2. **Invoke skills** for common tasks:
+   - `@skills:verify-before-commit` before committing
+   - `@skills:debug-pattern` when patterns fail to parse
+   - `@skills:investigate-code <topic>` for code exploration
+3. **Use MCPs** for documentation:
+   - "Use context7 to check Rust 1.85 documentation for..."
+   - "Use deepwiki to check the repo's documentation for..."
+4. **Always verify** before committing/pushing (NEVER do this without confirmation)
+
+### Recommended Devin Workflow
+
+1. **Exploration phase:**
+   - Use `@skills:investigate-code` to understand the codebase
+   - Use deepwiki MCP for repo documentation
+   - Use context7 MCP for Rust documentation
+
+2. **Implementation phase:**
+   - Make code changes
+   - Use `@skills:verify-before-commit` to validate
+   - Fix any issues found
+
+3. **Testing phase:**
+   - Use `@skills:test-integration` to run tests
+   - Debug issues with `@skills:debug-pattern` if needed
+
+4. **Commit phase:**
+   - Ask for user confirmation before committing
+   - Use conventional commit format
+   - Verify with pre-commit hook

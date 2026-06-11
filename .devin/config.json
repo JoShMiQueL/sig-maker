@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Exec(git)",
+      "Exec(cargo)",
+      "Exec(sh)"
+    ],
+    "deny": [
+      "Exec(sudo)",
+      "Exec(rm -rf)",
+      "Write(.git/**)"
+    ],
+    "ask": [
+      "Write(**)",
+      "Exec(pnpm)",
+      "Exec(pip)",
+      "Exec(pip3)"
+    ]
+  },
+  "read_config_from": {
+    "cursor": true,
+    "windsurf": true,
+    "claude": true
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "pnpm",
+      "args": ["dlx", "-y", "@context7/context7-mcp"]
+    },
+    "deepwiki": {
+      "command": "pnpm",
+      "args": ["dlx", "-y", "@deepwiki/deepwiki"]
+    }
+  }
+}
