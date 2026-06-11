@@ -13,7 +13,6 @@
     ],
     "ask": [
       "Write(**)",
-      "Exec(pnpm)",
       "Exec(pip)",
       "Exec(pip3)"
     ]
