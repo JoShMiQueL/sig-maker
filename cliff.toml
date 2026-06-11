@@ -17,11 +17,15 @@ body = """
 ### {{ group | striptags | trim | upper_first }}
 
 {% for commit in commits -%}
+{%- set clean_msg = commit.message | upper_first -%}
+{%- if commit.remote.pr_number -%}
+  {%- set pr_pattern = "(#" ~ commit.remote.pr_number ~ ")" -%}
+  {%- set clean_msg = clean_msg | replace(from=pr_pattern, to="") | trim_end -%}
+{%- endif -%}
 - {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
-{{ commit.message | upper_first }}\
-{% if commit.remote.username %} by [@{{ commit.remote.username }}](https://github.com/{{ commit.remote.username }}){% endif %}\
-{% if commit.remote.pr_number %} PR[#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %} \
-([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))
+{{ clean_msg }}\
+{% if commit.remote.pr_number %} ([#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }})){% endif %}\
+{% if commit.remote.username %} by [@{{ commit.remote.username }}](https://github.com/{{ commit.remote.username }}){% endif %}
 {% endfor %}
 {% endfor -%}
 
@@ -68,7 +72,7 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_parsers = [
-    # Skip bot/automated commits
+    # Skip automated/bot commits
     { message = "^docs: update CHANGELOG", skip = true },
     { message = "^chore\\(release\\)", skip = true },
     { message = "^chore\\(deps\\)", skip = true },
@@ -76,11 +80,8 @@ commit_parsers = [
     { message = "^Merge pull request", skip = true },
     { author = ".*\\[bot\\]", skip = true },
     { author = "dependabot", skip = true },
-    # Skip commits about internal tooling (changelog setup, TODO, Devin config)
+    # Skip changelog-related commits (always internal)
     { message = "(?i)\\(changelog\\)", skip = true },
-    { message = "(?i)^[a-z]+[^:]*: .*\\b(changelog|git-cliff|cliff\\.toml|GH_PAT|ADMIN_TOKEN)\\b", skip = true },
-    { message = "TODO\\.md", skip = true },
-    { message = "(?i)^(feat|fix|ci|docs|chore|refactor): .*(devin|mcp|act config|githook|\\.githook)", skip = true },
     # Group rules
     { message = "(?i)^feat", group = "Features" },
     { message = "(?i)^fix", group = "Bug Fixes" },
