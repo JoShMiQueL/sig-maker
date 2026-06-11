@@ -87,10 +87,14 @@ impl Input {
             // Check if it looks like a pattern (wildcards, dots, brackets, or hex bytes)
             let has_wildcards = cleaned.contains('?') || cleaned.contains('.');
             let has_brackets = cleaned.contains('[');
-            let has_hex = cleaned.split_whitespace().count() >= 2
-                && cleaned
-                    .split_whitespace()
-                    .all(|t| t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit()));
+
+            // More lenient hex detection: allow wildcards mixed with hex
+            let tokens: Vec<&str> = cleaned.split_whitespace().collect();
+            let has_hex = tokens.len() >= 2
+                && tokens.iter().all(|t| {
+                    // Allow: "AB" (hex), "A?" (high nibble), "?B" (low nibble), "??" (wildcard)
+                    t.len() == 2 && t.chars().all(|c| c.is_ascii_hexdigit() || c == '?')
+                });
 
             if has_wildcards || has_brackets || has_hex {
                 InputType::SimplePattern
