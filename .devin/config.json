@@ -8,8 +8,20 @@
     ],
     "deny": [
       "Exec(sudo)",
-      "Exec(rm -rf)",
       "Write(.git/**)"
+    ],
+    "ask": [
+      "Exec(git commit)",
+      "Exec(git push)",
+      "Exec(git reset --hard)",
+      "Exec(git clean -fd)",
+      "Exec(git branch -D)",
+      "Exec(git push --force)",
+      "Exec(git rebase)",
+      "Exec(gh repo delete)",
+      "Exec(gh release delete)",
+	  "Exec(rm)",
+	  
     ]
   },
   "read_config_from": {
@@ -19,12 +31,12 @@
   },
   "mcpServers": {
     "context7": {
-      "command": "pnpm",
-      "args": ["dlx", "-y", "@context7/context7-mcp"]
+      "url": "https://mcp.context7.com/mcp",
+      "transport": "http"
     },
     "deepwiki": {
-      "command": "pnpm",
-      "args": ["dlx", "-y", "@deepwiki/deepwiki"]
+      "url": "https://mcp.deepwiki.com/mcp",
+      "transport": "http"
     }
   }
 }
