@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sig-Maker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="header__title">Sig-Maker</h1>
+      <p class="header__subtitle">Multi-format signature / pattern converter</p>
+    </header>
+
+    <main class="main">
+
+      <!-- Input section -->
+      <section class="card" id="drop-zone">
+        <label class="label" for="input-pattern">Input pattern</label>
+        <p class="hint">
+          Accepts Cheat Engine, IDA Pro, x64dbg, Ghidra, C++, Rust, Python or JSON.
+          You can also <strong>drag &amp; drop</strong> a file here.
+        </p>
+        <textarea
+          id="input-pattern"
+          class="textarea"
+          rows="5"
+          placeholder="e.g.  48 8B 05 ?? ?? ?? ?? 48 85 C0"
+          spellcheck="false"
+        ></textarea>
+        <div id="drop-overlay" class="drop-overlay" hidden>
+          <span>Drop file here</span>
+        </div>
+      </section>
+
+      <!-- Controls -->
+      <section class="card controls">
+        <label class="label">Output formats</label>
+        <div id="format-toggles" class="format-toggles">
+          <span>Loading formats…</span>
+        </div>
+      </section>
+
+      <!-- Output section -->
+      <div id="outputs-container"></div>
+
+      <!-- Error banner -->
+      <div id="error-banner" class="error-banner" hidden></div>
+
+    </main>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

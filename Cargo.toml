@@ -2,6 +2,7 @@
 members = [
     "crates/sig-maker-core",
     "crates/sig-maker-cli",
+    "crates/sig-maker-gui",
 ]
 resolver = "2"
 
