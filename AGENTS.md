@@ -183,9 +183,6 @@ Devin CLI configuration lives in `.devin/` directory:
 .devin/
 ├── config.json              # Project config (permissions, MCPs, imports) - committed
 ├── config.local.json        # Personal overrides (MCP tokens) - gitignored
-├── hooks.v1.json            # Lifecycle hooks (optional) - committed
-├── scripts/                 # Hook support scripts - committed
-│   └── check-git-commit.sh
 └── skills/                  # Project-specific skills - committed
     ├── verify-before-commit/
     │   └── SKILL.md
@@ -235,17 +232,6 @@ Model Context Protocol servers configured in `.devin/config.json`:
 ```
 
 Use MCPs by asking Devin to query documentation or access external services.
-
-### Devin Hooks
-
-Lifecycle hooks configured in `.devin/hooks.v1.json`:
-
-- **`SessionStart`** - Runs `.githooks/setup.sh` to ensure git hooks are configured on session start
-- **`PreToolUse`** - Warns before `git commit` commands to remind user to run verification
-
-**Purpose:** Hooks provide automated guidance and reminders during development without being intrusive. They respect the "NEVER commit automatically" rule by only providing warnings, not blocking actions.
-
-**Configuration:** Hooks are defined in `.devin/hooks.v1.json` and use the Devin CLI hook format (compatible with Claude Code hooks).
 
 ### Permissions
 
