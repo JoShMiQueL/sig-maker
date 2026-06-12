@@ -58,6 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - upgrade actions/cache to v6 in release workflow by [@JoShMiQueL](https://github.com/JoShMiQueL) ([969d752](https://github.com/JoShMiQueL/sig-maker/commit/969d752156e5a1e84e29a0fd45ef8596a7dc31d8))
 
+
+- revert actions/cache to v4 (v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([bd7a2f7](https://github.com/JoShMiQueL/sig-maker/commit/bd7a2f7c74942cf972bac3bbdc0e86bfb03f7dfe))
+
 ### Documentation
 
 
