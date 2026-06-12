@@ -201,22 +201,22 @@ jobs:
         run: npm run build
 
       - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "2.11.2" --locked
+        run: npm install -g @tauri-apps/cli@2
 
       - name: Build GUI (Windows - NSIS + Portable)
         if: matrix.os == 'windows-2025-vs2026'
         working-directory: crates/sig-maker-gui
-        run: cargo tauri build
+        run: tauri build
 
       - name: Build GUI (Linux - AppImage)
         if: matrix.os == 'ubuntu-latest'
         working-directory: crates/sig-maker-gui
-        run: cargo tauri build --bundles appimage
+        run: tauri build --bundles appimage
 
       - name: Build GUI (macOS - Universal DMG)
         if: matrix.os == 'macos-latest'
         working-directory: crates/sig-maker-gui
-        run: cargo tauri build --target universal-apple-darwin --bundles dmg
+        run: tauri build --target universal-apple-darwin --bundles dmg
 
       - name: Upload GUI artifacts (Windows)
         if: matrix.os == 'windows-2025-vs2026'
