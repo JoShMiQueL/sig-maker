@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **release:** wait for CI to pass before releasing by [@JoShMiQueL](https://github.com/JoShMiQueL) ([3ba72b7](https://github.com/JoShMiQueL/sig-maker/commit/3ba72b71fec205984475378ee7b566384b4d6adf))
 
 
+- **release:** auto-bump Cargo.toml and tauri.conf.json from tag version by [@JoShMiQueL](https://github.com/JoShMiQueL) ([b8e3f9f](https://github.com/JoShMiQueL/sig-maker/commit/b8e3f9fa8c9ba17d021869893ec7e131018f508e))
+
+
 
 
 ### Contributors
