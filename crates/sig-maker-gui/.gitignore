@@ -13,5 +13,4 @@ frontend/node_modules/
 # Node lockfile (optional, but recommended)
 frontend/package-lock.json
 
-# Generated icon (re-generatable)
-icons/icon.ico
+# Icons are committed (generated via `cargo tauri icon icons/icon.png`)
