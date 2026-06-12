@@ -127,28 +127,23 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Mutex, MutexGuard};
 
-    fn setup_test_env() {
+    // Serialize all tests that mutate env vars to prevent race conditions
+    static ENV_MUTEX: Mutex<()> = Mutex::new(());
+
+    fn setup_test_env() -> MutexGuard<'static, ()> {
+        let guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             std::env::set_var("SIG_MAKER_TEST", "1");
-        }
-        unsafe {
             std::env::set_var("SIG_MAKER_NO_PAUSE", "1");
         }
-    }
-
-    fn teardown_test_env() {
-        unsafe {
-            std::env::remove_var("SIG_MAKER_TEST");
-        }
-        unsafe {
-            std::env::remove_var("SIG_MAKER_NO_PAUSE");
-        }
+        guard
     }
 
     #[test]
     fn process_input_simple_pattern() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "AB ?? CD ?? EF".to_string(),
             to_format: Some(formats::Format::CheatEngine),
@@ -157,15 +152,12 @@ mod tests {
             quiet: true,
             check_only: false,
         };
-
-        let result = process_input(&config);
-        teardown_test_env();
-        assert!(result.is_ok());
+        assert!(process_input(&config).is_ok());
     }
 
     #[test]
     fn process_input_check_only_valid() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "AB ?? CD ?? EF".to_string(),
             to_format: None,
@@ -174,15 +166,12 @@ mod tests {
             quiet: true,
             check_only: true,
         };
-
-        let result = process_input(&config);
-        teardown_test_env();
-        assert!(result.is_ok());
+        assert!(process_input(&config).is_ok());
     }
 
     #[test]
     fn process_input_check_only_invalid() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "invalid pattern".to_string(),
             to_format: None,
@@ -191,16 +180,14 @@ mod tests {
             quiet: true,
             check_only: true,
         };
-
         let result = process_input(&config);
-        teardown_test_env();
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("invalid"));
     }
 
     #[test]
     fn process_input_with_format() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "AB ?? CD".to_string(),
             to_format: Some(formats::Format::Rust),
@@ -209,15 +196,12 @@ mod tests {
             quiet: true,
             check_only: false,
         };
-
-        let result = process_input(&config);
-        teardown_test_env();
-        assert!(result.is_ok());
+        assert!(process_input(&config).is_ok());
     }
 
     #[test]
     fn process_input_verbose() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "AB ?? CD ?? EF".to_string(),
             to_format: Some(formats::Format::CheatEngine),
@@ -226,15 +210,12 @@ mod tests {
             quiet: false,
             check_only: false,
         };
-
-        let result = process_input(&config);
-        teardown_test_env();
-        assert!(result.is_ok());
+        assert!(process_input(&config).is_ok());
     }
 
     #[test]
     fn process_input_quiet() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "AB ?? CD ?? EF".to_string(),
             to_format: Some(formats::Format::CheatEngine),
@@ -243,15 +224,12 @@ mod tests {
             quiet: true,
             check_only: false,
         };
-
-        let result = process_input(&config);
-        teardown_test_env();
-        assert!(result.is_ok());
+        assert!(process_input(&config).is_ok());
     }
 
     #[test]
     fn process_input_empty() {
-        setup_test_env();
+        let _guard = setup_test_env();
         let config = cli::Config {
             input_file: "".to_string(),
             to_format: None,
@@ -260,10 +238,7 @@ mod tests {
             quiet: true,
             check_only: false,
         };
-
-        let result = process_input(&config);
-        teardown_test_env();
         // In test mode, empty input returns Ok() instead of exiting
-        assert!(result.is_ok());
+        assert!(process_input(&config).is_ok());
     }
 }
