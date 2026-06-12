@@ -21,6 +21,10 @@ tauri-build = { version = "=2.5.1", features = [] }
 
 [dependencies]
 sig-maker-core = { path = "../sig-maker-core" }
-tauri = { version = "^2.1", features = [] }
+# Pinned to 2.9.2: tauri 2.10+ pulls tauri-utils 2.9.x which has an E0119
+# coherence bug with rustc 1.96.0. tauri 2.9.2 uses tauri-utils 2.8.0 which
+# is unaffected. Re-pin to latest once tauri-utils is fixed.
+# Track: https://github.com/tauri-apps/tauri/issues/15525
+tauri = { version = "=2.9.2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
