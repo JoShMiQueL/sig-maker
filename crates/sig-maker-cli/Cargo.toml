@@ -11,7 +11,7 @@ categories.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "sig-maker"
+name = "sig-maker-cli"
 path = "src/main.rs"
 
 [dependencies]

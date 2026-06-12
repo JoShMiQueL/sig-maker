@@ -180,3 +180,379 @@ fn format_json(pattern: &[BytePattern]) -> String {
         pattern.len()
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_pattern_cheat_engine() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::CheatEngine);
+        assert_eq!(result, "AB ?? C? ?D");
+    }
+
+    #[test]
+    fn format_pattern_cpp() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::Cpp);
+        assert!(result.contains("const uint8_t pattern[]"));
+        assert!(result.contains("0xAB"));
+        assert!(result.contains("0x00"));
+        assert!(result.contains("0xC0"));
+        assert!(result.contains("0x0D"));
+        assert!(result.contains("const uint8_t mask[]"));
+    }
+
+    #[test]
+    fn format_pattern_rust() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::Rust);
+        assert!(result.contains("static PATTERN: [u8; 4]"));
+        assert!(result.contains("0xAB"));
+        assert!(result.contains("0x00"));
+        assert!(result.contains("0xC0"));
+        assert!(result.contains("0x0D"));
+        assert!(result.contains("static MASK: [u8; 4]"));
+    }
+
+    #[test]
+    fn format_pattern_ghidra() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::Ghidra);
+        assert!(result.contains("AB"));
+        assert!(result.contains("."));
+        assert!(result.contains("[C0-CF]"));
+        assert!(result.contains("[0D"));
+    }
+
+    #[test]
+    fn format_pattern_ida_pro() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::IdaPro);
+        assert!(result.contains("AB"));
+        assert!(result.contains("[0-F0]"));
+        assert!(result.contains("[C0-CF]"));
+        assert!(result.contains("[0D"));
+    }
+
+    #[test]
+    fn format_pattern_x64dbg() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::X64dbg);
+        assert_eq!(result, "AB .. C. .D");
+    }
+
+    #[test]
+    fn format_pattern_python() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::Python);
+        assert!(result.contains("import re"));
+        assert!(result.contains("pattern = re.compile"));
+        assert!(result.contains("\\xAB"));
+        assert!(result.contains("."));
+        assert!(result.contains("[\\xC0-\\xCF]"));
+        assert!(result.contains("[\\x0D"));
+    }
+
+    #[test]
+    fn format_pattern_json() {
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::HighNibble(0xC),
+            BytePattern::LowNibble(0xD),
+        ];
+        let result = format_pattern(&pattern, Format::Json);
+        assert!(result.contains("\"pattern\""));
+        assert!(result.contains("\"mask\""));
+        assert!(result.contains("\"length\""));
+        assert!(result.contains("4"));
+    }
+
+    #[test]
+    fn format_cheat_engine_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_cheat_engine(&pattern);
+        assert_eq!(result, "AB CD");
+    }
+
+    #[test]
+    fn format_cheat_engine_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_cheat_engine(&pattern);
+        assert_eq!(result, "?? ??");
+    }
+
+    #[test]
+    fn format_cheat_engine_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_cheat_engine(&pattern);
+        assert_eq!(result, "A? C?");
+    }
+
+    #[test]
+    fn format_cheat_engine_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_cheat_engine(&pattern);
+        assert_eq!(result, "?B ?D");
+    }
+
+    #[test]
+    fn format_cheat_engine_empty() {
+        let pattern = vec![];
+        let result = format_cheat_engine(&pattern);
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn format_cpp_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_cpp(&pattern);
+        assert!(result.contains("0xAB, 0xCD"));
+        assert!(result.contains("0xFF, 0xFF"));
+    }
+
+    #[test]
+    fn format_cpp_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_cpp(&pattern);
+        assert!(result.contains("0x00, 0x00"));
+        assert!(result.contains("0x00, 0x00"));
+    }
+
+    #[test]
+    fn format_cpp_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_cpp(&pattern);
+        assert!(result.contains("0xA0, 0xC0"));
+        assert!(result.contains("0xF0, 0xF0"));
+    }
+
+    #[test]
+    fn format_cpp_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_cpp(&pattern);
+        assert!(result.contains("0x0B, 0x0D"));
+        assert!(result.contains("0x0F, 0x0F"));
+    }
+
+    #[test]
+    fn format_rust_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_rust(&pattern);
+        assert!(result.contains("static PATTERN: [u8; 2]"));
+        assert!(result.contains("0xAB, 0xCD"));
+        assert!(result.contains("static MASK: [u8; 2]"));
+        assert!(result.contains("0xFF, 0xFF"));
+    }
+
+    #[test]
+    fn format_rust_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_rust(&pattern);
+        assert!(result.contains("0x00, 0x00"));
+        assert!(result.contains("0x00, 0x00"));
+    }
+
+    #[test]
+    fn format_rust_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_rust(&pattern);
+        assert!(result.contains("0xA0, 0xC0"));
+        assert!(result.contains("0xF0, 0xF0"));
+    }
+
+    #[test]
+    fn format_rust_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_rust(&pattern);
+        assert!(result.contains("0x0B, 0x0D"));
+        assert!(result.contains("0x0F, 0x0F"));
+    }
+
+    #[test]
+    fn format_ghidra_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_ghidra(&pattern);
+        assert_eq!(result, "AB CD");
+    }
+
+    #[test]
+    fn format_ghidra_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_ghidra(&pattern);
+        assert_eq!(result, ". .");
+    }
+
+    #[test]
+    fn format_ghidra_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_ghidra(&pattern);
+        assert_eq!(result, "[A0-AF] [C0-CF]");
+    }
+
+    #[test]
+    fn format_ghidra_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_ghidra(&pattern);
+        assert!(result.contains("[0B"));
+        assert!(result.contains("[0D"));
+    }
+
+    #[test]
+    fn format_ida_pro_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_ida_pro(&pattern);
+        assert_eq!(result, "AB CD");
+    }
+
+    #[test]
+    fn format_ida_pro_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_ida_pro(&pattern);
+        assert_eq!(result, "[0-F0] [0-F0]");
+    }
+
+    #[test]
+    fn format_ida_pro_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_ida_pro(&pattern);
+        assert_eq!(result, "[A0-AF] [C0-CF]");
+    }
+
+    #[test]
+    fn format_ida_pro_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_ida_pro(&pattern);
+        assert!(result.contains("[0B"));
+        assert!(result.contains("[0D"));
+    }
+
+    #[test]
+    fn format_x64dbg_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_x64dbg(&pattern);
+        assert_eq!(result, "AB CD");
+    }
+
+    #[test]
+    fn format_x64dbg_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_x64dbg(&pattern);
+        assert_eq!(result, ".. ..");
+    }
+
+    #[test]
+    fn format_x64dbg_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_x64dbg(&pattern);
+        assert_eq!(result, "A. C.");
+    }
+
+    #[test]
+    fn format_x64dbg_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_x64dbg(&pattern);
+        assert_eq!(result, ".B .D");
+    }
+
+    #[test]
+    fn format_python_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_python(&pattern);
+        assert!(result.contains("\\xAB"));
+        assert!(result.contains("\\xCD"));
+    }
+
+    #[test]
+    fn format_python_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_python(&pattern);
+        assert!(result.contains(".."));
+    }
+
+    #[test]
+    fn format_python_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_python(&pattern);
+        assert!(result.contains("[\\xA0-\\xAF]"));
+        assert!(result.contains("[\\xC0-\\xCF]"));
+    }
+
+    #[test]
+    fn format_python_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_python(&pattern);
+        assert!(result.contains("[\\x0B"));
+        assert!(result.contains("[\\x0D"));
+    }
+
+    #[test]
+    fn format_json_fixed() {
+        let pattern = vec![BytePattern::Fixed(0xAB), BytePattern::Fixed(0xCD)];
+        let result = format_json(&pattern);
+        assert!(result.contains("[171, 205]"));
+        assert!(result.contains("[255, 255]"));
+        assert!(result.contains("\"length\": 2"));
+    }
+
+    #[test]
+    fn format_json_wildcard() {
+        let pattern = vec![BytePattern::Wildcard, BytePattern::Wildcard];
+        let result = format_json(&pattern);
+        assert!(result.contains("[0, 0]"));
+        assert!(result.contains("[0, 0]"));
+    }
+
+    #[test]
+    fn format_json_high_nibble() {
+        let pattern = vec![BytePattern::HighNibble(0xA), BytePattern::HighNibble(0xC)];
+        let result = format_json(&pattern);
+        assert!(result.contains("[160, 192]"));
+        assert!(result.contains("[240, 240]"));
+    }
+
+    #[test]
+    fn format_json_low_nibble() {
+        let pattern = vec![BytePattern::LowNibble(0xB), BytePattern::LowNibble(0xD)];
+        let result = format_json(&pattern);
+        assert!(result.contains("[11, 13]"));
+        assert!(result.contains("[15, 15]"));
+    }
+}

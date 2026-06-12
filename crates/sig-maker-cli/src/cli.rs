@@ -4,6 +4,7 @@ use sig_maker_core::formats::Format;
 use std::io::IsTerminal;
 
 /// CLI configuration
+#[derive(Debug, Clone)]
 pub struct Config {
     pub input_file: String,
     pub to_format: Option<Format>, // None = show all formats
@@ -224,4 +225,86 @@ fn print_usage() {
     println!("  sig-maker pattern.txt -v            # Verbose with stats");
     println!("  echo '0? 00 00' | sig-maker         # Read from stdin");
     println!("  sig-maker -                         # Read from stdin (pipe)");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn config_from_string_simple() {
+        // Test with custom args (we'll need to refactor Config::parse to accept args)
+        // For now, just test the struct fields
+        let config = Config {
+            input_file: "test.txt".to_string(),
+            to_format: Some(Format::CheatEngine),
+            output_file: Some("output.txt".to_string()),
+            verbose: true,
+            quiet: false,
+            check_only: false,
+        };
+
+        assert_eq!(config.input_file, "test.txt");
+        assert_eq!(config.to_format, Some(Format::CheatEngine));
+        assert_eq!(config.output_file, Some("output.txt".to_string()));
+        assert!(config.verbose);
+        assert!(!config.quiet);
+        assert!(!config.check_only);
+    }
+
+    #[test]
+    fn config_from_string_all_options() {
+        let config = Config {
+            input_file: "-".to_string(),
+            to_format: Some(Format::Rust),
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: true,
+        };
+
+        assert_eq!(config.input_file, "-");
+        assert_eq!(config.to_format, Some(Format::Rust));
+        assert!(config.output_file.is_none());
+        assert!(!config.verbose);
+        assert!(config.quiet);
+        assert!(config.check_only);
+    }
+
+    #[test]
+    fn pause_if_no_terminal_with_env_var() {
+        // Set environment variable to skip pause
+        unsafe {
+            std::env::set_var("SIG_MAKER_NO_PAUSE", "1");
+        }
+        pause_if_no_terminal(); // Should not panic or hang
+        unsafe {
+            std::env::remove_var("SIG_MAKER_NO_PAUSE");
+        }
+    }
+
+    #[test]
+    fn format_variants() {
+        assert_eq!(Format::from_string("ce"), Some(Format::CheatEngine));
+        assert_eq!(Format::from_string("cpp"), Some(Format::Cpp));
+        assert_eq!(Format::from_string("rust"), Some(Format::Rust));
+        assert_eq!(Format::from_string("ghidra"), Some(Format::Ghidra));
+        assert_eq!(Format::from_string("ida"), Some(Format::IdaPro));
+        assert_eq!(Format::from_string("x64dbg"), Some(Format::X64dbg));
+        assert_eq!(Format::from_string("python"), Some(Format::Python));
+        assert_eq!(Format::from_string("json"), Some(Format::Json));
+        assert_eq!(Format::from_string("invalid"), None);
+    }
+
+    #[test]
+    fn format_name() {
+        assert_eq!(Format::CheatEngine.name(), "Cheat Engine");
+        assert_eq!(Format::Cpp.name(), "C++");
+        assert_eq!(Format::Rust.name(), "Rust");
+        assert_eq!(Format::Ghidra.name(), "Ghidra");
+        assert_eq!(Format::IdaPro.name(), "IDA Pro");
+        assert_eq!(Format::X64dbg.name(), "x64dbg");
+        assert_eq!(Format::Python.name(), "Python");
+        assert_eq!(Format::Json.name(), "JSON");
+    }
 }

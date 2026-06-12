@@ -7,7 +7,7 @@ Project context and rules for AI agents working on this codebase.
 **sig-maker** is a Rust CLI tool for converting and optimizing binary signatures/patterns between multiple formats (Cheat Engine, IDA, Ghidra, x64dbg, C++, Rust, Python, JSON).
 
 - **Language:** Rust (edition 2024, MSRV 1.85)
-- **Build system:** Cargo workspace with 2 crates
+- **Build system:** Cargo workspace with 3 crates
 - **Repository:** https://github.com/JoShMiQueL/sig-maker
 
 ## Commands
@@ -15,6 +15,13 @@ Project context and rules for AI agents working on this codebase.
 ```bash
 # Build workspace
 cargo build --workspace
+
+# Build specific binaries
+cargo build --bin sig-maker-cli
+cargo build --bin sig-maker-gui
+
+# Build in release mode
+cargo build --workspace --release
 
 # Run tests
 cargo test --workspace
@@ -29,7 +36,38 @@ cargo fmt -- --check
 cargo fmt
 
 # Run the CLI
-cargo run --bin sig-maker -- <input_file> [--to <format>]
+cargo run --bin sig-maker-cli -- <input_file> [--to <format>]
+
+# GUI development (Playwright MCP access)
+.\scripts\dev.bat      # Windows
+./scripts/dev.sh       # Linux/macOS
+
+# GUI production build
+.\scripts\build.bat    # Windows
+./scripts/build.sh     # Linux/macOS
+```
+
+## GUI Development
+
+**IMPORTANT:** GUI development uses the dev server feature. Never use dev mode for production GUI builds - always use release mode.
+
+### GUI Development Workflow
+
+**Development (browser + Playwright MCP):**
+```bash
+.\scripts\dev.bat      # Windows
+./scripts/dev.sh       # Linux/macOS
+```
+
+The dev server:
+- Serves the compiled frontend at http://localhost:7331
+- Exposes `GET /api/formats` and `POST /api/convert` backed by sig-maker-core
+- Allows Playwright MCP to automate the GUI from the browser
+
+**Production:**
+```bash
+.\scripts\build.bat    # Windows
+./scripts/build.sh     # Linux/macOS
 ```
 
 ## Verification
@@ -39,18 +77,29 @@ cargo run --bin sig-maker -- <input_file> [--to <format>]
 Before considering any change complete, run **all** of these:
 
 ```bash
-# Option 1: Use the pre-commit hook (recommended)
-# The hook runs automatically on commit, but you can also run it manually:
-sh .githooks/pre-commit
-
-# Option 2: Run checks manually
 cargo fmt -- --check
 cargo clippy --workspace -- -D warnings
 cargo build --workspace
 cargo test --workspace
 ```
 
-These are the same checks enforced by the pre-commit hook and CI.
+These are the same checks enforced by CI.
+
+### Git Hooks
+
+Pre-commit and commit-msg hooks are configured to enforce quality:
+
+**pre-commit hook:**
+- Runs `cargo fmt -- --check`
+- Runs `cargo clippy --workspace -- -D warnings`
+- Runs `cargo build --workspace`
+- Runs `cargo test --workspace`
+
+**commit-msg hook:**
+- Enforces Conventional Commits format
+- Validates against regex: `^(feat|fix|docs|style|refactor|perf|test|ci|chore|build|revert)(\(.+\))?: .{1,}$`
+
+To skip hooks (not recommended): `git commit --no-verify`
 
 ## Project Structure
 
@@ -69,13 +118,25 @@ sig-maker/                    # Cargo workspace
 │   │   │       ├── parser.rs
 │   │   │       └── formatter.rs
 │   │   └── tests/           # Unit tests
-│   └── sig-maker-cli/       # CLI binary
+│   ├── sig-maker-cli/       # CLI binary
+│   │   ├── src/
+│   │   │   ├── main.rs      # CLI entry point
+│   │   │   ├── cli.rs       # CLI argument parsing
+│   │   │   ├── converter.rs # Pattern conversion logic
+│   │   │   └── output.rs    # Output formatting
+│   │   └── tests/           # Integration tests
+│   └── sig-maker-gui/       # GUI binary (Tauri + Astro)
 │       ├── src/
-│       │   ├── main.rs      # CLI entry point
-│       │   ├── cli.rs       # CLI argument parsing
-│       │   ├── converter.rs # Pattern conversion logic
-│       │   └── output.rs    # Output formatting
-│       └── tests/           # Integration tests
+│       │   ├── main.rs      # Tauri entry point
+│       │   ├── commands.rs  # Tauri commands
+│       │   └── http_server.rs # HTTP dev server (feature: dev-server)
+│       ├── frontend/         # Astro frontend
+│       │   ├── src/
+│       │   │   ├── pages/
+│       │   │   ├── scripts/
+│       │   │   └── styles/
+│       │   └── package.json
+│       └── tauri.conf.json  # Tauri configuration
 └── .github/workflows/       # CI/CD
 ```
 
@@ -98,19 +159,6 @@ ci: upgrade actions to v6
 chore!: bump MSRV to 1.85
 ```
 
-A `commit-msg` git hook validates this format. Non-conforming messages will be rejected.
-
-## Git Hooks
-
-Located in `.githooks/`. Activate with:
-
-```bash
-sh .githooks/setup.sh
-```
-
-**pre-commit:** runs `cargo fmt --check`, `cargo clippy`, `cargo build`, `cargo test`
-**commit-msg:** validates Conventional Commits format
-
 ## Branch Protection
 
 - `main` is protected: PRs required with CI passing (`build` check)
@@ -129,30 +177,97 @@ sh .githooks/setup.sh
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `ci.yml` | Push/PR to main | Tests on Linux, Windows, macOS + clippy + fmt |
-| `changelog.yml` | Push to main | Auto-generates `CHANGELOG.md` via git-cliff |
-| `release.yml` | Tag `v*` | Builds multi-platform binaries via cargo-dist |
+| `ci.yml` | Push/PR to main | Format check, clippy, tests, build on Linux |
 
-### Releases (cargo-dist)
+### CI Jobs
 
-Releases are automated with `cargo-dist`. To release:
+The CI workflow has two jobs:
 
-1. Bump version in `Cargo.toml`
+**`test`** (fast, no system dependencies):
+- Cache Rust dependencies (Swatinem/rust-cache)
+- Format check (cargo fmt -- --check)
+- Clippy on core (cargo clippy --package sig-maker-core -- -D warnings)
+- Tests on core (cargo test --package sig-maker-core --verbose)
+- Build core (cargo build --package sig-maker-core)
+- Build CLI (cargo build --package sig-maker-cli)
+
+**`test-gui`** (requires system dependencies):
+- Install system dependencies (libdbus, webkit, gtk, etc.)
+- Cache Rust dependencies (Swatinem/rust-cache)
+- Build GUI (cargo build --package sig-maker-gui)
+
+### Testing CI Locally with act
+
+To test GitHub Actions workflows locally using `act`:
+
+```bash
+# Install act (Linux/macOS)
+curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
+
+# Install act (Windows with Chocolatey - requires admin)
+choco install act-cli
+
+# Or download binary directly (Windows)
+# Download from: https://github.com/nektos/act/releases/latest/download/act_windows_amd64.exe
+
+# Test main job (fast, no system dependencies)
+act -W .github/workflows/ci.yml -j test
+
+# Test GUI job (slow, requires system dependencies)
+act -W .github/workflows/ci.yml -j test-gui
+
+# Test all jobs
+act -W .github/workflows/ci.yml
+
+# Dry run (don't execute)
+act -n -W .github/workflows/ci.yml
+```
+
+**Note:** For faster local testing, test individual commands locally instead of running the full CI with act. The GUI job requires heavy system dependencies and is slow to run with act.
+
+### Releases
+
+Releases are **fully automated** via GitHub Actions. To release:
+
+1. Bump version in `Cargo.toml` (workspace.package.version)
 2. Commit: `chore(release): v0.x.x`
-3. Tag: `git tag v0.x.x`
+3. Tag: `git tag v0.x.x` (optional: sign with GPG: `git tag -s v0.x.x`)
 4. Push: `git push && git push --tags`
 
-cargo-dist builds binaries for: Linux x64/ARM64, macOS x64/ARM64, Windows x64, plus shell and PowerShell installers.
+The `.github/workflows/release.yml` workflow will automatically:
+- Validate tag format and version match
+- Build CLI for 5 platforms (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
+- Build GUI for 3 platforms (Linux AppImage, macOS Universal, Windows NSIS + Portable)
+- Generate changelog via git-cliff
+- Create GitHub Release with all artifacts
+- Generate SHA-256 checksums
+- Create SLSA build provenance attestations
+- Commit updated CHANGELOG.md
 
-### Changelog (git-cliff)
+**Note:** fmt, clippy, and tests are NOT re-run in release workflow. These are validated by the existing CI workflow (`.github/workflows/ci.yml`) on every push/PR. Only tag validation is performed in release workflow.
 
-`CHANGELOG.md` is auto-generated on every push to main. Configuration in `cliff.toml`.
+**Artifacts Generated:**
+- CLI: 5 binaries (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
+- GUI: 4 installers (Linux AppImage, macOS DMG, Windows NSIS + Portable ZIP)
+- Total: 9 artifacts per release
 
-- Groups commits by type (Features, Bug Fixes, CI/CD, etc.)
-- Links to commits, PRs, and author profiles
-- Shows New Contributors and all Contributors per release
-- Filters out bot commits and changelog update commits
-- **Do NOT edit `CHANGELOG.md` manually** — it will be overwritten
+**Release Duration:** ~12-15 minutes (with cache)
+
+**Local Testing with act:**
+```bash
+# Test release workflow locally
+act -W .github/workflows/release.yml -j pre-checks
+```
+
+**Changelog Format:**
+- Uses git-cliff with Conventional Commits
+- Follows Keep a Changelog standard
+- Auto-generates from commit history
+- Commits must follow: `feat:`, `fix:`, `docs:`, etc.
+
+**Breaking Changes:**
+- Use `feat!:` prefix or `BREAKING CHANGE:` footer
+- Automatically highlighted in changelog
 
 ## Code Style
 
@@ -169,7 +284,6 @@ cargo-dist builds binaries for: Linux x64/ARM64, macOS x64/ARM64, Windows x64, p
 - When outputting to a pipe or when `--to <format>` is specified, output is simplified for clean piping
 - On Windows, the CLI pauses with "Press Enter to exit..." when launched via double-click (detected via `GetConsoleProcessList` Windows API)
 - On Unix, the CLI pauses when stdout is not a TTY
-- `dist-workspace.toml` and the release workflow are managed by cargo-dist — do not edit manually. Use `dist init` to reconfigure.
 
 ## Devin AI Agent Configuration
 
@@ -183,15 +297,9 @@ Devin CLI configuration lives in `.devin/` directory:
 .devin/
 ├── config.json              # Project config (permissions, MCPs, imports) - committed
 ├── config.local.json        # Personal overrides (MCP tokens) - gitignored
-└── skills/                  # Project-specific skills - committed
-    ├── verify-before-commit/
-    │   └── SKILL.md
-    ├── debug-pattern/
-    │   └── SKILL.md
-    ├── investigate-code/
-    │   └── SKILL.md
-    └── test-integration/
-        └── SKILL.md
+├── hooks.json              # Safety hooks configuration - committed
+└── scripts/
+    └── safety-check.sh     # Safety hook script - committed
 ```
 
 **Setup steps:**
@@ -199,16 +307,37 @@ Devin CLI configuration lives in `.devin/` directory:
 2. Add your API keys for context7 and deepwiki
 3. Run `devin mcp login context7` and `devin mcp login deepwiki` if OAuth is required
 
+### Safety Hooks
+
+PreToolUse hooks are configured to block truly dangerous commands that cannot be recovered with git:
+
+**Blocked git commands (affect history irreversibly):**
+- `git reset --hard` → Use `git stash` or `git reset --soft`
+- `git clean -fd` / `git clean -f` → Use `git clean -n` (dry run)
+- `git branch -D` → Use `git branch -d` (only merged branches)
+- `git push --force` / `git push -f` → Use `git push --force-with-lease`
+- `git rebase` → Consider using merge instead
+- `git checkout --` / `git restore --worktree` → Use `git stash` first
+- `git stash drop` / `git stash clear` → Warns about permanent loss
+- `git reflog expire` → Destroys recovery data
+- `git commit --no-verify` / `git commit -n` → Remove flag, fix hooks
+
+**Blocked file deletions (outside project or destroys recovery):**
+- `rm -rf /` (system root)
+- `rm -rf ~` (home directory)
+- `rm -rf ..` (parent directory)
+- `rm -rf .git/` (destroys git history)
+
+**Allowed file deletions (within project):**
+- Any `rm` command within the project directory is allowed
+- Files can be recovered with git if needed
+- This enables automated refactoring and cleanup
+
+The hook runs before every `exec` tool call and exits with code 2 to block the action. It provides safer alternatives in the error message.
+
 ### Available Skills
 
-Skills are reusable procedures located in `.devin/skills/<skill-name>/SKILL.md`:
-
-- **`verify-before-commit`** - Run full verification (fmt, clippy, build, test) before committing
-- **`debug-pattern`** - Debug pattern parsing issues with detailed analysis
-- **`investigate-code`** - Read-only code exploration and analysis
-- **`test-integration`** - Run integration tests with detailed output
-
-Invoke skills by mentioning them: `@skills:verify-before-commit` or `@skills:debug-pattern <pattern>`
+No project-specific skills are currently configured. Use standard cargo commands directly for development.
 
 ### Available MCPs
 
@@ -245,30 +374,25 @@ Pre-approved permissions in `.devin/config.json`:
 When using Devin CLI locally:
 
 1. **Start a session** in the project directory
-2. **Invoke skills** for common tasks:
-   - `@skills:verify-before-commit` before committing
-   - `@skills:debug-pattern` when patterns fail to parse
-   - `@skills:investigate-code <topic>` for code exploration
-3. **Use MCPs** for documentation:
+2. **Use MCPs** for documentation:
    - "Use context7 to check Rust 1.85 documentation for..."
    - "Use deepwiki to check the repo's documentation for..."
-4. **Always verify** before committing/pushing (NEVER do this without confirmation)
+3. **Always verify** before committing/pushing (NEVER do this without confirmation)
 
 ### Recommended Devin Workflow
 
 1. **Exploration phase:**
-   - Use `@skills:investigate-code` to understand the codebase
    - Use deepwiki MCP for repo documentation
    - Use context7 MCP for Rust documentation
+   - Read relevant source files to understand the codebase
 
 2. **Implementation phase:**
    - Make code changes
-   - Use `@skills:verify-before-commit` to validate
+   - Run verification: `cargo fmt -- --check`, `cargo clippy --workspace -- -D warnings`, `cargo build --workspace`, `cargo test --workspace`
    - Fix any issues found
 
 3. **Testing phase:**
-   - Use `@skills:test-integration` to run tests
-   - Debug issues with `@skills:debug-pattern` if needed
+   - Run `cargo test --workspace` to verify all tests pass
 
 4. **Commit phase:**
    - Ask for user confirmation before committing

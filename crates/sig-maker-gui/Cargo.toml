@@ -1,0 +1,26 @@
+[package]
+name = "sig-maker-gui"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "GUI frontend for sig-maker using Tauri with optional dev HTTP server"
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+dev-server = []  # Start HTTP server at localhost:7331 for browser/Playwright access
+
+[[bin]]
+name = "sig-maker-gui"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2.1", features = [] }
+
+[dependencies]
+sig-maker-core = { path = "../sig-maker-core" }
+tauri = { version = "2.1", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

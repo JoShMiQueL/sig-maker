@@ -171,3 +171,217 @@ impl Input {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn input_read_direct_string() {
+        let input = Input::read("AB CD EF").unwrap();
+        assert_eq!(input.content, "AB CD EF");
+    }
+
+    #[test]
+    fn input_read_with_stdin_false() {
+        let input = Input::read_with_stdin("AB CD EF", false).unwrap();
+        assert_eq!(input.content, "AB CD EF");
+    }
+
+    #[test]
+    fn input_read_with_stdin_true_file_not_found() {
+        // When use_stdin is true and the file doesn't exist, it treats it as direct input
+        let result = Input::read_with_stdin("nonexistent_file.txt", true);
+        // It should succeed by treating the string as direct input
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().content, "nonexistent_file.txt");
+    }
+
+    #[test]
+    fn input_read_with_stdin_true_direct_input() {
+        // When use_stdin is true and the file doesn't exist, it treats it as direct input
+        let result = Input::read_with_stdin("AB CD EF", true);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().content, "AB CD EF");
+    }
+
+    #[test]
+    fn detect_type_code_pattern_cpp() {
+        let input = Input {
+            content: "const uint8_t pattern[] = { 0xAB, 0xCD };".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::CodePattern);
+    }
+
+    #[test]
+    fn detect_type_code_pattern_rust() {
+        let input = Input {
+            content: "static PATTERN: [u8; 2] = [0xAB, 0xCD];".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::CodePattern);
+    }
+
+    #[test]
+    fn detect_type_code_pattern_json() {
+        let input = Input {
+            content: "{ \"pattern\": [0xAB, 0xCD] }".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::CodePattern);
+    }
+
+    #[test]
+    fn detect_type_code_pattern_python() {
+        let input = Input {
+            content: "import re\npattern = re.compile(b'\\xAB\\xCD')".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::CodePattern);
+    }
+
+    #[test]
+    fn detect_type_multiple_aobs() {
+        let input = Input {
+            content: "AB CD EF\n12 34 56".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::MultipleAobs);
+    }
+
+    #[test]
+    fn detect_type_simple_pattern() {
+        let input = Input {
+            content: "AB CD EF".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn detect_type_simple_pattern_with_wildcards() {
+        let input = Input {
+            content: "AB ?? CD".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn detect_type_simple_pattern_with_dots() {
+        let input = Input {
+            content: "AB .. CD".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn detect_type_simple_pattern_with_brackets() {
+        let input = Input {
+            content: "AB [A0-AF] CD".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn detect_type_empty() {
+        let input = Input {
+            content: "".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn detect_type_with_comments() {
+        let input = Input {
+            content: "# Comment\nAB CD EF".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn detect_type_with_prefixes() {
+        let input = Input {
+            content: "- AB CD EF\n* 12 34 56".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::MultipleAobs);
+    }
+
+    #[test]
+    fn detect_type_mixed_content() {
+        let input = Input {
+            content: "AB CD EF\ninvalid line\n12 34 56".to_string(),
+        };
+        assert_eq!(input.detect_type(), InputType::SimplePattern);
+    }
+
+    #[test]
+    fn extract_pattern_code() {
+        let input = Input {
+            content: "const uint8_t pattern[] = { 0xAB, 0xCD };".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert_eq!(
+            result,
+            Some("const uint8_t pattern[] = { 0xAB, 0xCD };".to_string())
+        );
+    }
+
+    #[test]
+    fn extract_pattern_simple() {
+        let input = Input {
+            content: "AB CD EF".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert_eq!(result, Some("AB CD EF".to_string()));
+    }
+
+    #[test]
+    fn extract_pattern_with_prefix() {
+        let input = Input {
+            content: "- AB CD EF".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert_eq!(result, Some("AB CD EF".to_string()));
+    }
+
+    #[test]
+    fn extract_pattern_with_comment() {
+        let input = Input {
+            content: "# Comment\nAB CD EF".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert_eq!(result, Some("AB CD EF".to_string()));
+    }
+
+    #[test]
+    fn extract_pattern_empty() {
+        let input = Input {
+            content: "".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn extract_pattern_only_comments() {
+        let input = Input {
+            content: "# Comment\n// Another".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn extract_pattern_multiline_code() {
+        let input = Input {
+            content: "const uint8_t pattern[] = { 0xAB,\n0xCD };".to_string(),
+        };
+        let result = input.extract_pattern();
+        assert!(result.is_some());
+        assert!(result.unwrap().contains("const uint8_t"));
+    }
+
+    #[test]
+    fn input_type_equality() {
+        assert_eq!(InputType::MultipleAobs, InputType::MultipleAobs);
+        assert_eq!(InputType::CodePattern, InputType::CodePattern);
+        assert_eq!(InputType::SimplePattern, InputType::SimplePattern);
+        assert_ne!(InputType::MultipleAobs, InputType::CodePattern);
+        assert_ne!(InputType::CodePattern, InputType::SimplePattern);
+    }
+}

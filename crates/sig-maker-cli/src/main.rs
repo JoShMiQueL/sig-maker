@@ -11,10 +11,9 @@ mod cli;
 mod converter;
 mod output;
 
-fn main() {
-    // Parse command-line arguments
-    let config = cli::Config::parse();
-
+/// Process input based on configuration
+/// Returns Ok(()) on success, Err(message) on failure
+pub fn process_input(config: &cli::Config) -> Result<(), String> {
     // Auto-detect if we're in a pipe (not a TTY)
     let is_tty = std::io::stdout().is_terminal();
     let auto_quiet = !is_tty || config.quiet;
@@ -24,10 +23,7 @@ fn main() {
     let input_source = &config.input_file;
 
     // Read input file or stdin
-    let input = match Input::read_with_stdin(input_source, use_stdin) {
-        Ok(i) => i,
-        Err(e) => cli::error_exit(&e),
-    };
+    let input = Input::read_with_stdin(input_source, use_stdin)?;
 
     // If input doesn't come from a file (direct pattern), force SimplePattern
     let input_type = if !PathBuf::from(input_source).exists() && !use_stdin {
@@ -46,11 +42,10 @@ fn main() {
                 if !config.quiet {
                     println!("Pattern is valid: {}", pattern_str);
                 }
-                std::process::exit(0);
+                return Ok(());
             }
             Err(e) => {
-                eprintln!("Pattern is invalid: {}", e);
-                std::process::exit(1);
+                return Err(format!("Pattern is invalid: {}", e));
             }
         }
     }
@@ -61,9 +56,9 @@ fn main() {
             // Analyze multiple AOB instances
             let aobs = parse_aobs(&input.content);
             if aobs.len() < 2 {
-                cli::error_exit("Need at least 2 valid AOB instances");
+                return Err("Need at least 2 valid AOB instances".to_string());
             }
-            let (result, stats) = analyzer::analyze_aobs(&input.content);
+            let result = analyzer::analyze_aobs(&input.content);
 
             // Print header (only in TTY mode)
             if !auto_quiet {
@@ -75,12 +70,6 @@ fn main() {
                 }
                 println!();
                 println!("All AOBs have {} bytes", aobs[0].bytes.len());
-                println!();
-                println!("Analysis:");
-                println!("  Fixed: {} bytes", stats.fixed_bytes());
-                println!("  High nibble wildcards: {}", stats.high_nibble_wildcards());
-                println!("  Low nibble wildcards: {}", stats.low_nibble_wildcards());
-                println!("  Full wildcards: {}", stats.full_wildcards());
                 println!();
             }
 
@@ -95,7 +84,6 @@ fn main() {
 
             output::print_analysis_results(
                 &result,
-                &stats,
                 config.to_format,
                 &aobs,
                 config.output_file.as_deref(),
@@ -116,5 +104,161 @@ fn main() {
                 config.verbose,
             );
         }
+    }
+
+    Ok(())
+}
+
+fn main() {
+    // Parse command-line arguments
+    let config = cli::Config::parse();
+
+    // Process input
+    if let Err(e) = process_input(&config) {
+        cli::error_exit(&e);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn setup_test_env() {
+        unsafe {
+            std::env::set_var("SIG_MAKER_TEST", "1");
+        }
+        unsafe {
+            std::env::set_var("SIG_MAKER_NO_PAUSE", "1");
+        }
+    }
+
+    fn teardown_test_env() {
+        unsafe {
+            std::env::remove_var("SIG_MAKER_TEST");
+        }
+        unsafe {
+            std::env::remove_var("SIG_MAKER_NO_PAUSE");
+        }
+    }
+
+    #[test]
+    fn process_input_simple_pattern() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "AB CD EF".to_string(),
+            to_format: Some(formats::Format::CheatEngine),
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: false,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn process_input_check_only_valid() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "AB CD EF".to_string(),
+            to_format: None,
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: true,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn process_input_check_only_invalid() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "invalid pattern".to_string(),
+            to_format: None,
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: true,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("invalid"));
+    }
+
+    #[test]
+    fn process_input_with_format() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "AB ?? CD".to_string(),
+            to_format: Some(formats::Format::Rust),
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: false,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn process_input_verbose() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "AB CD EF".to_string(),
+            to_format: Some(formats::Format::CheatEngine),
+            output_file: None,
+            verbose: true,
+            quiet: false,
+            check_only: false,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn process_input_quiet() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "AB CD EF".to_string(),
+            to_format: Some(formats::Format::CheatEngine),
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: false,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn process_input_empty() {
+        setup_test_env();
+        let config = cli::Config {
+            input_file: "".to_string(),
+            to_format: None,
+            output_file: None,
+            verbose: false,
+            quiet: true,
+            check_only: false,
+        };
+
+        let result = process_input(&config);
+        teardown_test_env();
+        // In test mode, empty input returns Ok() instead of exiting
+        assert!(result.is_ok());
     }
 }

@@ -2,6 +2,7 @@
 members = [
     "crates/sig-maker-core",
     "crates/sig-maker-cli",
+    "crates/sig-maker-gui",
 ]
 resolver = "2"
 
@@ -9,7 +10,7 @@ resolver = "2"
 # Additional metadata can be added here
 
 [workspace.package]
-version = "0.1.1-beta"
+version = "0.1.2-beta"
 edition = "2024"
 authors = ["JoShMiQueL"]
 description = "Multi-format signature/pattern converter and optimizer"
@@ -18,8 +19,3 @@ repository = "https://github.com/JoShMiQueL/sig-maker"
 keywords = ["signature", "pattern", "aob", "reverse-engineering", "cheat-engine", "binary"]
 categories = ["command-line-utilities", "development-tools"]
 rust-version = "1.85"
-
-# The profile that 'dist' will build with
-[profile.dist]
-inherits = "release"
-lto = "thin"

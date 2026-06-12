@@ -110,14 +110,16 @@ The tool auto-detects input format by content:
 
 ## Wildcard Types
 
-The optimizer detects three wildcard levels:
+The optimizer detects four wildcard levels:
 
 - **Fixed**: `5F` - byte must match exactly
 - **High nibble**: `4?` - high nibble fixed, low varies (40-4F)
 - **Low nibble**: `?F` - low nibble fixed, high varies (0F, 1F, ..., FF)
 - **Full**: `??` - any byte
 
-Example: Values `07`, `08`, `09` → optimized to `0?`
+Example: Values `07`, `08`, `09` → optimized to `0?` (share high nibble 0x0)
+Example: Values `27`, `28`, `2A` → optimized to `2?` (share high nibble 0x2)
+Example: Values `07`, `27`, `47` → optimized to `?7` (share low nibble 0x7)
 
 ## Project Structure
 

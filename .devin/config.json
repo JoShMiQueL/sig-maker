@@ -20,7 +20,7 @@
       "Exec(git rebase)",
       "Exec(gh repo delete)",
       "Exec(gh release delete)",
-	  "Exec(rm)"
+	    "Exec(rm)"
     ]
   },
   "read_config_from": {
