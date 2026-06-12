@@ -12,6 +12,7 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
+  SIG_MAKER_NO_PAUSE: "1"
 
 jobs:
   generate-changelog:
