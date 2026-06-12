@@ -239,9 +239,9 @@ jobs:
         if: matrix.os == 'windows-2025-vs2026'
         shell: pwsh
         run: |
-          $exe = Get-ChildItem "crates/sig-maker-gui/target/release/bundle/nsis" -Filter "*.exe" | Select-Object -First 1
+          $exe = Get-ChildItem "target/release/bundle/nsis" -Filter "*.exe" | Select-Object -First 1
           $version = "${{ needs.pre-checks.outputs.tag }}"
-          $zip = "crates/sig-maker-gui/target/release/bundle/nsis/sig-maker-gui_${version}_x64_portable.zip"
+          $zip = "target/release/bundle/nsis/sig-maker-gui_${version}_x64_portable.zip"
           Compress-Archive -Path $exe.FullName -DestinationPath $zip
           Write-Host "Created portable: $zip"
 
@@ -251,8 +251,8 @@ jobs:
         with:
           name: gui-windows
           path: |
-            crates/sig-maker-gui/target/release/bundle/nsis/*.exe
-            crates/sig-maker-gui/target/release/bundle/nsis/*.zip
+            target/release/bundle/nsis/*.exe
+            target/release/bundle/nsis/*.zip
           if-no-files-found: error
 
       - name: Upload GUI artifacts (Linux)
@@ -260,7 +260,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: gui-linux
-          path: crates/sig-maker-gui/target/release/bundle/appimage/*.AppImage
+          path: target/release/bundle/appimage/*.AppImage
           if-no-files-found: error
 
       - name: Upload GUI artifacts (macOS)
@@ -268,7 +268,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: gui-macos
-          path: crates/sig-maker-gui/target/release/bundle/dmg/*.dmg
+          path: target/release/bundle/dmg/*.dmg
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
