@@ -49,10 +49,8 @@ jobs:
       - name: Generate release body
         if: steps.previous_tag.outputs.previous_tag != ''
         run: |
-          chmod +x .github/workflows/scripts/generate-release-body.sh
-          .github/workflows/scripts/generate-release-body.sh ${{ steps.previous_tag.outputs.previous_tag }} ${{ github.ref_name }} release_notes.md
-        env:
-          PATH: $PATH:/home/runner/.cargo/bin
+          git-cliff --config cliff.toml "${{ steps.previous_tag.outputs.previous_tag }}..${{ github.ref_name }}" --output release_notes.md --offline
+          echo "**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/${{ steps.previous_tag.outputs.previous_tag }}...${{ github.ref_name }}" >> release_notes.md
 
       - name: Extract changelog section (fallback if no previous tag)
         if: steps.previous_tag.outputs.previous_tag == ''
