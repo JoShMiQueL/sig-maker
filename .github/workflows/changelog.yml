@@ -8,13 +8,11 @@ jobs:
   update-changelog:
     name: Update CHANGELOG.md
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Install git-cliff
         uses: taiki-e/install-action@v2
@@ -24,7 +22,7 @@ jobs:
       - name: Generate full changelog
         run: git-cliff --output CHANGELOG.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Commit updated CHANGELOG.md
         run: |
