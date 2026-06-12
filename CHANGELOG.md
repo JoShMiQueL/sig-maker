@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Bug Fixes
+
+
+
+- **changelog:** remove buggy New Contributors section from git-cliff template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ab18407](https://github.com/JoShMiQueL/sig-maker/commit/ab184072779fc2fee7d42194febc0353bbccefd2))
+
 ### Documentation
 
 
 
 - add Tauri GUI release build notes to AGENTS.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([687664b](https://github.com/JoShMiQueL/sig-maker/commit/687664bb1eeba258335c60637e83475260e4617d))
-
 
 
 
@@ -102,7 +107,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **release:** bump version to 0.1.3-beta by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c04bcec](https://github.com/JoShMiQueL/sig-maker/commit/c04bcecfe16baf9148ea01ec68a4f87a8cc6dac8))
-
 
 
 
@@ -235,7 +239,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - simplify dependencies and improve CLI experience by [@JoShMiQueL](https://github.com/JoShMiQueL) [[#27](https://github.com/JoShMiQueL/sig-maker/pull/27)]
-
 
 
 
@@ -479,7 +482,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-
 ### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
@@ -518,11 +520,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set version to 0.1.0-beta by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d1750c2](https://github.com/JoShMiQueL/sig-maker/commit/d1750c26bd73bb440c54c0c51072b64704cbbb20))
 
-
-
-
-### New Contributors
-- [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
 
 
 ### Contributors
