@@ -5,27 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Bug Fixes
-
-
-
-- **ci:** use separate --bundles flags for nsis and zip on Windows by [@JoShMiQueL](https://github.com/JoShMiQueL) ([46e6e44](https://github.com/JoShMiQueL/sig-maker/commit/46e6e44825268bbc14be1556d2e863c77df4d7be))
-
-### Documentation
-
-
-
-- update AGENTS.md to reflect current GUI build status by [@JoShMiQueL](https://github.com/JoShMiQueL) ([fc4196a](https://github.com/JoShMiQueL/sig-maker/commit/fc4196a4a7af305131b161e0d43a10ff139185c0))
-
-
-
-
-### Contributors
-
-- [@JoShMiQueL](https://github.com/JoShMiQueL)
-
 ## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
 
 ### Bug Fixes
@@ -46,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **ci:** pin rustc to 1.95.0 for GUI builds to avoid tauri-utils E0119 by [@JoShMiQueL](https://github.com/JoShMiQueL) ([9dc2907](https://github.com/JoShMiQueL/sig-maker/commit/9dc2907a7a6dd69f9a4cae86ffec26caf6a1a6b0))
 
+
+- **ci:** use separate --bundles flags for nsis and zip on Windows by [@JoShMiQueL](https://github.com/JoShMiQueL) ([46e6e44](https://github.com/JoShMiQueL/sig-maker/commit/46e6e44825268bbc14be1556d2e863c77df4d7be))
+
 ### CI/CD
 
 
@@ -60,6 +42,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **release:** add portable ZIP bundle for Windows GUI by [@JoShMiQueL](https://github.com/JoShMiQueL) ([4e7eb6a](https://github.com/JoShMiQueL/sig-maker/commit/4e7eb6a854274ad9f3592c0b7eae1012cb2b254c))
+
+### Documentation
+
+
+
+- update AGENTS.md to reflect current GUI build status by [@JoShMiQueL](https://github.com/JoShMiQueL) ([fc4196a](https://github.com/JoShMiQueL/sig-maker/commit/fc4196a4a7af305131b161e0d43a10ff139185c0))
+
+### Features
+
+
+
+- **install:** add install.sh and install.ps1 one-liner installers by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1c3eef2](https://github.com/JoShMiQueL/sig-maker/commit/1c3eef2c2db3d9b3f62ac79b9250ff1f8c797b1c))
 
 ### Miscellaneous
 
