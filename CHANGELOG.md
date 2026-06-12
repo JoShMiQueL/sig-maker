@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### CI/CD
+
+
+
+- use actions/cache@v5 (latest major, v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d73b849](https://github.com/JoShMiQueL/sig-maker/commit/d73b849e17b22c288cd26a9d954bd2c334d0a452))
+
+
+
+
+### Contributors
+
+- [@JoShMiQueL](https://github.com/JoShMiQueL)
+
 ## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
 
 ### Bug Fixes
