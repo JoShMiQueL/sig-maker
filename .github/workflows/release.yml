@@ -28,10 +28,7 @@ jobs:
 
       - name: Install git-cliff
         run: |
-          curl -sSL https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-x86_64-unknown-linux-musl.tar.gz -o git-cliff.tar.gz
-          tar -xzf git-cliff.tar.gz
-          sudo mv git-cliff /usr/local/bin/
-          git-cliff --version
+          cargo install git-cliff --locked
 
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
