@@ -257,6 +257,110 @@ Track: https://github.com/tauri-apps/tauri/issues/15525
 
 **Release Duration:** ~12-15 minutes (with cache)
 
+### Tauri GUI Release Build Notes
+
+These notes are critical for any agent modifying the Tauri GUI release pipeline.
+
+#### 1. npm / Rust Version Synchronization
+
+Tauri CLI **requires** `@tauri-apps/api` (npm) and the `tauri` Rust crate to share
+the same **major.minor** version. A mismatch causes an immediate fatal error:
+
+```
+Found version mismatched Tauri packages. Make sure the NPM package and
+Rust crate versions are on the same major/minor releases:
+tauri (v2.9.2) : @tauri-apps/api (v2.11.0)
+```
+
+**Current pinning (do not change without verifying compatibility):**
+- Rust `Cargo.toml`: `tauri = { version = "=2.9.2", ... }`
+- npm `frontend/package.json`: `"@tauri-apps/api": "=2.9.0"`
+
+**Rule:** When updating the Rust `tauri` crate version, always update the npm
+`@tauri-apps/api` package to a matching `major.minor.x` release, then regenerate
+`package-lock.json`.
+
+#### 2. Bundle Targets (tauri.conf.json vs CI)
+
+Do **NOT** hardcode `"targets": ["nsis"]` (or any single target) in
+`tauri.conf.json`. The CI passes `--bundles <format>` per platform via the
+`tauri build` CLI flag. A hardcoded `targets` array **overrides** the CLI flag
+and prevents bundles from being generated on other platforms.
+
+**Correct `tauri.conf.json`:**
+```json
+{
+  "bundle": {
+    "active": true,
+    "icon": ["icons/32x32.png", ...]
+  }
+}
+```
+
+**Correct CI per platform:**
+- Linux: `tauri build --bundles appimage`
+- macOS: `tauri build --bundles dmg`
+- Windows: `tauri build --bundles nsis`
+
+#### 3. Bundle Output Paths
+
+Tauri writes bundles to the **workspace root** `target/release/bundle/`, NOT to
+`crates/sig-maker-gui/target/release/bundle/`.
+
+| Platform | Path in CI |
+|----------|------------|
+| Linux    | `target/release/bundle/appimage/*.AppImage` |
+| macOS    | `target/release/bundle/dmg/*.dmg` |
+| Windows  | `target/release/bundle/nsis/*.exe` |
+
+The `actions/upload-artifact` steps must use the root-level path.
+
+#### 4. Icons Must Be Committed
+
+`tauri::generate_context!()` (called from `main.rs`) compiles icon paths into
+the binary at build time. If `icons/icon.png` (or any referenced icon) is not
+present on the CI runner, the macro panics:
+
+```
+proc macro panicked: failed to open icon .../icons/icon.png:
+No such file or directory (os error 2)
+```
+
+**Rule:** The `icons/` directory must be fully committed to git. Do not add
+icon files to `.gitignore`. Generate them locally with:
+
+```bash
+cd crates/sig-maker-gui
+cargo tauri icon icons/icon.png
+```
+
+#### 5. Dev-Server Feature (Development Only)
+
+The `dev-server` Cargo feature starts an HTTP fallback server for browser-based
+Playwright MCP testing. It is **NOT** included in release builds.
+
+- `Cargo.toml`: `dev-server = []` (not in `default`)
+- CI never passes `--features dev-server`
+- Local dev: `cargo run --bin sig-maker-gui --features dev-server`
+
+#### 6. GitHub Actions Cache Version
+
+`actions/cache@v5` is the latest stable major version. `v6` does **not** exist.
+The release workflow uses `actions/cache@v5` for the Tauri CLI and `cross`
+binary caches.
+
+#### 7. Linux Dependencies for AppImage
+
+Ubuntu runners need these packages before `tauri build`:
+
+```bash
+sudo apt-get update -qq
+sudo apt-get install -y --no-install-recommends \
+  libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+```
+
+Note: Tauri v2 requires `libwebkit2gtk-4.1-dev` (not 4.0).
+
 **Local Testing with act:**
 ```bash
 # Test release workflow locally
