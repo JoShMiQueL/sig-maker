@@ -5,21 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### CI/CD
-
-
-
-- use actions/cache@v5 (latest major, v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d73b849](https://github.com/JoShMiQueL/sig-maker/commit/d73b849e17b22c288cd26a9d954bd2c334d0a452))
-
-
-
-
-### Contributors
-
-- [@JoShMiQueL](https://github.com/JoShMiQueL)
-
 ## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
 
 ### Bug Fixes
@@ -52,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **gui:** add Tauri icons and configure bundle icon paths by [@JoShMiQueL](https://github.com/JoShMiQueL) ([298262c](https://github.com/JoShMiQueL/sig-maker/commit/298262cbe17f37efa06d672bcdcec4a23ea37d0f))
 
+
+- **gui:** remove hardcoded nsis target from tauri.conf.json by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6e3ffcd](https://github.com/JoShMiQueL/sig-maker/commit/6e3ffcd61ea2cb7a8bdb60188e2843cdc9fcb3bf))
+
 ### CI/CD
 
 
@@ -75,6 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - revert actions/cache to v4 (v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([bd7a2f7](https://github.com/JoShMiQueL/sig-maker/commit/bd7a2f7c74942cf972bac3bbdc0e86bfb03f7dfe))
+
+
+- use actions/cache@v5 (latest major, v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d73b849](https://github.com/JoShMiQueL/sig-maker/commit/d73b849e17b22c288cd26a9d954bd2c334d0a452))
 
 ### Documentation
 
