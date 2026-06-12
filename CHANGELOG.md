@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **release:** build GUI for Windows only until tauri-utils#15525 is fixed by [@JoShMiQueL](https://github.com/JoShMiQueL) ([72b6a1f](https://github.com/JoShMiQueL/sig-maker/commit/72b6a1f39b7bad7c352d4853bd5b0d35ae01278d))
 
+
+- **release:** add portable ZIP bundle for Windows GUI by [@JoShMiQueL](https://github.com/JoShMiQueL) ([4e7eb6a](https://github.com/JoShMiQueL/sig-maker/commit/4e7eb6a854274ad9f3592c0b7eae1012cb2b254c))
+
 ### Miscellaneous
 
 
