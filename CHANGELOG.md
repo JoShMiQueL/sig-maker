@@ -67,6 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - use actions/cache@v5 (latest major, v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d73b849](https://github.com/JoShMiQueL/sig-maker/commit/d73b849e17b22c288cd26a9d954bd2c334d0a452))
 
+
+- fix bundle artifact paths (target/release/bundle, not crates/...) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1d7b68e](https://github.com/JoShMiQueL/sig-maker/commit/1d7b68e8697968f432558781ef9a8c3126ee2d78))
+
 ### Documentation
 
 
