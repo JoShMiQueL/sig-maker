@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - remove GUI tests and use windows-2025-vs2026 ([762b9df](https://github.com/JoShMiQueL/sig-maker/commit/762b9dfa70e92cda739e97834c52f32d484489a7)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 - add release and changelog workflows ([c29d5bd](https://github.com/JoShMiQueL/sig-maker/commit/c29d5bd2ed27b01e69465498ef603529a8c40514)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 - **changelog:** use GH_PAT to bypass branch protection on push ([3b54a02](https://github.com/JoShMiQueL/sig-maker/commit/3b54a0221ca4ff940386c31ed5aa7babff433cd9)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
+- **changelog:** add New Contributors section and fix header/footer split ([63ad40a](https://github.com/JoShMiQueL/sig-maker/commit/63ad40a74296bf9b36280912a9f2d0a833a02ecf)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 ### Documentation
 
@@ -55,8 +56,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - simplify dependencies and improve CLI experience [[#27](https://github.com/JoShMiQueL/sig-maker/pull/27)] by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 
-### Contributors
 
+
+### New Contributors
+
+### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
@@ -154,12 +158,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add integration tests for CLI features ([3f7514d](https://github.com/JoShMiQueL/sig-maker/commit/3f7514d7028b8cc89adc734f9ba83b882bba9acd)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 
-### Contributors
 
+
+### New Contributors
+
+### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 
+**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.0-beta...v0.1.1-beta
 ## [v0.1.0-beta] - 2026-06-10
 
 ### CI/CD
@@ -179,11 +187,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set version to 0.1.0-beta ([d1750c2](https://github.com/JoShMiQueL/sig-maker/commit/d1750c26bd73bb440c54c0c51072b64704cbbb20)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 
-### Contributors
 
+
+### New Contributors
+- [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
+
+### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
-[v0.1.1-beta]: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.0-beta...v0.1.1-beta
-[v0.1.0-beta]: https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.0-beta
 
