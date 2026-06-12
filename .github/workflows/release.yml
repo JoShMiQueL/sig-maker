@@ -265,7 +265,7 @@ jobs:
           tool: git-cliff
 
       - name: Generate changelog
-        run: git-cliff --latest --strip header --output changelog.md
+        run: git-cliff --latest --strip all --output changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
