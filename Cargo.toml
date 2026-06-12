@@ -19,8 +19,3 @@ repository = "https://github.com/JoShMiQueL/sig-maker"
 keywords = ["signature", "pattern", "aob", "reverse-engineering", "cheat-engine", "binary"]
 categories = ["command-line-utilities", "development-tools"]
 rust-version = "1.85"
-
-# The profile that 'dist' will build with
-[profile.dist]
-inherits = "release"
-lto = "thin"

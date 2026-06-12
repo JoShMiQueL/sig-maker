@@ -276,7 +276,7 @@ assert_eq!(pattern4, BytePattern::Wildcard);
 Analyze multiple AOB instances and generate an optimized pattern.
 
 ```rust
-pub fn analyze_aobs(content: &str) -> (Vec<BytePattern>, PatternStats)
+pub fn analyze_aobs(content: &str) -> Vec<BytePattern>
 ```
 
 **Input Format:**
@@ -288,9 +288,12 @@ pub fn analyze_aobs(content: &str) -> (Vec<BytePattern>, PatternStats)
 **Behavior:**
 1. Parses all AOB instances from the input
 2. Verifies all instances have the same length
-3. Analyzes each byte position across all instances
-4. For positions with original wildcards, only analyzes non-expanded instances
-5. Returns optimized pattern and statistics
+3. Analyzes each byte position across all instances:
+   - If all values are identical → `Fixed(value)`
+   - If all values share the same high nibble → `HighNibble(high)`
+   - If all values share the same low nibble → `LowNibble(low)`
+   - Otherwise → `Wildcard`
+4. Returns optimized pattern
 
 **Example:**
 ```rust
@@ -302,8 +305,11 @@ let input = r#"
 48 8B 05 AB CD EF 00
 "#;
 
-let (pattern, stats) = analyze_aobs(input);
+let pattern = analyze_aobs(input);
 println!("Pattern length: {}", pattern.len());
+
+// Get statistics separately
+let stats = sig_maker_core::get_pattern_stats(&pattern);
 println!("Fixed bytes: {}", stats.fixed_bytes());
 println!("Compression ratio: {:.2}", stats.compression_ratio());
 ```
@@ -607,38 +613,40 @@ Pattern optimization analyzes multiple AOB instances to find the most specific p
 
 For each byte position across all AOB instances:
 
-1. **Check for original wildcards** - If any instance had a wildcard at this position (from pattern expansion), only analyze non-expanded instances
-2. **Collect values** - Gather all byte values at this position
-3. **Apply optimization logic**:
+1. **Collect values** - Gather all byte values at this position (excluding wildcards)
+2. **Apply optimization logic**:
    - If all values are identical → Use `Fixed(value)`
    - If all values share the same high nibble → Use `HighNibble(high)`
    - If all values share the same low nibble → Use `LowNibble(low)`
    - Otherwise → Use `Wildcard`
 
-### Pattern Expansion
+### Nibble-Level Detection
 
-When parsing patterns with wildcards, they are expanded to representative instances:
-- Wildcards are replaced with placeholder values (0x00)
-- Original wildcard positions are tracked
-- During optimization, positions with original wildcards are handled specially to avoid over-constraining the pattern
+The optimizer can detect when bytes share common nibbles:
+
+- **High nibble sharing**: Values `0x27`, `0x28`, `0x2A` all have high nibble `0x2` → `HighNibble(2)` → `2?` in Cheat Engine
+- **Low nibble sharing**: Values `0x07`, `0x27`, `0x47` all have low nibble `0x7` → `LowNibble(7)` → `?7` in Cheat Engine
+- **No sharing**: Values `0x00`, `0xFF`, `0x42` share no nibbles → `Wildcard` → `??` in Cheat Engine
 
 ### Example
 
 Given these AOB instances:
 ```
-48 8B 05 ? ? ? ?
-48 8B 05 12 34 56 78
-48 8B 05 AB CD EF 00
+27 00 00 00 01 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 10 B2 DA 97 B2 02 00 00 A0 6B DA 97 B2 02
+28 00 00 00 01 00 00 00 EB FF FF FF 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02
 ```
 
 The optimizer analyzes each position:
-- Position 0-2: All instances have `48 8B 05` → Fixed bytes
-- Position 3-5: First instance has wildcards, others vary → Analyze non-expanded instances only
-  - If positions 3-5 in instances 2-3 share commonality → Use nibble wildcards
-  - Otherwise → Use wildcards
-- Position 6: All instances have different values → Wildcard
+- Position 0: `27` and `28` share high nibble `0x2` → `HighNibble(2)` → `2?`
+- Position 1-7: All identical → Fixed bytes
+- Position 8: `FF` and `EB` vary with no shared nibbles → `Wildcard` → `??`
+- Position 20: `10` and `E0` share low nibble `0x0` → `LowNibble(0)` → `?0`
+- Position 28: `A0` and `E0` share low nibble `0x0` → `LowNibble(0)` → `?0`
 
-Result might be: `48 8B 05 ? ? ? ?` (if no commonality) or `48 8B 05 1? ? ? ?` (if high nibble is common)
+Result in Cheat Engine format:
+```
+2? 00 00 00 01 00 00 00 ?? FF FF FF 00 00 00 00 00 00 00 00 ?0 ?? ?? ?? ?? 02 00 00 ?0 ?? ?? ?? ?? 02
+```
 
 ## Supported Formats and Their Characteristics
 
@@ -724,7 +732,7 @@ fn main() {
 ### Example 2: Pattern Optimization
 
 ```rust
-use sig_maker_core::analyze_aobs;
+use sig_maker_core::{analyze_aobs, get_pattern_stats};
 
 fn main() {
     let input = r#"
@@ -733,9 +741,10 @@ fn main() {
 48 8B 05 AB CD EF 00
 48 8B 05 90 AB CD EF
 "#;
-    
-    let (pattern, stats) = analyze_aobs(input);
-    
+
+    let pattern = analyze_aobs(input);
+    let stats = get_pattern_stats(&pattern);
+
     println!("Optimized pattern:");
     println!("  Total bytes: {}", stats.total_bytes());
     println!("  Fixed bytes: {}", stats.fixed_bytes());

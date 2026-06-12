@@ -1,106 +1,15 @@
 //! AOB analysis - compare multiple instances and find optimal pattern
 
-use crate::formats::{BytePattern, optimize_byte, parse_pattern};
-
-/// AOB instance with source line info
-pub struct AobInstance {
-    pub bytes: Vec<Option<u8>>,
-    #[allow(dead_code)]
-    pub line_num: usize,
-    /// Marks if this instance came from expanding a pattern (vs raw hex)
-    pub is_expanded: bool,
-    /// For expanded instances, tracks which positions had wildcards in original pattern
-    pub wildcard_positions: Vec<bool>,
-}
-
-/// Statistics about pattern optimization
-#[derive(Debug, Clone)]
-pub struct PatternStats {
-    fixed: usize,
-    high_nibble: usize,
-    low_nibble: usize,
-    wildcard: usize,
-    entropy: f64,
-    compression_ratio: f64,
-}
-
-impl PatternStats {
-    pub fn from_patterns(patterns: &[BytePattern]) -> Self {
-        let mut stats = Self {
-            fixed: 0,
-            high_nibble: 0,
-            low_nibble: 0,
-            wildcard: 0,
-            entropy: 0.0,
-            compression_ratio: 0.0,
-        };
-
-        for p in patterns {
-            match p {
-                BytePattern::Fixed(_) => stats.fixed += 1,
-                BytePattern::Wildcard => stats.wildcard += 1,
-                BytePattern::HighNibble(_) => stats.high_nibble += 1,
-                BytePattern::LowNibble(_) => stats.low_nibble += 1,
-            }
-        }
-
-        // Calculate entropy (simplified: based on pattern type distribution)
-        let total = stats.total_bytes();
-        if total > 0 {
-            let mut entropy = 0.0;
-            let counts = [
-                stats.fixed,
-                stats.high_nibble,
-                stats.low_nibble,
-                stats.wildcard,
-            ];
-            for &count in &counts {
-                if count > 0 {
-                    let p = count as f64 / total as f64;
-                    entropy -= p * p.log2();
-                }
-            }
-            stats.entropy = entropy;
-
-            // Compression ratio: fixed bytes / total bytes
-            stats.compression_ratio = stats.fixed as f64 / total as f64;
-        }
-
-        stats
-    }
-
-    pub fn total_bytes(&self) -> usize {
-        self.fixed + self.high_nibble + self.low_nibble + self.wildcard
-    }
-
-    pub fn fixed_bytes(&self) -> usize {
-        self.fixed
-    }
-    pub fn high_nibble_wildcards(&self) -> usize {
-        self.high_nibble
-    }
-    pub fn low_nibble_wildcards(&self) -> usize {
-        self.low_nibble
-    }
-    pub fn full_wildcards(&self) -> usize {
-        self.wildcard
-    }
-    pub fn entropy(&self) -> f64 {
-        self.entropy
-    }
-    pub fn compression_ratio(&self) -> f64 {
-        self.compression_ratio
-    }
-}
+use crate::formats::BytePattern;
 
 /// Analyze multiple AOB instances and generate optimized pattern
-/// Returns the optimized pattern and statistics
-pub fn analyze_aobs(content: &str) -> (Vec<BytePattern>, PatternStats) {
-    // Parse AOBs from content
+/// Algorithm: if bytes vary, check for shared nibbles (HighNibble/LowNibble),
+/// otherwise use "??". If bytes are identical, keep the byte.
+pub fn analyze_aobs(content: &str) -> Vec<BytePattern> {
     let aobs = parse_aobs(content);
 
-    if aobs.len() < 2 {
-        panic!("Need at least 2 valid AOB instances");
+    if aobs.is_empty() {
+        return vec![];
     }
 
     // Verify all have same length
@@ -120,42 +29,44 @@ pub fn analyze_aobs(content: &str) -> (Vec<BytePattern>, PatternStats) {
     let mut result: Vec<BytePattern> = Vec::with_capacity(first_len);
 
     for byte_idx in 0..first_len {
-        // Check if any expanded instance had a wildcard at this position
-        let has_original_wildcard = aobs
-            .iter()
-            .any(|aob| aob.is_expanded && aob.wildcard_positions[byte_idx]);
+        // Collect all byte values at this position
+        let values: Vec<u8> = aobs.iter().filter_map(|aob| aob.bytes[byte_idx]).collect();
 
-        if has_original_wildcard {
-            // For positions with original wildcards, analyze only non-expanded instances
-            // to see if we can refine the wildcard
-            let non_expanded_values: Vec<u8> = aobs
-                .iter()
-                .filter(|aob| !aob.is_expanded)
-                .filter_map(|aob| aob.bytes[byte_idx])
-                .collect();
-
-            if non_expanded_values.is_empty() {
-                // No non-expanded instances, keep wildcard
-                result.push(BytePattern::Wildcard);
-            } else {
-                // Try to optimize based on new AOBs
-                let pattern = optimize_byte(&non_expanded_values);
-                result.push(pattern);
-            }
+        if values.is_empty() {
+            // All wildcards at this position
+            result.push(BytePattern::Wildcard);
         } else {
-            // No original wildcard, analyze all instances
-            let values: Vec<u8> = aobs.iter().filter_map(|aob| aob.bytes[byte_idx]).collect();
-            let pattern = optimize_byte(&values);
-            result.push(pattern);
+            // Check if all values are the same
+            let first = values[0];
+            if values.iter().all(|&v| v == first) {
+                result.push(BytePattern::Fixed(first));
+            } else {
+                // Bytes vary - check for shared nibbles
+                let high_nibbles: Vec<u8> = values.iter().map(|&v| v >> 4).collect();
+                let low_nibbles: Vec<u8> = values.iter().map(|&v| v & 0x0F).collect();
+
+                let first_high = high_nibbles[0];
+                let first_low = low_nibbles[0];
+
+                if high_nibbles.iter().all(|&n| n == first_high) {
+                    // All share the same high nibble
+                    result.push(BytePattern::HighNibble(first_high));
+                } else if low_nibbles.iter().all(|&n| n == first_low) {
+                    // All share the same low nibble
+                    result.push(BytePattern::LowNibble(first_low));
+                } else {
+                    // No shared nibbles - use wildcard
+                    result.push(BytePattern::Wildcard);
+                }
+            }
         }
     }
 
-    let stats = PatternStats::from_patterns(&result);
-    (result, stats)
+    result
 }
 
 /// Parse AOB instances from file content
-/// Supports both raw hex bytes and patterns with wildcards
+/// Supports raw hex bytes (one per line)
 pub fn parse_aobs(content: &str) -> Vec<AobInstance> {
     let lines: Vec<&str> = content.lines().collect();
     let mut aobs = Vec::new();
@@ -175,31 +86,34 @@ pub fn parse_aobs(content: &str) -> Vec<AobInstance> {
             trimmed
         };
 
-        // Try to parse as pattern with wildcards first
-        if let Some(pattern) = parse_pattern(cleaned) {
-            // Expand pattern to instances
-            let expanded = expand_pattern_to_instances(&pattern, i + 1);
-            aobs.extend(expanded);
-        } else {
-            // Parse as simple hex bytes
-            let bytes: Vec<Option<u8>> = cleaned
-                .split_whitespace()
-                .map(|s| u8::from_str_radix(s, 16).ok())
-                .collect();
+        // Parse as simple hex bytes
+        let bytes: Vec<Option<u8>> = cleaned
+            .split_whitespace()
+            .map(|s| u8::from_str_radix(s, 16).ok())
+            .collect();
 
-            if !bytes.is_empty() {
-                let len = bytes.len();
-                aobs.push(AobInstance {
-                    bytes,
-                    line_num: i + 1,
-                    is_expanded: false,
-                    wildcard_positions: vec![false; len],
-                });
-            }
+        if !bytes.is_empty() {
+            let len = bytes.len();
+            aobs.push(AobInstance {
+                bytes,
+                line_num: i + 1,
+                is_expanded: false,
+                wildcard_positions: vec![false; len],
+            });
         }
     }
 
     aobs
+}
+
+/// AOB instance with source line info
+pub struct AobInstance {
+    pub bytes: Vec<Option<u8>>,
+    pub line_num: usize,
+    /// Marks if this instance came from expanding a pattern (vs raw hex)
+    pub is_expanded: bool,
+    /// For expanded instances, tracks which positions had wildcards in original pattern
+    pub wildcard_positions: Vec<bool>,
 }
 
 /// Check if an AOB matches a pattern
@@ -244,37 +158,220 @@ pub fn instance_matches_pattern(instance: &AobInstance, pattern: &[BytePattern])
     true
 }
 
-/// Expand a pattern with wildcards to a single representative instance
-/// Uses placeholder values (0x00) for wildcards to avoid combinatorial explosion
-/// The original wildcard positions are tracked to force wildcards in final result
-fn expand_pattern_to_instances(pattern: &[BytePattern], line_num: usize) -> Vec<AobInstance> {
-    let mut bytes = Vec::with_capacity(pattern.len());
-    let mut wildcard_positions = vec![false; pattern.len()];
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    for (idx, &byte_pattern) in pattern.iter().enumerate() {
-        match byte_pattern {
-            BytePattern::Fixed(byte) => {
-                bytes.push(Some(byte));
-            }
-            BytePattern::Wildcard => {
-                wildcard_positions[idx] = true;
-                bytes.push(Some(0x00)); // Placeholder
-            }
-            BytePattern::HighNibble(high) => {
-                wildcard_positions[idx] = true;
-                bytes.push(Some(high << 4)); // Use 0x00 for low nibble
-            }
-            BytePattern::LowNibble(low) => {
-                wildcard_positions[idx] = true;
-                bytes.push(Some(low)); // Use 0x00 for high nibble
-            }
-        }
+    #[test]
+    fn analyze_aobs_simple() {
+        let content = "AB CD EF\nAB CD EF";
+        let pattern = analyze_aobs(content);
+        assert_eq!(pattern.len(), 3);
+        assert_eq!(pattern[0], BytePattern::Fixed(0xAB));
+        assert_eq!(pattern[1], BytePattern::Fixed(0xCD));
+        assert_eq!(pattern[2], BytePattern::Fixed(0xEF));
     }
 
-    vec![AobInstance {
-        bytes,
-        line_num,
-        is_expanded: true,
-        wildcard_positions,
-    }]
+    #[test]
+    fn analyze_aobs_with_variation() {
+        let content = "AB CD EF\nAB 00 EF";
+        let pattern = analyze_aobs(content);
+        assert_eq!(pattern.len(), 3);
+        assert_eq!(pattern[0], BytePattern::Fixed(0xAB));
+        assert_eq!(pattern[1], BytePattern::Wildcard); // CD vs 00
+        assert_eq!(pattern[2], BytePattern::Fixed(0xEF));
+    }
+
+    #[test]
+    fn analyze_aobs_all_wildcard() {
+        let content = "AB CD EF\n00 11 22\nFF EE DD";
+        let pattern = analyze_aobs(content);
+        assert_eq!(pattern.len(), 3);
+        assert_eq!(pattern[0], BytePattern::Wildcard);
+        assert_eq!(pattern[1], BytePattern::Wildcard);
+        assert_eq!(pattern[2], BytePattern::Wildcard);
+    }
+
+    #[test]
+    fn analyze_aobs_shared_high_nibble() {
+        let content = "27 00 00\n28 00 00\n2A 00 00";
+        let pattern = analyze_aobs(content);
+        assert_eq!(pattern.len(), 3);
+        assert_eq!(pattern[0], BytePattern::HighNibble(0x2)); // 27, 28, 2A share high nibble 0x2
+        assert_eq!(pattern[1], BytePattern::Fixed(0x00));
+        assert_eq!(pattern[2], BytePattern::Fixed(0x00));
+    }
+
+    #[test]
+    fn analyze_aobs_shared_low_nibble() {
+        let content = "07 00 00\n27 00 00\n47 00 00";
+        let pattern = analyze_aobs(content);
+        assert_eq!(pattern.len(), 3);
+        assert_eq!(pattern[0], BytePattern::LowNibble(0x7)); // 07, 27, 47 share low nibble 0x7
+        assert_eq!(pattern[1], BytePattern::Fixed(0x00));
+        assert_eq!(pattern[2], BytePattern::Fixed(0x00));
+    }
+
+    #[test]
+    fn analyze_aobs_user_example() {
+        let content = "07 00 00 00 01 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 10 B2 DA 97 B2 02 00 00 A0 6B DA 97 B2 02
+08 00 00 00 01 00 00 00 EB FF FF FF 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02
+09 00 00 00 01 00 00 00 EB FF FF FF 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02
+09 00 00 00 01 00 00 00 EA FF FF FF 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02
+FF FF FF FF 01 00 00 00 EA FF FF FF 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02
+FF FF FF FF 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02
+01 00 00 00 01 00 00 00 FF 00 EB 00 00 00 00 00 00 00 00 00 E0 54 11 15 57 02 00 00 E0 AA 10 15 57 02";
+        let pattern = analyze_aobs(content);
+
+        // The algorithm should work - just verify it produces a pattern
+        assert!(!pattern.is_empty());
+        // First byte varies (07, 08, 09, FF, FF, 01) - no shared nibbles
+        assert_eq!(pattern[0], BytePattern::Wildcard);
+    }
+
+    #[test]
+    fn parse_aobs_simple_hex() {
+        let content = "AB CD EF\n12 34 56";
+        let aobs = parse_aobs(content);
+        assert_eq!(aobs.len(), 2);
+        assert_eq!(aobs[0].bytes.len(), 3);
+        assert_eq!(aobs[1].bytes.len(), 3);
+        assert!(!aobs[0].is_expanded);
+        assert!(!aobs[1].is_expanded);
+    }
+
+    #[test]
+    fn parse_aobs_with_comments() {
+        let content = "# Comment\nAB CD EF\n// Another comment\n12 34 56";
+        let aobs = parse_aobs(content);
+        assert_eq!(aobs.len(), 2);
+    }
+
+    #[test]
+    fn parse_aobs_with_prefixes() {
+        let content = "- AB CD EF\n* 12 34 56";
+        let aobs = parse_aobs(content);
+        assert_eq!(aobs.len(), 2);
+    }
+
+    #[test]
+    fn parse_aobs_empty_lines() {
+        let content = "AB CD EF\n\n\n12 34 56";
+        let aobs = parse_aobs(content);
+        assert_eq!(aobs.len(), 2);
+    }
+
+    #[test]
+    fn aob_matches_pattern_exact() {
+        let aob = vec![Some(0xAB), Some(0xCD), Some(0xEF)];
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Fixed(0xCD),
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(aob_matches_pattern(&aob, &pattern));
+    }
+
+    #[test]
+    fn aob_matches_pattern_with_wildcard() {
+        let aob = vec![Some(0xAB), Some(0xCD), Some(0xEF)];
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(aob_matches_pattern(&aob, &pattern));
+    }
+
+    #[test]
+    fn aob_matches_pattern_mismatch() {
+        let aob = vec![Some(0xAB), Some(0xCD), Some(0xEF)];
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Fixed(0x00),
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(!aob_matches_pattern(&aob, &pattern));
+    }
+
+    #[test]
+    fn aob_matches_pattern_length_mismatch() {
+        let aob = vec![Some(0xAB), Some(0xCD)];
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Fixed(0xCD),
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(!aob_matches_pattern(&aob, &pattern));
+    }
+
+    #[test]
+    fn aob_matches_pattern_aob_wildcard() {
+        let aob = vec![Some(0xAB), None, Some(0xEF)];
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(aob_matches_pattern(&aob, &pattern));
+    }
+
+    #[test]
+    fn aob_matches_pattern_aob_wildcard_mismatch() {
+        let aob = vec![Some(0xAB), None, Some(0xEF)];
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Fixed(0x00),
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(!aob_matches_pattern(&aob, &pattern));
+    }
+
+    #[test]
+    fn instance_matches_pattern_exact() {
+        let instance = AobInstance {
+            bytes: vec![Some(0xAB), Some(0xCD), Some(0xEF)],
+            line_num: 1,
+            is_expanded: false,
+            wildcard_positions: vec![false; 3],
+        };
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Fixed(0xCD),
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(instance_matches_pattern(&instance, &pattern));
+    }
+
+    #[test]
+    fn instance_matches_pattern_with_wildcard() {
+        let instance = AobInstance {
+            bytes: vec![Some(0xAB), Some(0xCD), Some(0xEF)],
+            line_num: 1,
+            is_expanded: false,
+            wildcard_positions: vec![false; 3],
+        };
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Wildcard,
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(instance_matches_pattern(&instance, &pattern));
+    }
+
+    #[test]
+    fn instance_matches_pattern_mismatch() {
+        let instance = AobInstance {
+            bytes: vec![Some(0xAB), Some(0xCD), Some(0xEF)],
+            line_num: 1,
+            is_expanded: false,
+            wildcard_positions: vec![false; 3],
+        };
+        let pattern = vec![
+            BytePattern::Fixed(0xAB),
+            BytePattern::Fixed(0x00),
+            BytePattern::Fixed(0xEF),
+        ];
+        assert!(!instance_matches_pattern(&instance, &pattern));
+    }
 }

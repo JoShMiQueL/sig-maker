@@ -1,25 +1,26 @@
 // Sig-Maker GUI — frontend logic
 // Runs inside Tauri (window.__TAURI__ available via withGlobalTauri) or
-// a plain browser hitting the test HTTP server (sig-maker-testserver).
+// a plain browser hitting the dev HTTP server (localhost:7331).
 
 // ── Backend abstraction ───────────────────────────────────────────────────────
 const isTauri = !!(window.__TAURI__ && window.__TAURI__.core);
 
 async function invokeCommand(command, args = {}) {
   if (isTauri) {
+    // Production: Use Tauri IPC
     return window.__TAURI__.core.invoke(command, args);
   }
-  // HTTP fallback (test server)
+  // Development: HTTP fallback (dev server at localhost:7331)
   if (command === "get_formats") {
-    const res = await fetch("/api/formats");
+    const res = await fetch("http://localhost:7331/api/formats");
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   }
   if (command === "convert_pattern") {
-    const res = await fetch("/api/convert", {
+    const res = await fetch("http://localhost:7331/api/convert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input: args.input, format_id: args.formatId }),
+      body: JSON.stringify({ input: args.input, formatId: args.formatId }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? res.statusText);
@@ -141,7 +142,6 @@ async function doConvert() {
           <div class="stats">
             <span><strong>${result.byte_count}</strong> bytes</span>
             <span><strong>${result.wildcard_count}</strong> full wildcards</span>
-            <span>Specificity <strong>${(result.specificity * 100).toFixed(1)}%</strong></span>
           </div>
         `;
         const copyBtn = card.querySelector(".copy-btn");

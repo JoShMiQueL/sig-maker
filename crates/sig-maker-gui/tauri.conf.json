@@ -4,9 +4,7 @@
   "version": "0.1.2-beta",
   "identifier": "com.joshmiguel.sig-maker",
   "build": {
-    "devUrl": "http://localhost:4321",
-    "frontendDist": "./frontend/dist",
-    "beforeBuildCommand": "powershell -ExecutionPolicy Bypass -Command \"Set-Location frontend; npm run build\""
+    "frontendDist": "frontend/dist"
   },
   "app": {
     "withGlobalTauri": true,

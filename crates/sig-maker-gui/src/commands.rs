@@ -2,9 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use sig_maker_core::formats::Format;
-use sig_maker_core::{
-    analyze_aobs, convert_to_format, get_pattern_stats, parse_aobs, parse_single_pattern,
-};
+use sig_maker_core::{analyze_aobs, convert_to_format, parse_aobs, parse_single_pattern};
 
 /// A format entry returned to the frontend
 #[derive(Debug, Serialize, Deserialize)]
@@ -19,7 +17,6 @@ pub struct ConversionResult {
     pub output: String,
     pub byte_count: usize,
     pub wildcard_count: usize,
-    pub specificity: f64,
 }
 
 /// Return all supported formats for the UI dropdown
@@ -51,7 +48,7 @@ pub fn convert_pattern(input: String, format_id: String) -> Result<ConversionRes
         .filter(|l| !l.is_empty() && !l.starts_with('#') && !l.starts_with("//"))
         .collect();
 
-    let (parsed, stats) = if non_empty_lines.len() >= 2 {
+    let parsed = if non_empty_lines.len() >= 2 {
         // Multiple lines: use AOB analysis to find optimal pattern
         let aobs = parse_aobs(&input);
         if aobs.len() < 2 {
@@ -73,22 +70,25 @@ pub fn convert_pattern(input: String, format_id: String) -> Result<ConversionRes
             }
         }
 
-        let (pattern, stats) = analyze_aobs(&input);
-        (pattern, stats)
+        analyze_aobs(&input)
     } else {
         // Single pattern: parse and convert directly
-        let parsed = parse_single_pattern(&input)
-            .ok_or_else(|| "Could not parse pattern — check the input format".to_string())?;
-        let stats = get_pattern_stats(&parsed);
-        (parsed, stats)
+        parse_single_pattern(&input)
+            .ok_or_else(|| "Could not parse pattern — check the input format".to_string())?
     };
 
     let output = convert_to_format(&parsed, format);
 
+    // Calculate stats from the pattern
+    let byte_count = parsed.len();
+    let wildcard_count = parsed
+        .iter()
+        .filter(|b| matches!(b, sig_maker_core::BytePattern::Wildcard))
+        .count();
+
     Ok(ConversionResult {
         output,
-        byte_count: stats.total_bytes(),
-        wildcard_count: stats.full_wildcards(),
-        specificity: stats.compression_ratio(),
+        byte_count,
+        wildcard_count,
     })
 }

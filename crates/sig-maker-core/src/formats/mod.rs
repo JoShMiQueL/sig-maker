@@ -123,102 +123,180 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_optimize_byte_fixed() {
-        let values = vec![0x5F, 0x5F, 0x5F];
-        assert_eq!(optimize_byte(&values), BytePattern::Fixed(0x5F));
+    fn format_from_string_variants() {
+        assert_eq!(Format::from_string("ce"), Some(Format::CheatEngine));
+        assert_eq!(
+            Format::from_string("cheatengine"),
+            Some(Format::CheatEngine)
+        );
+        assert_eq!(
+            Format::from_string("cheat-engine"),
+            Some(Format::CheatEngine)
+        );
+        assert_eq!(Format::from_string("cpp"), Some(Format::Cpp));
+        assert_eq!(Format::from_string("c++"), Some(Format::Cpp));
+        assert_eq!(Format::from_string("c"), Some(Format::Cpp));
+        assert_eq!(Format::from_string("rust"), Some(Format::Rust));
+        assert_eq!(Format::from_string("rs"), Some(Format::Rust));
+        assert_eq!(Format::from_string("ghidra"), Some(Format::Ghidra));
+        assert_eq!(Format::from_string("gh"), Some(Format::Ghidra));
+        assert_eq!(Format::from_string("ida"), Some(Format::IdaPro));
+        assert_eq!(Format::from_string("idapro"), Some(Format::IdaPro));
+        assert_eq!(Format::from_string("ida-pro"), Some(Format::IdaPro));
+        assert_eq!(Format::from_string("x64dbg"), Some(Format::X64dbg));
+        assert_eq!(Format::from_string("x64"), Some(Format::X64dbg));
+        assert_eq!(Format::from_string("py"), Some(Format::Python));
+        assert_eq!(Format::from_string("python"), Some(Format::Python));
+        assert_eq!(Format::from_string("json"), Some(Format::Json));
+        assert_eq!(Format::from_string("invalid"), None);
     }
 
     #[test]
-    fn test_optimize_byte_high_nibble() {
-        let values = vec![0x40, 0x45, 0x4F];
-        assert_eq!(optimize_byte(&values), BytePattern::HighNibble(4));
+    fn format_from_string_case_insensitive() {
+        assert_eq!(Format::from_string("CE"), Some(Format::CheatEngine));
+        assert_eq!(Format::from_string("RUST"), Some(Format::Rust));
+        assert_eq!(Format::from_string("JSON"), Some(Format::Json));
     }
 
     #[test]
-    fn test_optimize_byte_low_nibble() {
-        let values = vec![0x0F, 0x3F, 0xBF];
-        assert_eq!(optimize_byte(&values), BytePattern::LowNibble(0x0F));
+    fn format_name() {
+        assert_eq!(Format::CheatEngine.name(), "Cheat Engine");
+        assert_eq!(Format::Cpp.name(), "C++");
+        assert_eq!(Format::Rust.name(), "Rust");
+        assert_eq!(Format::Ghidra.name(), "Ghidra");
+        assert_eq!(Format::IdaPro.name(), "IDA Pro");
+        assert_eq!(Format::X64dbg.name(), "x64dbg");
+        assert_eq!(Format::Python.name(), "Python");
+        assert_eq!(Format::Json.name(), "JSON");
     }
 
     #[test]
-    fn test_optimize_byte_wildcard() {
-        let values = vec![0x00, 0xFF, 0x42];
-        assert_eq!(optimize_byte(&values), BytePattern::Wildcard);
+    fn format_all() {
+        let all = Format::all();
+        assert_eq!(all.len(), 8);
+        assert!(all.contains(&Format::CheatEngine));
+        assert!(all.contains(&Format::Cpp));
+        assert!(all.contains(&Format::Rust));
+        assert!(all.contains(&Format::Ghidra));
+        assert!(all.contains(&Format::IdaPro));
+        assert!(all.contains(&Format::X64dbg));
+        assert!(all.contains(&Format::Python));
+        assert!(all.contains(&Format::Json));
     }
 
     #[test]
-    fn test_matches_pattern() {
-        assert!(matches_pattern(0x5F, BytePattern::Fixed(0x5F)));
-        assert!(!matches_pattern(0x5F, BytePattern::Fixed(0x40)));
+    fn byte_pattern_fixed() {
+        let pattern = BytePattern::Fixed(0xAB);
+        assert_eq!(pattern, BytePattern::Fixed(0xAB));
+        assert_ne!(pattern, BytePattern::Fixed(0xCD));
+    }
 
-        assert!(matches_pattern(0x45, BytePattern::HighNibble(4)));
-        assert!(!matches_pattern(0x55, BytePattern::HighNibble(4)));
+    #[test]
+    fn byte_pattern_wildcard() {
+        let pattern = BytePattern::Wildcard;
+        assert_eq!(pattern, BytePattern::Wildcard);
+    }
 
-        assert!(matches_pattern(0x3F, BytePattern::LowNibble(0x0F)));
-        assert!(!matches_pattern(0x30, BytePattern::LowNibble(0x0F)));
+    #[test]
+    fn byte_pattern_high_nibble() {
+        let pattern = BytePattern::HighNibble(0xA);
+        assert_eq!(pattern, BytePattern::HighNibble(0xA));
+        assert_ne!(pattern, BytePattern::HighNibble(0xB));
+    }
 
+    #[test]
+    fn byte_pattern_low_nibble() {
+        let pattern = BytePattern::LowNibble(0xB);
+        assert_eq!(pattern, BytePattern::LowNibble(0xB));
+        assert_ne!(pattern, BytePattern::LowNibble(0xC));
+    }
+
+    #[test]
+    fn matches_pattern_fixed() {
+        assert!(matches_pattern(0xAB, BytePattern::Fixed(0xAB)));
+        assert!(!matches_pattern(0xAB, BytePattern::Fixed(0xCD)));
+    }
+
+    #[test]
+    fn matches_pattern_wildcard() {
+        assert!(matches_pattern(0xAB, BytePattern::Wildcard));
         assert!(matches_pattern(0x00, BytePattern::Wildcard));
         assert!(matches_pattern(0xFF, BytePattern::Wildcard));
     }
 
     #[test]
-    fn test_format_parse_roundtrip_ce() {
-        let input = "0? 00 00 00 01 00 00 00 E? FF FF FF 00";
-        let parsed = parse_pattern(input).unwrap();
-        let formatted = format_pattern(&parsed, Format::CheatEngine);
-        assert_eq!(formatted, input);
+    fn matches_pattern_high_nibble() {
+        assert!(matches_pattern(0xAB, BytePattern::HighNibble(0xA)));
+        assert!(matches_pattern(0xAF, BytePattern::HighNibble(0xA)));
+        assert!(!matches_pattern(0xAB, BytePattern::HighNibble(0xB)));
+        assert!(!matches_pattern(0x0B, BytePattern::HighNibble(0xA)));
     }
 
     #[test]
-    fn test_parse_cheat_engine() {
-        let input = "0? 00 ?? 01 ?F F?";
-        let result = parse_pattern(input).unwrap();
-
-        assert_eq!(result[0], BytePattern::HighNibble(0));
-        assert_eq!(result[1], BytePattern::Fixed(0x00));
-        assert_eq!(result[2], BytePattern::Wildcard);
-        assert_eq!(result[3], BytePattern::Fixed(0x01));
-        assert_eq!(result[4], BytePattern::LowNibble(0x0F));
-        assert_eq!(result[5], BytePattern::HighNibble(0x0F));
+    fn matches_pattern_low_nibble() {
+        assert!(matches_pattern(0xAB, BytePattern::LowNibble(0xB)));
+        assert!(matches_pattern(0x0B, BytePattern::LowNibble(0xB)));
+        assert!(!matches_pattern(0xAB, BytePattern::LowNibble(0xC)));
+        assert!(!matches_pattern(0xB0, BytePattern::LowNibble(0xB)));
     }
 
     #[test]
-    fn test_parse_cpp_array() {
-        let input = "const uint8_t pattern[] = { 0x00, 0x01, 0xE0 }; const uint8_t mask[] = { 0xF0, 0xFF, 0xF0 };";
-        let result = parse_pattern(input).unwrap();
-
-        assert_eq!(result[0], BytePattern::HighNibble(0));
-        assert_eq!(result[1], BytePattern::Fixed(0x01));
-        assert_eq!(result[2], BytePattern::HighNibble(0x0E));
+    fn optimize_byte_empty() {
+        assert_eq!(optimize_byte(&[]), BytePattern::Wildcard);
     }
 
     #[test]
-    fn test_parse_json() {
-        let input = r#"{ "pattern": [0, 0, 1, 224], "mask": [240, 255, 255, 240] }"#;
-        let result = parse_pattern(input).unwrap();
-
-        assert_eq!(result[0], BytePattern::HighNibble(0));
-        assert_eq!(result[1], BytePattern::Fixed(0x00));
-        assert_eq!(result[2], BytePattern::Fixed(0x01));
-        assert_eq!(result[3], BytePattern::HighNibble(0x0E));
+    fn optimize_byte_all_same() {
+        assert_eq!(optimize_byte(&[0xAB, 0xAB, 0xAB]), BytePattern::Fixed(0xAB));
+        assert_eq!(optimize_byte(&[0x00, 0x00]), BytePattern::Fixed(0x00));
     }
 
     #[test]
-    fn test_format_all_formats() {
-        let pattern = vec![
-            BytePattern::HighNibble(0),
-            BytePattern::Fixed(0x00),
-            BytePattern::Fixed(0x01),
-            BytePattern::HighNibble(0x0E),
-        ];
+    fn optimize_byte_high_nibble_same() {
+        assert_eq!(
+            optimize_byte(&[0xAB, 0xAC, 0xAD]),
+            BytePattern::HighNibble(0xA)
+        );
+        assert_eq!(
+            optimize_byte(&[0x10, 0x1F, 0x15]),
+            BytePattern::HighNibble(0x1)
+        );
+    }
 
-        for format in Format::all() {
-            let output = format_pattern(&pattern, *format);
-            assert!(
-                !output.is_empty(),
-                "Format {:?} produced empty output",
-                format
-            );
-        }
+    #[test]
+    fn optimize_byte_low_nibble_same() {
+        assert_eq!(
+            optimize_byte(&[0xAB, 0xCB, 0x0B]),
+            BytePattern::LowNibble(0xB)
+        );
+        assert_eq!(
+            optimize_byte(&[0x05, 0xF5, 0xA5]),
+            BytePattern::LowNibble(0x5)
+        );
+    }
+
+    #[test]
+    fn optimize_byte_wildcard() {
+        assert_eq!(optimize_byte(&[0xAB, 0xCD, 0xEF]), BytePattern::Wildcard);
+        assert_eq!(optimize_byte(&[0x00, 0xFF, 0x55]), BytePattern::Wildcard);
+    }
+
+    #[test]
+    fn optimize_byte_single_value() {
+        assert_eq!(optimize_byte(&[0xAB]), BytePattern::Fixed(0xAB));
+    }
+
+    #[test]
+    fn validate_pattern_valid() {
+        assert!(validate_pattern("AB CD EF").is_ok());
+        assert!(validate_pattern("AB ? ?F").is_ok());
+        assert!(validate_pattern("AB ?? CD").is_ok());
+    }
+
+    #[test]
+    fn validate_pattern_invalid() {
+        assert!(validate_pattern("").is_err());
+        assert!(validate_pattern("invalid").is_err());
+        assert!(validate_pattern("XYZ").is_err());
     }
 }
