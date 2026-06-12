@@ -12,7 +12,7 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Validate that the tag version matches Cargo.toml workspace version
+  # Read tag version, auto-bump Cargo.toml + tauri.conf.json, push bump commit
   # ---------------------------------------------------------------------------
   pre-checks:
     name: Pre-release checks
@@ -22,11 +22,13 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
       version: ${{ steps.version.outputs.version }}
       prerelease: ${{ steps.version.outputs.prerelease }}
+      sha: ${{ steps.bump.outputs.sha }}
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
 
       - name: Extract tag version
         id: version
@@ -45,15 +47,26 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Validate tag matches Cargo.toml
+      - name: Bump version in Cargo.toml and tauri.conf.json
+        id: bump
         run: |
-          CARGO_VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
-          TAG_VERSION="${{ steps.version.outputs.version }}"
-          if [ "${CARGO_VERSION}" != "${TAG_VERSION}" ]; then
-            echo "ERROR: Tag version '${TAG_VERSION}' does not match Cargo.toml version '${CARGO_VERSION}'"
-            exit 1
+          VERSION="${{ steps.version.outputs.version }}"
+          # Update workspace Cargo.toml
+          sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" Cargo.toml
+          # Update tauri.conf.json
+          sed -i "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" crates/sig-maker-gui/tauri.conf.json
+          # Check if anything changed
+          if git diff --quiet; then
+            echo "Version already at ${VERSION}, no bump needed."
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add Cargo.toml crates/sig-maker-gui/tauri.conf.json
+            git commit -m "chore(release): bump version to ${VERSION} [skip ci]"
+            git push origin HEAD:main
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
-          echo "Version match: ${CARGO_VERSION}"
 
   # ---------------------------------------------------------------------------
   # Build CLI for 5 platforms
@@ -91,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ needs.pre-checks.outputs.sha }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -144,7 +157,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ needs.pre-checks.outputs.sha }}
 
       - name: Install system dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -244,7 +257,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ needs.pre-checks.outputs.sha }}
           fetch-depth: 0
 
       - name: Download all artifacts
