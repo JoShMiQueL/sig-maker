@@ -145,7 +145,7 @@ mod tests {
     fn process_input_simple_pattern() {
         setup_test_env();
         let config = cli::Config {
-            input_file: "AB CD EF".to_string(),
+            input_file: "AB ?? CD ?? EF".to_string(),
             to_format: Some(formats::Format::CheatEngine),
             output_file: None,
             verbose: false,
@@ -162,7 +162,7 @@ mod tests {
     fn process_input_check_only_valid() {
         setup_test_env();
         let config = cli::Config {
-            input_file: "AB CD EF".to_string(),
+            input_file: "AB ?? CD ?? EF".to_string(),
             to_format: None,
             output_file: None,
             verbose: false,
@@ -214,7 +214,7 @@ mod tests {
     fn process_input_verbose() {
         setup_test_env();
         let config = cli::Config {
-            input_file: "AB CD EF".to_string(),
+            input_file: "AB ?? CD ?? EF".to_string(),
             to_format: Some(formats::Format::CheatEngine),
             output_file: None,
             verbose: true,
@@ -231,7 +231,7 @@ mod tests {
     fn process_input_quiet() {
         setup_test_env();
         let config = cli::Config {
-            input_file: "AB CD EF".to_string(),
+            input_file: "AB ?? CD ?? EF".to_string(),
             to_format: Some(formats::Format::CheatEngine),
             output_file: None,
             verbose: false,
