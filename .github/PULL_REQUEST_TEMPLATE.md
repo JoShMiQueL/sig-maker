@@ -21,13 +21,6 @@ Closes #(issue number)
 -
 -
 
-## Testing
-<!-- Describe how you tested the changes -->
-- [ ] Ran `cargo test` — all tests pass
-- [ ] Ran `cargo clippy -- -D warnings` — no warnings
-- [ ] Ran `cargo fmt -- --check` — code is formatted
-- [ ] Manual testing (describe steps)
-
 ## Checklist
 - [ ] Code follows the project's style guidelines
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
