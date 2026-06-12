@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
+## [Unreleased]
 
 ### Bug Fixes
 
@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **ci:** use separate --bundles flags for nsis and zip on Windows by [@JoShMiQueL](https://github.com/JoShMiQueL) ([46e6e44](https://github.com/JoShMiQueL/sig-maker/commit/46e6e44825268bbc14be1556d2e863c77df4d7be))
 
+
+- **deps:** pin tauri-utils to 2.8.3 and time to 0.3.46 to avoid E0119 by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c4c7906](https://github.com/JoShMiQueL/sig-maker/commit/c4c79060962587055ee5ddbc1d85811cb52ce34a))
+
 ### CI/CD
 
 
@@ -42,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **release:** add portable ZIP bundle for Windows GUI by [@JoShMiQueL](https://github.com/JoShMiQueL) ([4e7eb6a](https://github.com/JoShMiQueL/sig-maker/commit/4e7eb6a854274ad9f3592c0b7eae1012cb2b254c))
+
+
+- **release:** restore all-platform GUI builds + optimize cache by [@JoShMiQueL](https://github.com/JoShMiQueL) ([55023de](https://github.com/JoShMiQueL/sig-maker/commit/55023de810717b105cd288e423d4f151ea1053a3))
 
 ### Documentation
 
@@ -68,7 +74,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
-**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.2-beta-test...v0.1.3-beta
 ## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
 
 ### Bug Fixes
