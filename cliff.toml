@@ -19,8 +19,8 @@ body = """
 ### {{ group | upper_first }}
 {% for commit in commits %}
 - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message }}{% if commit.breaking %} [**BREAKING**]{% endif %}\
-{% if commit.id %}{% if commit.message is not containing("[[#") %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/JoShMiQueL/sig-maker/commit/{{ commit.id }})){% endif %}{% endif %}\
 {% if commit.author.name %} by [@{{ commit.author.name }}](https://github.com/{{ commit.author.name }}){% endif %}\
+{% if commit.id %}{% if commit.message is not containing("[[#") %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/JoShMiQueL/sig-maker/commit/{{ commit.id }})){% endif %}{% endif %}\
 {% endfor %}
 {% endfor %}
 
