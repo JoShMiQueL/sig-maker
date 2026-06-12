@@ -26,12 +26,20 @@ body = """
 
 {% set contributors = commits | map(attribute="author.name") | unique | sort %}
 {% set past_contributors = previous.commits | map(attribute="author.name") | unique | sort %}
+{%- set_global has_new = false -%}
+{%- for contributor in contributors -%}
+  {%- if contributor is not containing("[bot]") and contributor not in past_contributors -%}
+    {%- set_global has_new = true -%}
+  {%- endif -%}
+{%- endfor -%}
+{% if has_new %}
 ### New Contributors
 {% for contributor in contributors %}
 {%- if contributor is not containing("[bot]") and contributor not in past_contributors -%}
 - [@{{ contributor }}](https://github.com/{{ contributor }}) made their first contribution
 {% endif -%}
 {% endfor %}
+{% endif %}
 ### Contributors
 {% for contributor in contributors %}
 {% if contributor is not containing("[bot]") -%}
