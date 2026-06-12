@@ -32,17 +32,37 @@ jobs:
         with:
           key: ${{ matrix.os }}
 
+      - name: Install system dependencies (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: crates/sig-maker-gui/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd crates/sig-maker-gui/frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd crates/sig-maker-gui/frontend
+          npm run build
+
       - name: Check formatting
         run: cargo fmt -- --check
 
-      - name: Run clippy on core
-        run: cargo clippy --package sig-maker-core -- -D warnings
+      - name: Run clippy on workspace
+        run: cargo clippy --workspace -- -D warnings
 
-      - name: Run tests on core
-        run: cargo test --package sig-maker-core --verbose
+      - name: Run tests on workspace
+        run: cargo test --workspace --verbose
 
-      - name: Build core library
-        run: cargo build --package sig-maker-core
-
-      - name: Build CLI
-        run: cargo build --package sig-maker-cli
+      - name: Build workspace
+        run: cargo build --workspace
