@@ -201,7 +201,7 @@ jobs:
         run: npm run build
 
       - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "^2" --locked
+        run: cargo install tauri-cli --version "2.11.2" --locked
 
       - name: Build GUI (Windows - NSIS + Portable)
         if: matrix.os == 'windows-2025-vs2026'
