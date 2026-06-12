@@ -26,6 +26,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install git-cliff
+        run: |
+          curl -sSL https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-x86_64-unknown-linux-musl.tar.gz -o git-cliff.tar.gz
+          tar -xzf git-cliff.tar.gz
+          sudo mv git-cliff /usr/local/bin/
+          git-cliff --version
+
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
         with:
@@ -51,6 +58,8 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/generate-release-body.sh
           .github/workflows/scripts/generate-release-body.sh ${{ steps.previous_tag.outputs.previous_tag }} ${{ github.ref_name }} release_notes.md
+        env:
+          PATH: ${{ env.PATH }}:/usr/local/bin
 
       - name: Extract changelog section (fallback if no previous tag)
         if: steps.previous_tag.outputs.previous_tag == ''
