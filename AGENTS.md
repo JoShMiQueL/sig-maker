@@ -237,23 +237,23 @@ Releases are **fully automated** via GitHub Actions. To release:
 The `.github/workflows/release.yml` workflow will automatically:
 - Validate tag format and version match
 - Build CLI for 5 platforms (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
-- Build GUI for Windows only (NSIS installer + Portable ZIP)
+- Build GUI for 3 platforms (Linux AppImage, macOS DMG, Windows NSIS + Portable ZIP)
 - Generate changelog via git-cliff
-- Create GitHub Release with all artifacts
+- Create GitHub Release with all artifacts + install scripts
 - Generate SHA-256 checksums
-- Create SLSA build provenance attestations
-- Commit updated CHANGELOG.md
 
 **Note:** fmt, clippy, and tests are NOT re-run in release workflow. These are validated by the existing CI workflow (`.github/workflows/ci.yml`) on every push/PR. Only tag validation is performed in release workflow.
 
 **Artifacts Generated:**
 - CLI: 5 binaries (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
-- GUI: 2 Windows artifacts (NSIS installer + Portable ZIP)
-- Total: 7 artifacts per release
+- GUI: Linux AppImage, macOS DMG, Windows NSIS installer + Portable ZIP
+- Install scripts: `install.sh` (curl | sh), `install.ps1` (irm | iex)
+- Total: ~9 artifacts per release
 
-**Known limitation:** GUI Linux AppImage and macOS DMG are temporarily disabled.
-`tauri-utils 2.9.2` has a coherence bug with `rustc 1.96.0` (E0119).
-Re-enable once fixed: https://github.com/tauri-apps/tauri/issues/15525
+**Dependency pinning:** `Cargo.lock` is committed for reproducible builds.
+`tauri-utils` is pinned to `2.8.3` and `time` to `0.3.46` in `Cargo.lock` to avoid
+an E0119 coherence bug present in `tauri-utils 2.9.x` + `time 0.3.47+`.
+Track: https://github.com/tauri-apps/tauri/issues/15525
 
 **Release Duration:** ~12-15 minutes (with cache)
 
