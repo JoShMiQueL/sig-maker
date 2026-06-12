@@ -16,7 +16,7 @@ fi
 
 # Generate changelog using cliff.toml
 TEMP_FILE=$(mktemp)
-git cliff --config cliff.toml "${PREVIOUS_TAG}..${CURRENT_TAG}" --output "$TEMP_FILE" --offline
+git-cliff --config cliff.toml "${PREVIOUS_TAG}..${CURRENT_TAG}" --output "$TEMP_FILE" --offline
 
 # Read the generated changelog
 CONTENT=$(cat "$TEMP_FILE")
