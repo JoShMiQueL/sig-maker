@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add release and changelog workflows ([c29d5bd](https://github.com/JoShMiQueL/sig-maker/commit/c29d5bd2ed27b01e69465498ef603529a8c40514)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 - **changelog:** use GH_PAT to bypass branch protection on push ([3b54a02](https://github.com/JoShMiQueL/sig-maker/commit/3b54a0221ca4ff940386c31ed5aa7babff433cd9)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 - **changelog:** add New Contributors section and fix header/footer split ([63ad40a](https://github.com/JoShMiQueL/sig-maker/commit/63ad40a74296bf9b36280912a9f2d0a833a02ecf)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
+- **changelog:** hide New Contributors section when empty ([856c3fb](https://github.com/JoShMiQueL/sig-maker/commit/856c3fb16fb016ab78e8a7569fac53d592ba9762)) by [@JoShMiQueL](https://github.com/JoShMiQueL)
 
 ### Documentation
 
@@ -57,8 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-
-### New Contributors
 
 ### Contributors
 
@@ -160,8 +159,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-### New Contributors
-
 ### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
@@ -191,6 +188,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Contributors
 - [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
+
 
 ### Contributors
 
