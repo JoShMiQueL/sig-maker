@@ -10,7 +10,7 @@ resolver = "2"
 # Additional metadata can be added here
 
 [workspace.package]
-version = "0.1.2-beta"
+version = "0.1.2-beta-test"
 edition = "2024"
 authors = ["JoShMiQueL"]
 description = "Multi-format signature/pattern converter and optimizer"
