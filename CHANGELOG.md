@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+- **gui:** pin @tauri-apps/api to =2.9.0 to match tauri crate 2.9.2 by [@JoShMiQueL](https://github.com/JoShMiQueL) ([a558217](https://github.com/JoShMiQueL/sig-maker/commit/a5582175c18a7d639ed04dcd36b4080e2324f683))
+
+
+
+
+### Contributors
+
+- [@JoShMiQueL](https://github.com/JoShMiQueL)
+
+## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
+
+### Bug Fixes
+
+
+
 - **cli:** serialize env-var tests with mutex to prevent race conditions by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6055174](https://github.com/JoShMiQueL/sig-maker/commit/6055174e3f1a054d10d1c62e29aea6279a646631))
 
 
@@ -74,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
+**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.2-beta-test...v0.1.3-beta
 ## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
 
 ### Bug Fixes
