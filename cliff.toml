@@ -18,9 +18,11 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {% for commit in commits %}
-- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message }}{% if commit.breaking %} [**BREAKING**]{% endif %}\
+{% set has_pr = commit.message is containing("[[#") %}
+{% if has_pr %}{% set parts = commit.message | split(pat=" [[#") %}{% set msg = parts[0] %}{% set pr_link = "[[#" ~ parts[1] %}{% else %}{% set msg = commit.message %}{% endif %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ msg }}{% if commit.breaking %} [**BREAKING**]{% endif %}\
 {% if commit.author.name %} by [@{{ commit.author.name }}](https://github.com/{{ commit.author.name }}){% endif %}\
-{% if commit.id %}{% if commit.message is not containing("[[#") %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/JoShMiQueL/sig-maker/commit/{{ commit.id }})){% endif %}{% endif %}\
+{% if has_pr %} {{ pr_link }}{% elif commit.id %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/JoShMiQueL/sig-maker/commit/{{ commit.id }})){% endif %}\
 {% endfor %}
 {% endfor %}
 
