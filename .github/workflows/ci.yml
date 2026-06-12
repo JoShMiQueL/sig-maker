@@ -3,22 +3,16 @@ name: CI
 on:
   push:
     branches: [main]
-    paths:
-      - 'crates/**/*.rs'
-      - '**/Cargo.toml'
-      - 'scripts/**'
-      - '.github/workflows/*.yml'
-      - 'crates/sig-maker-gui/tauri.conf.json'
-      - 'crates/sig-maker-gui/frontend/**'
+    paths-ignore:
+      - '**.md'
+      - '.devin/**'
+      - '.github/**'
   pull_request:
     branches: [main]
-    paths:
-      - 'crates/**/*.rs'
-      - '**/Cargo.toml'
-      - 'scripts/**'
-      - '.github/workflows/*.yml'
-      - 'crates/sig-maker-gui/tauri.conf.json'
-      - 'crates/sig-maker-gui/frontend/**'
+    paths-ignore:
+      - '**.md'
+      - '.devin/**'
+      - '.github/**'
 
 env:
   CARGO_TERM_COLOR: always
