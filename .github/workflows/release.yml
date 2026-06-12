@@ -211,6 +211,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         with:
           args: ${{ matrix.args }}
+        env:
+          TAURI_CLI_VERSION: 2.1.1
 
       - name: Upload GUI artifacts
         uses: actions/upload-artifact@v7
