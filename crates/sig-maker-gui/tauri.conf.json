@@ -5,7 +5,7 @@
   "identifier": "com.joshmiguel.sig-maker",
   "build": {
     "beforeDevCommand": "cd frontend && npm run dev",
-    "beforeBuildCommand": "cd frontend && npm run build",
+    "beforeBuildCommand": "",
     "devUrl": "http://localhost:4321",
     "frontendDist": "frontend/dist"
   },
