@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **release:** auto-bump Cargo.toml and tauri.conf.json from tag version by [@JoShMiQueL](https://github.com/JoShMiQueL) ([b8e3f9f](https://github.com/JoShMiQueL/sig-maker/commit/b8e3f9fa8c9ba17d021869893ec7e131018f508e))
 
+
+- **release:** build GUI for Windows only until tauri-utils#15525 is fixed by [@JoShMiQueL](https://github.com/JoShMiQueL) ([72b6a1f](https://github.com/JoShMiQueL/sig-maker/commit/72b6a1f39b7bad7c352d4853bd5b0d35ae01278d))
+
 ### Miscellaneous
 
 
