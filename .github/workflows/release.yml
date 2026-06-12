@@ -26,11 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install git-cliff
-        uses: orhun/git-cliff-action@v4
-        with:
-          install-only: true
-
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
         with:
@@ -51,11 +46,14 @@ jobs:
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
 
-      - name: Generate release body
+      - name: Extract changelog section for release
         if: steps.previous_tag.outputs.previous_tag != ''
+        id: changelog
         run: |
-          git-cliff --config cliff.toml "${{ steps.previous_tag.outputs.previous_tag }}..${{ github.ref_name }}" --output release_notes.md --offline
-          echo "**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/${{ steps.previous_tag.outputs.previous_tag }}...${{ github.ref_name }}" >> release_notes.md
+          CHANGELOG_SECTION=$(awk '/^## \[/{if (++n==2) exit; if (n==1) p=1} p' CHANGELOG.md | sed '1d')
+          echo "changelog_section<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_SECTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Extract changelog section (fallback if no previous tag)
         if: steps.previous_tag.outputs.previous_tag == ''
@@ -71,13 +69,6 @@ jobs:
         with:
           name: changelog
           path: CHANGELOG.md
-
-      - name: Upload release notes
-        if: steps.previous_tag.outputs.previous_tag != ''
-        uses: actions/upload-artifact@v7
-        with:
-          name: release-notes
-          path: release_notes.md
 
       - name: Commit CHANGELOG.md
         run: |
