@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Documentation
+
+
+
+- add Tauri GUI release build notes to AGENTS.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([687664b](https://github.com/JoShMiQueL/sig-maker/commit/687664bb1eeba258335c60637e83475260e4617d))
+
+
+
+
+### Contributors
+
+- [@JoShMiQueL](https://github.com/JoShMiQueL)
+
 ## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
 
 ### Bug Fixes
