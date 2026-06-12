@@ -138,6 +138,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           cache-bin: false
+          key: ${{ matrix.os }}-${{ matrix.target }}
 
       - name: Build CLI
         uses: michaelklishin/rust-build-package-release-action@v3
@@ -198,6 +199,7 @@ jobs:
         with:
           cache-bin: false
           workspaces: crates/sig-maker-gui -> target
+          key: ${{ matrix.platform }}-${{ matrix.args }}
 
       - name: Install frontend dependencies
         run: |
