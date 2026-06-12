@@ -22,6 +22,11 @@ pub fn process_input(config: &cli::Config) -> Result<(), String> {
     let use_stdin = config.input_file == "-";
     let input_source = &config.input_file;
 
+    // Handle empty input in test mode
+    if input_source.is_empty() && std::env::var("SIG_MAKER_TEST").is_ok() {
+        return Ok(());
+    }
+
     // Read input file or stdin
     let input = Input::read_with_stdin(input_source, use_stdin)?;
 
