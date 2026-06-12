@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **ci:** use npm @tauri-apps/cli instead of cargo install tauri-cli by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c022864](https://github.com/JoShMiQueL/sig-maker/commit/c022864a29c6a8b1314562f50cdb92646c0b6b89))
 
+
+- **ci:** pin rustc to 1.95.0 for GUI builds to avoid tauri-utils E0119 by [@JoShMiQueL](https://github.com/JoShMiQueL) ([9dc2907](https://github.com/JoShMiQueL/sig-maker/commit/9dc2907a7a6dd69f9a4cae86ffec26caf6a1a6b0))
+
 ### CI/CD
 
 
