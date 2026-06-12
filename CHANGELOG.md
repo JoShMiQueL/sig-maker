@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
 
 ### Bug Fixes
 
@@ -121,6 +121,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - remove release automation scripts by [@JoShMiQueL](https://github.com/JoShMiQueL) ([8e9c751](https://github.com/JoShMiQueL/sig-maker/commit/8e9c751171bba8b5ed5f9aff8b1fd1f08ead03b9))
 
+
+- bump version to 0.1.2-beta-test by [@JoShMiQueL](https://github.com/JoShMiQueL) ([edfe924](https://github.com/JoShMiQueL/sig-maker/commit/edfe924317e6cd2a32dc3c04e9e208d395f97947))
+
 ### Refactoring
 
 
@@ -134,6 +137,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
+**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.1-beta...v0.1.2-beta-test
 ## [v0.1.1-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.1-beta) - 2026-06-10
 
 ### Bug Fixes
