@@ -1,0 +1,75 @@
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+"""
+
+body = """
+{% if version %}\
+## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## [Unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message }}{% if commit.breaking %} [**BREAKING**]{% endif %}\
+{% if commit.id %}{% if commit.message is not containing("[[#") %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/JoShMiQueL/sig-maker/commit/{{ commit.id }})){% endif %}{% endif %}\
+{% if commit.author.name %} by [@{{ commit.author.name }}](https://github.com/{{ commit.author.name }}){% endif %}\
+{% endfor %}
+{% endfor %}
+
+### Contributors
+{% set contributors = commits | map(attribute="author.name") | unique | sort %}
+{% for contributor in contributors %}
+{% if contributor is not containing("[bot]") -%}
+- [@{{ contributor }}](https://github.com/{{ contributor }})
+{% endif -%}
+{% endfor %}
+
+"""
+
+footer = """
+{% for release in releases -%}
+{% if release.version and release.previous and release.previous.version -%}
+[{{ release.version }}]: https://github.com/JoShMiQueL/sig-maker/compare/{{ release.previous.version }}...{{ release.version }}
+{% elif release.version -%}
+[{{ release.version }}]: https://github.com/JoShMiQueL/sig-maker/releases/tag/{{ release.version }}
+{% endif -%}
+{% endfor %}
+"""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+commit_preprocessors = [
+  { pattern = '\(#([0-9]+)\)', replace = "[[#$1](https://github.com/JoShMiQueL/sig-maker/pull/$1)]" },
+]
+commit_parsers = [
+    { message = "update CHANGELOG.md", skip = true },
+    { message = "^feat", group = "Features" },
+    { message = "^fix", group = "Bug Fixes" },
+    { message = "^perf", group = "Performance" },
+    { message = "^refactor", group = "Refactoring" },
+    { message = "^doc", group = "Documentation" },
+    { message = "^test", group = "Testing" },
+    { message = "^build", group = "Build System" },
+    { message = "^ci", group = "CI/CD" },
+    { message = "^chore", group = "Miscellaneous" },
+    { message = "^revert", group = "Reverts" },
+    { message = "^style", skip = true },
+]
+protect_breaking_commits = false
+filter_commits = false
+tag_pattern = "v[0-9].*"
+skip_tags = ""
+ignore_tags = ""
+topo_order = false
+sort_commits = "oldest"
+use_branch_tags = false

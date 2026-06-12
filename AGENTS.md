@@ -227,14 +227,47 @@ act -n -W .github/workflows/ci.yml
 
 ### Releases
 
-Releases are currently manual. To release:
+Releases are **fully automated** via GitHub Actions. To release:
 
-1. Bump version in `Cargo.toml`
+1. Bump version in `Cargo.toml` (workspace.package.version)
 2. Commit: `chore(release): v0.x.x`
-3. Tag: `git tag v0.x.x`
+3. Tag: `git tag v0.x.x` (optional: sign with GPG: `git tag -s v0.x.x`)
 4. Push: `git push && git push --tags`
 
-Release automation will be added later as needed.
+The `.github/workflows/release.yml` workflow will automatically:
+- Validate tag format and version match
+- Build CLI for 5 platforms (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
+- Build GUI for 3 platforms (Linux AppImage, macOS Universal, Windows NSIS + Portable)
+- Generate changelog via git-cliff
+- Create GitHub Release with all artifacts
+- Generate SHA-256 checksums
+- Create SLSA build provenance attestations
+- Commit updated CHANGELOG.md
+
+**Note:** fmt, clippy, and tests are NOT re-run in release workflow. These are validated by the existing CI workflow (`.github/workflows/ci.yml`) on every push/PR. Only tag validation is performed in release workflow.
+
+**Artifacts Generated:**
+- CLI: 5 binaries (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
+- GUI: 4 installers (Linux AppImage, macOS DMG, Windows NSIS + Portable ZIP)
+- Total: 9 artifacts per release
+
+**Release Duration:** ~12-15 minutes (with cache)
+
+**Local Testing with act:**
+```bash
+# Test release workflow locally
+act -W .github/workflows/release.yml -j pre-checks
+```
+
+**Changelog Format:**
+- Uses git-cliff with Conventional Commits
+- Follows Keep a Changelog standard
+- Auto-generates from commit history
+- Commits must follow: `feat:`, `fix:`, `docs:`, etc.
+
+**Breaking Changes:**
+- Use `feat!:` prefix or `BREAKING CHANGE:` footer
+- Automatically highlighted in changelog
 
 ## Code Style
 
