@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Bug Fixes
+
+
+
+- **ci:** use separate --bundles flags for nsis and zip on Windows by [@JoShMiQueL](https://github.com/JoShMiQueL) ([46e6e44](https://github.com/JoShMiQueL/sig-maker/commit/46e6e44825268bbc14be1556d2e863c77df4d7be))
+
 ### Documentation
 
 
