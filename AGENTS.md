@@ -237,7 +237,7 @@ Releases are **fully automated** via GitHub Actions. To release:
 The `.github/workflows/release.yml` workflow will automatically:
 - Validate tag format and version match
 - Build CLI for 5 platforms (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
-- Build GUI for 3 platforms (Linux AppImage, macOS Universal, Windows NSIS + Portable)
+- Build GUI for Windows only (NSIS installer + Portable ZIP)
 - Generate changelog via git-cliff
 - Create GitHub Release with all artifacts
 - Generate SHA-256 checksums
@@ -248,8 +248,12 @@ The `.github/workflows/release.yml` workflow will automatically:
 
 **Artifacts Generated:**
 - CLI: 5 binaries (Linux x64/ARM64, macOS Intel/ARM, Windows x64)
-- GUI: 4 installers (Linux AppImage, macOS DMG, Windows NSIS + Portable ZIP)
-- Total: 9 artifacts per release
+- GUI: 2 Windows artifacts (NSIS installer + Portable ZIP)
+- Total: 7 artifacts per release
+
+**Known limitation:** GUI Linux AppImage and macOS DMG are temporarily disabled.
+`tauri-utils 2.9.2` has a coherence bug with `rustc 1.96.0` (E0119).
+Re-enable once fixed: https://github.com/tauri-apps/tauri/issues/15525
 
 **Release Duration:** ~12-15 minutes (with cache)
 
