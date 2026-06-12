@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
 
 ### Bug Fixes
 
@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **gui:** pin @tauri-apps/api to =2.9.0 to match tauri crate 2.9.2 by [@JoShMiQueL](https://github.com/JoShMiQueL) ([a558217](https://github.com/JoShMiQueL/sig-maker/commit/a5582175c18a7d639ed04dcd36b4080e2324f683))
+
+
+- **gui:** add Tauri icons and configure bundle icon paths by [@JoShMiQueL](https://github.com/JoShMiQueL) ([298262c](https://github.com/JoShMiQueL/sig-maker/commit/298262cbe17f37efa06d672bcdcec4a23ea37d0f))
 
 ### CI/CD
 
@@ -80,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
+**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.2-beta-test...v0.1.3-beta
 ## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
 
 ### Bug Fixes
