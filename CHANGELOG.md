@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
 
 ### Bug Fixes
 
@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **ci:** pin tauri-cli to 2.11.2 to fix E0119 compile error by [@JoShMiQueL](https://github.com/JoShMiQueL) ([59aa7af](https://github.com/JoShMiQueL/sig-maker/commit/59aa7af4c220966f68ec8c25e461a76b029f3526))
+
+
+- **ci:** use npm @tauri-apps/cli instead of cargo install tauri-cli by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c022864](https://github.com/JoShMiQueL/sig-maker/commit/c022864a29c6a8b1314562f50cdb92646c0b6b89))
 
 ### CI/CD
 
@@ -41,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
+**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.2-beta-test...v0.1.3-beta
 ## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
 
 ### Bug Fixes
