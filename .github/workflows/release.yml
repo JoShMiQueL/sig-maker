@@ -171,10 +171,13 @@ jobs:
             librsvg2-dev \
             patchelf
 
+      # Pin to 1.95.0: rustc 1.96.0 tightened coherence rules (next-solver)
+      # which breaks tauri-utils 2.9.2. Remove once tauri-utils is fixed.
+      # Track: https://github.com/tauri-apps/tauri/issues/15525
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
+          toolchain: "1.95.0"
 
       - name: Install macOS universal target
         if: matrix.os == 'macos-latest'
