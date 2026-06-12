@@ -47,7 +47,7 @@ jobs:
         run: cargo test --package sig-maker-core --verbose
 
       - name: Run tests on CLI
-        run: cargo test --package sig-maker-cli --verbose
+        run: cargo test --package sig-maker-cli --verbose -- --nocapture
 
       - name: Build core library
         run: cargo build --package sig-maker-core
