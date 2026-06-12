@@ -15,7 +15,6 @@ pub fn convert_pattern(
         None => {
             // In tests, return early instead of exiting
             if std::env::var("SIG_MAKER_TEST").is_ok() {
-                eprintln!("ERROR: Could not parse input pattern");
                 return;
             }
             crate::cli::error_exit("Could not parse input pattern")
