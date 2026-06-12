@@ -26,10 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install git-cliff
-        run: |
-          cargo install git-cliff --locked
-
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
         with:
@@ -55,8 +51,6 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/generate-release-body.sh
           .github/workflows/scripts/generate-release-body.sh ${{ steps.previous_tag.outputs.previous_tag }} ${{ github.ref_name }} release_notes.md
-        env:
-          PATH: ${{ env.PATH }}:/usr/local/bin
 
       - name: Extract changelog section (fallback if no previous tag)
         if: steps.previous_tag.outputs.previous_tag == ''
