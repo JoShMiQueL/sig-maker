@@ -51,6 +51,8 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/generate-release-body.sh
           .github/workflows/scripts/generate-release-body.sh ${{ steps.previous_tag.outputs.previous_tag }} ${{ github.ref_name }} release_notes.md
+        env:
+          PATH: ${{ env.PATH }}:/home/runner/.cargo/bin
 
       - name: Extract changelog section (fallback if no previous tag)
         if: steps.previous_tag.outputs.previous_tag == ''
