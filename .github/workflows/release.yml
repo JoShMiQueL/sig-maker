@@ -12,7 +12,7 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Read tag version, auto-bump Cargo.toml + tauri.conf.json, push bump commit
+  # Validate tag version matches Cargo.toml / tauri.conf.json
   # ---------------------------------------------------------------------------
   pre-checks:
     name: Pre-release checks
@@ -22,7 +22,6 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
       version: ${{ steps.version.outputs.version }}
       prerelease: ${{ steps.version.outputs.prerelease }}
-      sha: ${{ steps.bump.outputs.sha }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -47,23 +46,23 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Bump version in Cargo.toml and tauri.conf.json
-        id: bump
+      - name: Validate version is bumped
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" Cargo.toml
-          sed -i "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" crates/sig-maker-gui/tauri.conf.json
-          if git diff --quiet; then
-            echo "Version already at ${VERSION}, no bump needed."
-            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add Cargo.toml crates/sig-maker-gui/tauri.conf.json
-            git commit -m "chore(release): bump version to ${VERSION} [skip ci]"
-            git push origin HEAD:main
-            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          TAURI_VERSION=$(grep '"version"' crates/sig-maker-gui/tauri.conf.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          echo "Tag version: $VERSION"
+          echo "Cargo.toml version: $CARGO_VERSION"
+          echo "tauri.conf.json version: $TAURI_VERSION"
+          if [ "$CARGO_VERSION" != "$VERSION" ]; then
+            echo "::error::Cargo.toml version ($CARGO_VERSION) does not match tag ($VERSION). Run: sed -i \"s/^version = \".*\"/version = \\\"$VERSION\\\"/\" Cargo.toml"
+            exit 1
           fi
+          if [ "$TAURI_VERSION" != "$VERSION" ]; then
+            echo "::error::tauri.conf.json version ($TAURI_VERSION) does not match tag ($VERSION). Run: sed -i \"s/\\\"version\\\": \\\".*\\\"/\\\"version\\\": \\\"$VERSION\\\"/\" crates/sig-maker-gui/tauri.conf.json"
+            exit 1
+          fi
+          echo "Version validation passed."
 
   # ---------------------------------------------------------------------------
   # Build CLI for 5 platforms
@@ -101,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ needs.pre-checks.outputs.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -113,6 +112,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           key: cli-${{ matrix.target }}
+          cache-all-crates: true
           cache-on-failure: true
 
       - name: Cache cross binary
@@ -166,7 +166,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ needs.pre-checks.outputs.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Install system dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -184,6 +184,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           key: gui-${{ matrix.os-name }}
+          cache-all-crates: true
           cache-on-failure: true
 
       - name: Set up Node.js
@@ -220,6 +221,15 @@ jobs:
             /usr/local/lib/node_modules/@tauri-apps
             /usr/local/bin/tauri
           key: tauri-cli-npm-2-${{ matrix.os-name }}
+
+      - name: Cache linuxdeploy (Linux AppImage)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cache/tauri/linuxdeploy
+            ~/.cache/tauri/linuxdeploy-plugin-*
+          key: linuxdeploy-2024
 
       - name: Install Tauri CLI
         if: |
@@ -286,7 +296,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ needs.pre-checks.outputs.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -387,6 +397,12 @@ jobs:
           PYEOF
 
           cat changelog.md install_section.md > release_body.md
+
+      - name: Delete existing release (if any)
+        run: |
+          gh release delete "${{ needs.pre-checks.outputs.tag }}" --yes --cleanup-tag || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
