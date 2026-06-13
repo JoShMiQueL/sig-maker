@@ -242,7 +242,14 @@ jobs:
           $exe = Get-ChildItem "target/release/bundle/nsis" -Filter "*.exe" | Select-Object -First 1
           $version = "${{ needs.pre-checks.outputs.tag }}"
           $zip = "target/release/bundle/nsis/sig-maker-gui_${version}_x64_portable.zip"
-          Compress-Archive -Path $exe.FullName -DestinationPath $zip
+          $tmpDir = "target/release/bundle/nsis/portable-temp"
+          New-Item -ItemType Directory -Path $tmpDir -Force | Out-Null
+          Copy-Item $exe.FullName $tmpDir/
+          Copy-Item README.md $tmpDir/ -ErrorAction SilentlyContinue
+          Copy-Item LICENSE $tmpDir/ -ErrorAction SilentlyContinue
+          Copy-Item CHANGELOG.md $tmpDir/ -ErrorAction SilentlyContinue
+          Compress-Archive -Path "$tmpDir/*" -DestinationPath $zip -Force
+          Remove-Item -Recurse -Force $tmpDir
           Write-Host "Created portable: $zip"
 
       - name: Upload GUI artifacts (Windows)
