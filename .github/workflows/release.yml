@@ -51,11 +51,8 @@ jobs:
         id: bump
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Update workspace Cargo.toml
           sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" Cargo.toml
-          # Update tauri.conf.json
           sed -i "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" crates/sig-maker-gui/tauri.conf.json
-          # Check if anything changed
           if git diff --quiet; then
             echo "Version already at ${VERSION}, no bump needed."
             echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
@@ -147,7 +144,6 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Build GUI for 3 platforms
-  # E0119 fixed: Cargo.lock pins tauri-utils=2.8.3 + time=0.3.46
   # ---------------------------------------------------------------------------
   build-gui:
     name: Build GUI (${{ matrix.os-name }})
@@ -357,35 +353,38 @@ jobs:
           TAG="${{ needs.pre-checks.outputs.tag }}"
           VERSION="${TAG#v}"
 
-          cat > install_section.md << 'BODY'
-
-## Install sig-maker ${{ env.VERSION }}
-
-### Install prebuilt binaries via shell script
-
-```sh
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-installer.sh | sh
-```
-
-### Install prebuilt binaries via powershell script
-
-```sh
-powershell -ExecutionPolicy Bypass -c "irm https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-installer.ps1 | iex"
-```
-
-## Download sig-maker ${{ env.VERSION }}
-
-| File | Platform | Checksum |
-|------|----------|----------|
-| [sig-maker-cli-aarch64-apple-darwin.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-apple-darwin.tar.xz) | Apple Silicon macOS | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-apple-darwin.tar.xz.sha256) |
-| [sig-maker-cli-x86_64-apple-darwin.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-apple-darwin.tar.xz) | Intel macOS | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-apple-darwin.tar.xz.sha256) |
-| [sig-maker-cli-x86_64-pc-windows-msvc.zip](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-pc-windows-msvc.zip) | x64 Windows | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-pc-windows-msvc.zip.sha256) |
-| [sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz) | ARM64 Linux | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz.sha256) |
-| [sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz) | x64 Linux | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz.sha256) |
-BODY
-          # Replace env vars in the heredoc
-          sed -i "s|\${{ env.VERSION }}|$VERSION|g" install_section.md
-          sed -i "s|\${{ env.TAG }}|$TAG|g" install_section.md
+          python3 - "$TAG" "$VERSION" << 'PYEOF'
+          import sys
+          tag, version = sys.argv[1], sys.argv[2]
+          lines = [
+              "",
+              f"## Install sig-maker {version}",
+              "",
+              "### Install prebuilt binaries via shell script",
+              "",
+              "```sh",
+              f"curl --proto '=https' --tlsv1.2 -LsSf https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-installer.sh | sh",
+              "```",
+              "",
+              "### Install prebuilt binaries via powershell script",
+              "",
+              "```sh",
+              f'powershell -ExecutionPolicy Bypass -c "irm https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-installer.ps1 | iex"',
+              "```",
+              "",
+              f"## Download sig-maker {version}",
+              "",
+              "| File | Platform | Checksum |",
+              "|------|----------|----------|",
+              f"| [sig-maker-cli-aarch64-apple-darwin.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-aarch64-apple-darwin.tar.xz) | Apple Silicon macOS | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-aarch64-apple-darwin.tar.xz.sha256) |",
+              f"| [sig-maker-cli-x86_64-apple-darwin.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-x86_64-apple-darwin.tar.xz) | Intel macOS | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-x86_64-apple-darwin.tar.xz.sha256) |",
+              f"| [sig-maker-cli-x86_64-pc-windows-msvc.zip](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-x86_64-pc-windows-msvc.zip) | x64 Windows | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-x86_64-pc-windows-msvc.zip.sha256) |",
+              f"| [sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz) | ARM64 Linux | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz.sha256) |",
+              f"| [sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz) | x64 Linux | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/{tag}/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz.sha256) |",
+          ]
+          with open("install_section.md", "w") as f:
+              f.write("\n".join(lines) + "\n")
+          PYEOF
 
           cat changelog.md install_section.md > release_body.md
 
