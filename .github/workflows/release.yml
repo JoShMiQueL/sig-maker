@@ -285,36 +285,53 @@ jobs:
         with:
           ref: ${{ needs.pre-checks.outputs.sha }}
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
           path: artifacts/
 
-      - name: Flatten and rename artifacts
+      - name: Prepare release assets
+        id: assets
         run: |
           mkdir -p release/
-          # CLI binaries
-          cp artifacts/sig-maker-cli-linux-x64/sig-maker-cli         release/sig-maker-cli-linux-x64
-          cp artifacts/sig-maker-cli-linux-arm64/sig-maker-cli        release/sig-maker-cli-linux-arm64
-          cp artifacts/sig-maker-cli-macos-x64/sig-maker-cli          release/sig-maker-cli-macos-x64
-          cp artifacts/sig-maker-cli-macos-arm64/sig-maker-cli        release/sig-maker-cli-macos-arm64
-          cp "artifacts/sig-maker-cli-windows-x64.exe/sig-maker-cli.exe" "release/sig-maker-cli-windows-x64.exe"
-          # GUI bundles (all platforms)
-          find artifacts/gui-windows/ -type f | xargs -I{} cp {} release/
-          find artifacts/gui-linux/   -type f | xargs -I{} cp {} release/
-          find artifacts/gui-macos/   -type f | xargs -I{} cp {} release/
-          # Install scripts
-          cp scripts/install.sh  release/install.sh
-          cp scripts/install.ps1 release/install.ps1
-          chmod +x release/sig-maker-cli-linux-* release/sig-maker-cli-macos-* release/install.sh
-          ls -lh release/
+          TAG="${{ needs.pre-checks.outputs.tag }}"
+          VERSION="${TAG#v}"
 
-      - name: Generate SHA-256 checksums
-        working-directory: release/
-        run: |
-          sha256sum * > SHA256SUMS.txt
-          cat SHA256SUMS.txt
+          # --- CLI: compress + individual .sha256 ---
+          tar -cJf release/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz \
+            -C artifacts/sig-maker-cli-linux-x64 sig-maker-cli
+          tar -cJf release/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz \
+            -C artifacts/sig-maker-cli-linux-arm64 sig-maker-cli
+          tar -cJf release/sig-maker-cli-x86_64-apple-darwin.tar.xz \
+            -C artifacts/sig-maker-cli-macos-x64 sig-maker-cli
+          tar -cJf release/sig-maker-cli-aarch64-apple-darwin.tar.xz \
+            -C artifacts/sig-maker-cli-macos-arm64 sig-maker-cli
+          (cd artifacts/sig-maker-cli-windows-x64.exe && zip -q "${GITHUB_WORKSPACE}/release/sig-maker-cli-x86_64-pc-windows-msvc.zip" sig-maker-cli.exe)
+
+          for f in release/sig-maker-cli-*.tar.xz release/sig-maker-cli-*.zip; do
+            sha256sum "$f" > "$f.sha256"
+          done
+
+          # --- GUI ---
+          find artifacts/gui-linux/   -type f -name '*.AppImage' | xargs -I{} cp {} release/
+          find artifacts/gui-macos/   -type f -name '*.dmg'      | xargs -I{} cp {} release/
+          find artifacts/gui-windows/ -type f | xargs -I{} cp {} release/
+
+          # --- source.tar.gz ---
+          git archive --format=tar.gz -o release/source.tar.gz HEAD
+          sha256sum release/source.tar.gz > release/source.tar.gz.sha256
+
+          # --- Install scripts (renamed) ---
+          cp scripts/install.sh  release/sig-maker-installer.sh
+          cp scripts/install.ps1 release/sig-maker-installer.ps1
+          chmod +x release/sig-maker-installer.sh
+
+          # --- sha256.sum (all release files except itself) ---
+          (cd release && sha256sum * > sha256.sum)
+
+          ls -lh release/
 
       - name: Install git-cliff
         uses: taiki-e/install-action@v2
@@ -322,16 +339,55 @@ jobs:
           tool: git-cliff
 
       - name: Generate changelog
-        run: git-cliff --latest --strip all --output changelog.md
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          git-cliff "${PREV_TAG}..HEAD" --output changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build release body
+        run: |
+          TAG="${{ needs.pre-checks.outputs.tag }}"
+          VERSION="${TAG#v}"
+
+          cat > install_section.md << 'BODY'
+
+## Install sig-maker ${{ env.VERSION }}
+
+### Install prebuilt binaries via shell script
+
+```sh
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-installer.sh | sh
+```
+
+### Install prebuilt binaries via powershell script
+
+```sh
+powershell -ExecutionPolicy Bypass -c "irm https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-installer.ps1 | iex"
+```
+
+## Download sig-maker ${{ env.VERSION }}
+
+| File | Platform | Checksum |
+|------|----------|----------|
+| [sig-maker-cli-aarch64-apple-darwin.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-apple-darwin.tar.xz) | Apple Silicon macOS | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-apple-darwin.tar.xz.sha256) |
+| [sig-maker-cli-x86_64-apple-darwin.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-apple-darwin.tar.xz) | Intel macOS | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-apple-darwin.tar.xz.sha256) |
+| [sig-maker-cli-x86_64-pc-windows-msvc.zip](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-pc-windows-msvc.zip) | x64 Windows | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-pc-windows-msvc.zip.sha256) |
+| [sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz) | ARM64 Linux | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-aarch64-unknown-linux-gnu.tar.xz.sha256) |
+| [sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz) | x64 Linux | [checksum](https://github.com/JoShMiQueL/sig-maker/releases/download/${{ env.TAG }}/sig-maker-cli-x86_64-unknown-linux-gnu.tar.xz.sha256) |
+BODY
+          # Replace env vars in the heredoc
+          sed -i "s|\${{ env.VERSION }}|$VERSION|g" install_section.md
+          sed -i "s|\${{ env.TAG }}|$TAG|g" install_section.md
+
+          cat changelog.md install_section.md > release_body.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           name: ${{ needs.pre-checks.outputs.tag }}
           tag_name: ${{ needs.pre-checks.outputs.tag }}
-          body_path: changelog.md
+          body_path: release_body.md
           prerelease: ${{ needs.pre-checks.outputs.prerelease == 'true' }}
           files: release/*
           fail_on_unmatched_files: true

@@ -97,17 +97,22 @@ if [ -z "$VERSION" ]; then
 fi
 echo "Version: $VERSION"
 
-ASSET="sig-maker-cli-$TARGET"
+ASSET="sig-maker-cli-$TARGET.tar.xz"
 URL="https://github.com/$REPO/releases/download/$VERSION/$ASSET"
-TMP="$(mktemp)"
+TMP_DIR="$(mktemp -d)"
 
 echo "Downloading from $URL ..."
-download "$URL" "$TMP"
-chmod +x "$TMP"
+download "$URL" "$TMP_DIR/$ASSET"
+
+echo "Extracting..."
+tar -xf "$TMP_DIR/$ASSET" -C "$TMP_DIR"
 
 mkdir -p "$INSTALL_DIR"
-mv "$TMP" "$INSTALL_DIR/$BINARY_NAME"
+mv "$TMP_DIR/sig-maker-cli" "$INSTALL_DIR/$BINARY_NAME"
+chmod +x "$INSTALL_DIR/$BINARY_NAME"
 echo "Installed to $INSTALL_DIR/$BINARY_NAME"
+
+rm -rf "$TMP_DIR"
 
 # Add to PATH hint if needed
 case ":$PATH:" in

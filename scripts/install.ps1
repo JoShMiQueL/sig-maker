@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 $Repo = "JoShMiQueL/sig-maker"
 $BinaryName = "sig-maker-cli.exe"
-$AssetName = "sig-maker-cli-windows-x64.exe"
+$AssetName = "sig-maker-cli-x86_64-pc-windows-msvc.zip"
 
 function Get-LatestVersion {
     $release = Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest"
@@ -47,13 +47,23 @@ $TmpFile = Join-Path $env:TEMP $AssetName
 Write-Host "Downloading from $Url ..."
 Invoke-WebRequest -Uri $Url -OutFile $TmpFile -UseBasicParsing
 
+# Extract
+$TmpDir = Join-Path $env:TEMP "sig-maker-install-$(Get-Random)"
+New-Item -ItemType Directory -Path $TmpDir | Out-Null
+Write-Host "Extracting..."
+Expand-Archive -Path $TmpFile -DestinationPath $TmpDir -Force
+
 # Install
 if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir | Out-Null
 }
 $Dest = Join-Path $InstallDir $BinaryName
-Move-Item -Path $TmpFile -Destination $Dest -Force
+Move-Item -Path (Join-Path $TmpDir "sig-maker-cli.exe") -Destination $Dest -Force
 Write-Host "Installed to $Dest"
+
+# Cleanup
+Remove-Item -Path $TmpFile -Force
+Remove-Item -Path $TmpDir -Recurse -Force
 
 # PATH
 Add-ToPath $InstallDir
