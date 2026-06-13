@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-13
+## [Unreleased]
 
 ### Bug Fixes
 
+
+
+- **cli:** handle empty input in test mode. Add early return for empty input in test mode. Prevents parse error and pause in tests. Fixes CI test failure on Linux by [@JoShMiQueL](https://github.com/JoShMiQueL) ([3a82f71](https://github.com/JoShMiQueL/sig-maker/commit/3a82f712f292b27f693c40e19252295f4c1bbd75))
+
+
+- **cli:** remove error print in test mode. Remove eprintln from parse error in test mode to prevent CI failures by [@JoShMiQueL](https://github.com/JoShMiQueL) ([47abf40](https://github.com/JoShMiQueL/sig-maker/commit/47abf4048f713b8061a298bdd9a62b3a092f35aa))
 
 
 - **cli:** serialize env-var tests with mutex to prevent race conditions by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6055174](https://github.com/JoShMiQueL/sig-maker/commit/6055174e3f1a054d10d1c62e29aea6279a646631))
@@ -43,88 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **changelog:** remove buggy New Contributors section from git-cliff template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ab18407](https://github.com/JoShMiQueL/sig-maker/commit/ab184072779fc2fee7d42194febc0353bbccefd2))
 
-### CI/CD
 
-
-
-- **release:** wait for CI to pass before releasing by [@JoShMiQueL](https://github.com/JoShMiQueL) ([3ba72b7](https://github.com/JoShMiQueL/sig-maker/commit/3ba72b71fec205984475378ee7b566384b4d6adf))
-
-
-- **release:** auto-bump Cargo.toml and tauri.conf.json from tag version by [@JoShMiQueL](https://github.com/JoShMiQueL) ([b8e3f9f](https://github.com/JoShMiQueL/sig-maker/commit/b8e3f9fa8c9ba17d021869893ec7e131018f508e))
-
-
-- **release:** build GUI for Windows only until tauri-utils#15525 is fixed by [@JoShMiQueL](https://github.com/JoShMiQueL) ([72b6a1f](https://github.com/JoShMiQueL/sig-maker/commit/72b6a1f39b7bad7c352d4853bd5b0d35ae01278d))
-
-
-- **release:** add portable ZIP bundle for Windows GUI by [@JoShMiQueL](https://github.com/JoShMiQueL) ([4e7eb6a](https://github.com/JoShMiQueL/sig-maker/commit/4e7eb6a854274ad9f3592c0b7eae1012cb2b254c))
-
-
-- **release:** restore all-platform GUI builds + optimize cache by [@JoShMiQueL](https://github.com/JoShMiQueL) ([55023de](https://github.com/JoShMiQueL/sig-maker/commit/55023de810717b105cd288e423d4f151ea1053a3))
-
-
-- upgrade actions/cache to v6 in release workflow by [@JoShMiQueL](https://github.com/JoShMiQueL) ([969d752](https://github.com/JoShMiQueL/sig-maker/commit/969d752156e5a1e84e29a0fd45ef8596a7dc31d8))
-
-
-- revert actions/cache to v4 (v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([bd7a2f7](https://github.com/JoShMiQueL/sig-maker/commit/bd7a2f7c74942cf972bac3bbdc0e86bfb03f7dfe))
-
-
-- use actions/cache@v5 (latest major, v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d73b849](https://github.com/JoShMiQueL/sig-maker/commit/d73b849e17b22c288cd26a9d954bd2c334d0a452))
-
-
-- fix bundle artifact paths (target/release/bundle, not crates/...) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1d7b68e](https://github.com/JoShMiQueL/sig-maker/commit/1d7b68e8697968f432558781ef9a8c3126ee2d78))
-
-
-- **release:** generate .tar.xz/.zip + .sha256, restore cliff format, fix install scripts by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c463d42](https://github.com/JoShMiQueL/sig-maker/commit/c463d42ca8c36b7dab0fa04e4cca0571da258e86))
-
-
-- **release:** include README, LICENSE, CHANGELOG in portable ZIP by [@JoShMiQueL](https://github.com/JoShMiQueL) ([e25889b](https://github.com/JoShMiQueL/sig-maker/commit/e25889b0ffe0729f799f1eedfc6ac039562c76a9))
-
-
-- **release:** fix YAML syntax error in release body generation by [@JoShMiQueL](https://github.com/JoShMiQueL) ([7a9b7c6](https://github.com/JoShMiQueL/sig-maker/commit/7a9b7c67c23e8660dc542ded9ba338a785252aab))
-
-
-- **release:** validate version instead of auto-bump, add caches, fix release dup by [@JoShMiQueL](https://github.com/JoShMiQueL) ([8d51251](https://github.com/JoShMiQueL/sig-maker/commit/8d512514330a2f0db9e9ae9e1d8e8eebdaf550f1))
-
-### Documentation
-
-
-
-- update AGENTS.md to reflect current GUI build status by [@JoShMiQueL](https://github.com/JoShMiQueL) ([fc4196a](https://github.com/JoShMiQueL/sig-maker/commit/fc4196a4a7af305131b161e0d43a10ff139185c0))
-
-
-- add Tauri GUI release build notes to AGENTS.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([687664b](https://github.com/JoShMiQueL/sig-maker/commit/687664bb1eeba258335c60637e83475260e4617d))
-
-### Features
-
-
-
-- **install:** add install.sh and install.ps1 one-liner installers by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1c3eef2](https://github.com/JoShMiQueL/sig-maker/commit/1c3eef2c2db3d9b3f62ac79b9250ff1f8c797b1c))
-
-### Miscellaneous
-
-
-
-- **release:** bump version to 0.1.3-beta by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c04bcec](https://github.com/JoShMiQueL/sig-maker/commit/c04bcecfe16baf9148ea01ec68a4f87a8cc6dac8))
-
-
-
-
-
-### Contributors
-
-- [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.2-beta-test...v0.1.3-beta
-## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
-
-### Bug Fixes
-
-
-
-- **cli:** handle empty input in test mode. Add early return for empty input in test mode. Prevents parse error and pause in tests. Fixes CI test failure on Linux by [@JoShMiQueL](https://github.com/JoShMiQueL) ([3a82f71](https://github.com/JoShMiQueL/sig-maker/commit/3a82f712f292b27f693c40e19252295f4c1bbd75))
-
-
-- **cli:** remove error print in test mode. Remove eprintln from parse error in test mode to prevent CI failures by [@JoShMiQueL](https://github.com/JoShMiQueL) ([47abf40](https://github.com/JoShMiQueL/sig-maker/commit/47abf4048f713b8061a298bdd9a62b3a092f35aa))
+- **changelog:** use git log instead of git-cliff previous.commits for New Contributors by [@JoShMiQueL](https://github.com/JoShMiQueL) ([274dd75](https://github.com/JoShMiQueL/sig-maker/commit/274dd75f88097bb0b3cd975699a40fdca0fd0961))
 
 ### CI/CD
 
@@ -192,6 +118,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **changelog:** move PR link after author in commit format by [@JoShMiQueL](https://github.com/JoShMiQueL) ([cdf7f37](https://github.com/JoShMiQueL/sig-maker/commit/cdf7f37106109216edb15208ea1edf4cfcd16ce3))
 
+
+- **release:** wait for CI to pass before releasing by [@JoShMiQueL](https://github.com/JoShMiQueL) ([3ba72b7](https://github.com/JoShMiQueL/sig-maker/commit/3ba72b71fec205984475378ee7b566384b4d6adf))
+
+
+- **release:** auto-bump Cargo.toml and tauri.conf.json from tag version by [@JoShMiQueL](https://github.com/JoShMiQueL) ([b8e3f9f](https://github.com/JoShMiQueL/sig-maker/commit/b8e3f9fa8c9ba17d021869893ec7e131018f508e))
+
+
+- **release:** build GUI for Windows only until tauri-utils#15525 is fixed by [@JoShMiQueL](https://github.com/JoShMiQueL) ([72b6a1f](https://github.com/JoShMiQueL/sig-maker/commit/72b6a1f39b7bad7c352d4853bd5b0d35ae01278d))
+
+
+- **release:** add portable ZIP bundle for Windows GUI by [@JoShMiQueL](https://github.com/JoShMiQueL) ([4e7eb6a](https://github.com/JoShMiQueL/sig-maker/commit/4e7eb6a854274ad9f3592c0b7eae1012cb2b254c))
+
+
+- **release:** restore all-platform GUI builds + optimize cache by [@JoShMiQueL](https://github.com/JoShMiQueL) ([55023de](https://github.com/JoShMiQueL/sig-maker/commit/55023de810717b105cd288e423d4f151ea1053a3))
+
+
+- upgrade actions/cache to v6 in release workflow by [@JoShMiQueL](https://github.com/JoShMiQueL) ([969d752](https://github.com/JoShMiQueL/sig-maker/commit/969d752156e5a1e84e29a0fd45ef8596a7dc31d8))
+
+
+- revert actions/cache to v4 (v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([bd7a2f7](https://github.com/JoShMiQueL/sig-maker/commit/bd7a2f7c74942cf972bac3bbdc0e86bfb03f7dfe))
+
+
+- use actions/cache@v5 (latest major, v6 does not exist) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d73b849](https://github.com/JoShMiQueL/sig-maker/commit/d73b849e17b22c288cd26a9d954bd2c334d0a452))
+
+
+- fix bundle artifact paths (target/release/bundle, not crates/...) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1d7b68e](https://github.com/JoShMiQueL/sig-maker/commit/1d7b68e8697968f432558781ef9a8c3126ee2d78))
+
+
+- **release:** generate .tar.xz/.zip + .sha256, restore cliff format, fix install scripts by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c463d42](https://github.com/JoShMiQueL/sig-maker/commit/c463d42ca8c36b7dab0fa04e4cca0571da258e86))
+
+
+- **release:** include README, LICENSE, CHANGELOG in portable ZIP by [@JoShMiQueL](https://github.com/JoShMiQueL) ([e25889b](https://github.com/JoShMiQueL/sig-maker/commit/e25889b0ffe0729f799f1eedfc6ac039562c76a9))
+
+
+- **release:** fix YAML syntax error in release body generation by [@JoShMiQueL](https://github.com/JoShMiQueL) ([7a9b7c6](https://github.com/JoShMiQueL/sig-maker/commit/7a9b7c67c23e8660dc542ded9ba338a785252aab))
+
+
+- **release:** validate version instead of auto-bump, add caches, fix release dup by [@JoShMiQueL](https://github.com/JoShMiQueL) ([8d51251](https://github.com/JoShMiQueL/sig-maker/commit/8d512514330a2f0db9e9ae9e1d8e8eebdaf550f1))
+
 ### Documentation
 
 
@@ -207,6 +172,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - resolve merge conflict in CHANGELOG.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([da7903d](https://github.com/JoShMiQueL/sig-maker/commit/da7903d46843b6761c7c194686dbc12e84a24e6f))
 
+
+- update AGENTS.md to reflect current GUI build status by [@JoShMiQueL](https://github.com/JoShMiQueL) ([fc4196a](https://github.com/JoShMiQueL/sig-maker/commit/fc4196a4a7af305131b161e0d43a10ff139185c0))
+
+
+- add Tauri GUI release build notes to AGENTS.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([687664b](https://github.com/JoShMiQueL/sig-maker/commit/687664bb1eeba258335c60637e83475260e4617d))
+
 ### Features
 
 
@@ -218,6 +189,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **release:** add release skill and optimize CI paths by [@JoShMiQueL](https://github.com/JoShMiQueL) ([2958b66](https://github.com/JoShMiQueL/sig-maker/commit/2958b66043dfe3c202faf4e3a8e6beb643abe540))
+
+
+- **install:** add install.sh and install.ps1 one-liner installers by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1c3eef2](https://github.com/JoShMiQueL/sig-maker/commit/1c3eef2c2db3d9b3f62ac79b9250ff1f8c797b1c))
 
 ### Miscellaneous
 
@@ -234,6 +208,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - bump version to 0.1.2-beta-test by [@JoShMiQueL](https://github.com/JoShMiQueL) ([edfe924](https://github.com/JoShMiQueL/sig-maker/commit/edfe924317e6cd2a32dc3c04e9e208d395f97947))
 
+
+- **release:** bump version to 0.1.3-beta by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c04bcec](https://github.com/JoShMiQueL/sig-maker/commit/c04bcecfe16baf9148ea01ec68a4f87a8cc6dac8))
+
 ### Refactoring
 
 
@@ -242,13 +219,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-
-
 ### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
-**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.1-beta...v0.1.2-beta-test
 ## [v0.1.1-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.1-beta) - 2026-06-10
 
 ### Bug Fixes
@@ -484,8 +458,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-
-
 ### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
@@ -524,11 +496,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set version to 0.1.0-beta by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d1750c2](https://github.com/JoShMiQueL/sig-maker/commit/d1750c26bd73bb440c54c0c51072b64704cbbb20))
 
-
-
-
-### New Contributors
-- [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
 
 
 ### Contributors
