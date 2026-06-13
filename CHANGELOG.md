@@ -79,6 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **release:** include README, LICENSE, CHANGELOG in portable ZIP by [@JoShMiQueL](https://github.com/JoShMiQueL) ([e25889b](https://github.com/JoShMiQueL/sig-maker/commit/e25889b0ffe0729f799f1eedfc6ac039562c76a9))
 
+
+- **release:** fix YAML syntax error in release body generation by [@JoShMiQueL](https://github.com/JoShMiQueL) ([7a9b7c6](https://github.com/JoShMiQueL/sig-maker/commit/7a9b7c67c23e8660dc542ded9ba338a785252aab))
+
 ### Documentation
 
 
