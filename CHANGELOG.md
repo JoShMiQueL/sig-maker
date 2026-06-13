@@ -11,26 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-- **changelog:** remove buggy New Contributors section from git-cliff template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ab18407](https://github.com/JoShMiQueL/sig-maker/commit/ab184072779fc2fee7d42194febc0353bbccefd2))
-
-### Documentation
-
-
-
-- add Tauri GUI release build notes to AGENTS.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([687664b](https://github.com/JoShMiQueL/sig-maker/commit/687664bb1eeba258335c60637e83475260e4617d))
-
-
-
-### Contributors
-
-- [@JoShMiQueL](https://github.com/JoShMiQueL)
-
-## [v0.1.3-beta](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.3-beta) - 2026-06-12
-
-### Bug Fixes
-
-
-
 - **cli:** serialize env-var tests with mutex to prevent race conditions by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6055174](https://github.com/JoShMiQueL/sig-maker/commit/6055174e3f1a054d10d1c62e29aea6279a646631))
 
 
@@ -59,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - **gui:** remove hardcoded nsis target from tauri.conf.json by [@JoShMiQueL](https://github.com/JoShMiQueL) ([6e3ffcd](https://github.com/JoShMiQueL/sig-maker/commit/6e3ffcd61ea2cb7a8bdb60188e2843cdc9fcb3bf))
+
+
+- **changelog:** remove buggy New Contributors section from git-cliff template by [@JoShMiQueL](https://github.com/JoShMiQueL) ([ab18407](https://github.com/JoShMiQueL/sig-maker/commit/ab184072779fc2fee7d42194febc0353bbccefd2))
 
 ### CI/CD
 
@@ -90,11 +73,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - fix bundle artifact paths (target/release/bundle, not crates/...) by [@JoShMiQueL](https://github.com/JoShMiQueL) ([1d7b68e](https://github.com/JoShMiQueL/sig-maker/commit/1d7b68e8697968f432558781ef9a8c3126ee2d78))
 
+
+- **release:** generate .tar.xz/.zip + .sha256, restore cliff format, fix install scripts by [@JoShMiQueL](https://github.com/JoShMiQueL) ([c463d42](https://github.com/JoShMiQueL/sig-maker/commit/c463d42ca8c36b7dab0fa04e4cca0571da258e86))
+
 ### Documentation
 
 
 
 - update AGENTS.md to reflect current GUI build status by [@JoShMiQueL](https://github.com/JoShMiQueL) ([fc4196a](https://github.com/JoShMiQueL/sig-maker/commit/fc4196a4a7af305131b161e0d43a10ff139185c0))
+
+
+- add Tauri GUI release build notes to AGENTS.md by [@JoShMiQueL](https://github.com/JoShMiQueL) ([687664b](https://github.com/JoShMiQueL/sig-maker/commit/687664bb1eeba258335c60637e83475260e4617d))
 
 ### Features
 
@@ -110,11 +99,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+
 ### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
 
-**Full Changelog**: https://github.com/JoShMiQueL/sig-maker/compare/v0.1.2-beta-test...v0.1.3-beta
 ## [v0.1.2-beta-test](https://github.com/JoShMiQueL/sig-maker/releases/tag/v0.1.2-beta-test) - 2026-06-12
 
 ### Bug Fixes
@@ -239,6 +229,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - simplify dependencies and improve CLI experience by [@JoShMiQueL](https://github.com/JoShMiQueL) [[#27](https://github.com/JoShMiQueL/sig-maker/pull/27)]
+
+
 
 
 
@@ -482,6 +474,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+
 ### Contributors
 
 - [@JoShMiQueL](https://github.com/JoShMiQueL)
@@ -520,6 +514,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set version to 0.1.0-beta by [@JoShMiQueL](https://github.com/JoShMiQueL) ([d1750c2](https://github.com/JoShMiQueL/sig-maker/commit/d1750c26bd73bb440c54c0c51072b64704cbbb20))
 
+
+
+
+### New Contributors
+- [@JoShMiQueL](https://github.com/JoShMiQueL) made their first contribution
 
 
 ### Contributors
