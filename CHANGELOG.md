@@ -82,6 +82,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **release:** fix YAML syntax error in release body generation by [@JoShMiQueL](https://github.com/JoShMiQueL) ([7a9b7c6](https://github.com/JoShMiQueL/sig-maker/commit/7a9b7c67c23e8660dc542ded9ba338a785252aab))
 
+
+- **release:** validate version instead of auto-bump, add caches, fix release dup by [@JoShMiQueL](https://github.com/JoShMiQueL) ([8d51251](https://github.com/JoShMiQueL/sig-maker/commit/8d512514330a2f0db9e9ae9e1d8e8eebdaf550f1))
+
 ### Documentation
 
 
