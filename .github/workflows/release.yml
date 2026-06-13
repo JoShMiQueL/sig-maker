@@ -354,9 +354,32 @@ jobs:
       - name: Generate changelog
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          echo "PREV_TAG=$PREV_TAG"
           git-cliff "${PREV_TAG}..HEAD" --output changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate New Contributors section
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+          # All authors before the current release range
+          PAST=$(git log --format="%an" "$PREV_TAG" -- | sort -u | grep -v '\[bot\]' || true)
+          # Authors in the current release range
+          CURR=$(git log --format="%an" "$PREV_TAG..HEAD" | sort -u | grep -v '\[bot\]' || true)
+          # New contributors = current - past
+          NEW=$(comm -23 <(echo "$CURR") <(echo "$PAST") || true)
+          if [ -n "$NEW" ]; then
+            {
+              echo ""
+              echo "### New Contributors"
+              echo ""
+              for name in $NEW; do
+                echo "- [@$name](https://github.com/$name) made their first contribution"
+              done
+            } > new_contributors.md
+          else
+            touch new_contributors.md
+          fi
 
       - name: Build release body
         run: |
@@ -396,7 +419,7 @@ jobs:
               f.write("\n".join(lines) + "\n")
           PYEOF
 
-          cat changelog.md install_section.md > release_body.md
+          cat changelog.md new_contributors.md install_section.md > release_body.md
 
       - name: Delete existing release (if any)
         run: |
