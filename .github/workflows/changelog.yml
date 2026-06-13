@@ -21,8 +21,9 @@ jobs:
 
       - name: Generate full changelog
         run: git-cliff --output CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Inject New Contributors sections
+        run: python3 scripts/inject-new-contributors.py CHANGELOG.md
 
       - name: Commit updated CHANGELOG.md
         run: |
